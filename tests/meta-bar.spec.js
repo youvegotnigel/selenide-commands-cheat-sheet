@@ -61,7 +61,38 @@ test.describe('Meta bar', () => {
 
     await expect(page.locator('.meta-badge')).toHaveCount(4);
     const labels = await page.locator('.meta-badge .k').allInnerTexts();
-    expect(labels).toEqual(['playwright', 'last updated', 'commands', 'visitors']);
+    expect(labels).toEqual(['selenide', 'last updated', 'commands', 'visitors']);
+  });
+
+  test('version badge is populated from js/versions.json', async ({ page }) => {
+    await page.route('**/js/versions.json**', (route) =>
+      route.fulfill({
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          selenide: '9.9.9',
+          selenideAppium: '9.9.9',
+          appiumJavaClient: '1.0.0',
+        }),
+      })
+    );
+    await mockBackends(page);
+    await page.goto('/');
+    await expect(page.locator('#selenide-version')).toHaveText('v9.9.9');
+  });
+
+  test('js/versions.json pins the release this cheat sheet was verified against', async ({
+    page,
+  }) => {
+    await mockBackends(page);
+    await page.goto('/');
+    // Bumped deliberately by the selenide-release-sync skill, together with the content.
+    const versions = await page.evaluate(async () => (await fetch('./js/versions.json')).json());
+    expect(versions).toEqual({
+      selenide: '7.19.0',
+      selenideAppium: '7.19.0',
+      appiumJavaClient: '11.0.0',
+    });
   });
 
   test('command count badge matches the data', async ({ page }) => {
@@ -74,21 +105,6 @@ test.describe('Meta bar', () => {
     await expect(page.locator('#cmd-count')).toHaveText(String(dataCount));
   });
 
-  test('version badge is populated from package.json', async ({ page }) => {
-    await mockBackends(page);
-    await page.goto('/');
-
-    // Derive the expected version the same way app.js does (strip range prefix),
-    // so this stays correct whenever the dependency is bumped.
-    const expected = await page.evaluate(async () => {
-      const pkg = await (await fetch('./package.json')).json();
-      const dep =
-        pkg.devDependencies?.['@playwright/test'] ?? pkg.dependencies?.['@playwright/test'];
-      return 'v' + dep.replace(/^[\^~>=<\s]+/, '');
-    });
-    await expect(page.locator('#pw-version')).toHaveText(expected);
-  });
-
   test('last-updated badge reflects the stamped meta.json date', async ({ page }) => {
     await mockBackends(page);
     await page.goto('/');
@@ -97,14 +113,15 @@ test.describe('Meta bar', () => {
   });
 
   test('keeps fallback values if version/date lookups fail', async ({ page }) => {
-    // Fail every dynamic source: meta.json, package.json, and Supabase
+    // Fail every dynamic source: meta.json, versions.json, and Supabase
     await page.route('**/js/meta.json**', (route) => route.abort());
-    await page.route('**/package.json**', (route) => route.abort());
+    await page.route('**/js/versions.json**', (route) => route.abort());
     await page.route('**tilbhgcncnwibnfgebkg.supabase.co/**', (route) => route.abort());
     await page.goto('/');
 
     // Hardcoded fallbacks in the HTML must still be shown (never blank)
-    await expect(page.locator('#pw-version')).not.toBeEmpty();
+    // The spec's HTML fallback for the version badge
+    await expect(page.locator('#selenide-version')).toHaveText('v7.19.0');
     await expect(page.locator('#last-updated')).not.toBeEmpty();
   });
 });

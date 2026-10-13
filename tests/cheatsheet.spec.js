@@ -399,3 +399,108 @@ test.describe('Mobile', () => {
     await expect(page.locator('#modal')).toBeVisible();
   });
 });
+
+/* ── MOBILE FILTER (fixture data, hand-written expectations) ─────── */
+test.describe('Mobile filter', () => {
+  test.beforeEach(async ({ page }) => {
+    await useFixtureData(page);
+    await page.goto('/');
+  });
+
+  test('sits after Start Here and shows only mobile and both items', async ({ page }) => {
+    const labels = await page.locator('.filter-btn').allInnerTexts();
+    // Popular is hidden while analytics are off (Task 1 Step 7b); Task 8 re-adds it here.
+    expect(labels.slice(0, 3)).toEqual(['All', '⭐ Start Here', '📱 Mobile']);
+
+    await page.locator('.filter-btn[data-filter="mobile"]').click();
+    await expect(page.locator('.tile-name')).toHaveText(['gamma()', 'delta()', 'epsilon()']);
+    await expect(page).toHaveURL(/#filter=mobile$/);
+  });
+
+  test('#filter=mobile in the URL applies it on load', async ({ page }) => {
+    await page.goto('about:blank'); // force a fresh document load from the hash
+    await page.goto('/#filter=mobile');
+    await expect(page.locator('.filter-btn[data-filter="mobile"]')).toHaveClass(/active/);
+    await expect(page.locator('.tile-name')).toHaveText(['gamma()', 'delta()', 'epsilon()']);
+  });
+
+  test('search narrows the Mobile filter', async ({ page }) => {
+    await page.goto('/#filter=mobile&search=tap');
+    await expect(page.locator('.tile-name')).toHaveText(['delta()']);
+  });
+
+  test('grouped view under Mobile shows only categories with such items', async ({ page }) => {
+    await page.goto('/#filter=mobile');
+    await page.locator('#btnGrouped').click();
+    await expect(page.locator('.group-header')).toHaveText([
+      'Conditions (1)',
+      'Mobile Selectors (2)',
+    ]);
+  });
+});
+
+test.describe('Search with Selenide symbols (fixture data)', () => {
+  test('$$ matches only snippets containing $$', async ({ page }) => {
+    await useFixtureData(page);
+    await page.goto('/'); // full load so the fixture replaces the real data
+    await page.locator('#search-input').fill('$$');
+    await expect(page.locator('.tile-name')).toHaveText(['gamma()']);
+    await expect(page).toHaveURL(/#search=%24%24$/);
+  });
+});
+
+/* ── TILE GRADIENTS (expected values from the spec, section 6) ──── */
+test.describe('Tile gradients', () => {
+  // [cls, gradient start, gradient end], hand-copied from the spec's palette
+  const PALETTE = [
+    ['config', '#06b6d4', '#0e7490'],
+    ['navigation', '#0ea5e9', '#0369a1'],
+    ['selector', '#3b82f6', '#1d4ed8'],
+    ['action', '#22c55e', '#15803d'],
+    ['condition', '#f97316', '#c2410c'],
+    ['collection', '#eab308', '#a16207'],
+    ['wait', '#64748b', '#334155'],
+    ['page-object', '#f43f5e', '#be123c'],
+    ['window', '#10b981', '#047857'],
+    ['file', '#84cc16', '#4d7c0f'],
+    ['network', '#14b8a6', '#0f766e'],
+    ['javascript', '#f59e0b', '#b45309'],
+    ['report', '#ef4444', '#b91c1c'],
+    ['framework', '#a8a29e', '#57534e'],
+    ['remote', '#0891b2', '#164e63'],
+    ['pattern', '#fb7185', '#e11d48'],
+    ['cli', '#fbbf24', '#d97706'],
+    ['appium-setup', '#8b5cf6', '#1e1b4b'],
+    ['mobile-selector', '#a855f7', '#1e1b4b'],
+    ['mobile-gesture', '#c026d3', '#1e1b4b'],
+    ['mobile-context', '#db2777', '#1e1b4b'],
+  ];
+  const rgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
+
+  test('every category class renders its two-stop gradient', async ({ page }) => {
+    const actual = await page.evaluate(
+      (classes) =>
+        classes.map((cls) => {
+          const el = document.createElement('div');
+          el.className = `tile ${cls}`;
+          document.body.appendChild(el);
+          const bg = getComputedStyle(el).backgroundImage;
+          el.remove();
+          return bg;
+        }),
+      PALETTE.map(([cls]) => cls)
+    );
+    expect(actual).toEqual(
+      PALETTE.map(([, a, b]) => `linear-gradient(135deg, ${rgb(a)}, ${rgb(b)})`)
+    );
+  });
+
+  test("every data category's color is its gradient start", async ({ page }) => {
+    const cats = await page.evaluate(() => window.categories.map((c) => [c.cls, c.color]));
+    const start = Object.fromEntries(PALETTE.map(([cls, a]) => [cls, a]));
+    for (const [cls, color] of cats) expect(color.toLowerCase(), cls).toBe(start[cls]);
+  });
+});

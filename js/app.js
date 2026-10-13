@@ -50,6 +50,8 @@ function getItems() {
           popularCmds.getViewCount(popularCmds.commandId(b)) -
           popularCmds.getViewCount(popularCmds.commandId(a))
       );
+  } else if (activeFilter === 'mobile') {
+    items = items.filter((i) => i.platform === 'mobile' || i.platform === 'both');
   } else if (activeFilter !== 'all') {
     items = items.filter((i) => i.cat === activeFilter);
   }
@@ -258,6 +260,7 @@ function buildFilters() {
     { label: 'All', filter: 'all', color: null },
     { label: '⭐ Start Here', filter: 'beginner', color: null },
     ...(popularCmds.ENABLED ? [{ label: '🔥 Popular', filter: 'popular', color: null }] : []),
+    { label: '📱 Mobile', filter: 'mobile', color: null },
     ...categories.map((c) => ({ label: c.cat, filter: c.cat, color: c.color })),
   ];
   defs.forEach(({ label, filter, color }) => {
@@ -300,23 +303,21 @@ document.getElementById('btn-copy').addEventListener('click', copyCode);
 buildFilters();
 
 /* ── META BAR ─────────────────────────────────────────────────── */
-// Command count comes from the data; the Playwright version and the
+// Command count comes from the data; the Selenide version and the
 // last-updated date are fetched at load so they never go stale. Both
 // fetches fail gracefully, leaving the fallback values present in the HTML.
 (function initMetaBar() {
   const countEl = document.getElementById('cmd-count');
   if (countEl) countEl.textContent = allItems.length;
 
-  // Playwright version — read from package.json's declared dependency
-  fetch('./package.json')
+  // Selenide version — js/versions.json is the single pinned source of truth,
+  // bumped by the selenide-release-sync skill together with the content.
+  fetch('./js/versions.json', { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-    .then((pkg) => {
-      const dep =
-        pkg.devDependencies?.['@playwright/test'] ?? pkg.dependencies?.['@playwright/test'];
-      if (!dep) return;
-      const clean = dep.replace(/^[\^~>=<\s]+/, ''); // strip range prefix
-      const el = document.getElementById('pw-version');
-      if (el) el.textContent = 'v' + clean;
+    .then((versions) => {
+      if (!versions?.selenide) return;
+      const el = document.getElementById('selenide-version');
+      if (el) el.textContent = 'v' + versions.selenide;
     })
     .catch(() => {});
 
