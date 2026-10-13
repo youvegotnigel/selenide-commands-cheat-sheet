@@ -93,3 +93,21 @@ test.describe('Actions entries (Selenide 7.19.0)', () => {
     expect(entry.code).toContain('.clear();');
   });
 });
+
+test.describe('Actions corrections', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  test('click(ClickOptions) tip treats withTimeout() as the click retry timeout', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Actions', 'click(ClickOptions)');
+    // selenide-core 7.19.0 ClickOptions.java: public class ClickOptions implements HasTimeout
+    // impl/Arguments.java getTimeoutMs(): ofType(HasTimeout.class).map(HasTimeout::timeout)
+    // impl/SelenideElementProxy.java: dispatchAndRetry(timeoutMs, ...) uses that timeout,
+    // and commands/Click.java also applies it as a temporary pageLoadTimeout.
+    expect(entry.tip).not.toContain('not an element wait');
+    expect(entry.tip).toContain('pageLoadTimeout');
+  });
+});

@@ -19,7 +19,7 @@ $(".flash").shouldHave(text("Saved"));`,
       level: 'intermediate',
       platform: 'web',
       desc: 'Clicks with options: a JavaScript click, an offset from the centre of the element, keys held down during the click, or a forced click.',
-      tip: 'The static factories are using(), usingDefaultMethod(), usingJavaScript(), withOffset() and withTimeout(). force(), holdingKeys() and offset() are instance methods chained onto one of them. force() skips the clickable check, and timeout() is a page load timeout for slow links, not an element wait.',
+      tip: 'The static factories are using(), usingDefaultMethod(), usingJavaScript(), withOffset() and withTimeout(). force(), holdingKeys() and offset() are instance methods chained onto one of them. force() skips the clickable check. withTimeout(d) replaces Configuration.timeout for this click and is also applied as the pageLoadTimeout while it runs, which helps for links that open slow pages.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/ClickOptions.html',
       code: `import static com.codeborne.selenide.ClickOptions.*;
 import org.openqa.selenium.Keys;
