@@ -15,6 +15,7 @@ import windowCat from './window.js';
 import file from './file.js';
 import network from './network.js';
 import javascript from './javascript.js';
+import report from './report.js';
 import framework from './framework.js';
 import remote from './remote.js';
 
@@ -32,6 +33,7 @@ export const categories = [
   file,
   network,
   javascript,
+  report,
   framework,
   remote,
 ];
