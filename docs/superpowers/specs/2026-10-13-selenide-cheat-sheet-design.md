@@ -68,9 +68,10 @@ shipped as `AppiumSelectors.withTagAndContentDescription()`.
   holds `Configuration`, `Selenide`, `WebDriverRunner` and the JUnit 5 extensions
   (`BrowserPerTestStrategyExtension`, `ScreenShooterExtension`, `SoftAssertsExtension`).
   Both are needed.
-- `selenide-proxy`'s published sources jar is a 1 KB stub (`DummyProxy.java` only). Its
-  real source is `modules/proxy` at tag `v7.19.0` in `github.com/selenide/selenide`, which is
-  the approved fallback for any module whose sources jar is incomplete.
+- The proxy classes (`SelenideProxyServer`, `MockResponseFilter`, `RequestMatchers`) ship in
+  `selenide-core`. The `selenide-proxy` artifact only carries the `browserup-proxy-core`
+  dependency (its single source file, `DummyProxy.java`, is the same at tag `v7.19.0`), so it
+  is not needed for verification.
 - `selenide-appium` versions track `selenide` exactly. They are one release line.
   selenide-appium 7.19.0 depends on Appium `java-client` **11.0.0** and Selenium 4.51.0.
 - Javadoc exists only under `selenide.org/javadoc/current/`. There is no versioned path, so
@@ -323,9 +324,7 @@ artifact, check links, bump references, pin with tests, run the gates, report.
 `selenide-moon`, `selenide-testng`, `selenide-junit4`, `selenide-video-recorder`,
 `selenide-full-screenshot`, `selenide-clear-with-shortcut` (all at `selenide`'s version) and
 `io.appium:java-client` (at `appiumJavaClient`) from Maven Central, and unzips each into
-`.cache/sources/<artifact>-<version>/`. For `selenide-proxy`, whose jar is a stub, it fetches
-`modules/proxy/src/main/java` at tag `v<selenide>` from `github.com/selenide/selenide`.
-Idempotent: skips anything already present. `.cache/` is gitignored. npm script:
+`.cache/sources/<artifact>-<version>/`. Idempotent: skips anything already present. `.cache/` is gitignored. npm script:
 `fetch:sources`.
 
 **`check-docs-links.mjs`** (phase 4b). Imports `js/data/index.js`, groups items by page URL,
