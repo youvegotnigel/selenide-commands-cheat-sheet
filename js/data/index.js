@@ -13,6 +13,7 @@ import wait from './wait.js';
 import pageObject from './page-object.js';
 import windowCat from './window.js';
 import file from './file.js';
+import javascript from './javascript.js';
 import framework from './framework.js';
 
 /** @type {Category[]} */
@@ -27,5 +28,6 @@ export const categories = [
   pageObject,
   windowCat,
   file,
+  javascript,
   framework,
 ];
