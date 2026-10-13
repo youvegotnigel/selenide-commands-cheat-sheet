@@ -32,3 +32,10 @@ test('finds a GitHub README heading through its escaped user-content id', () => 
   assert.equal(hasAnchor(GITHUB_BLOB, 'changelog', { github: true }), false);
   assert.equal(hasAnchor(GITHUB_BLOB, 'features'), false);
 });
+
+test('finds a Javadoc constructor id, which the page writes HTML-escaped', () => {
+  // Observed on SelenideDriver.html: the link is #%3Cinit%3E(...) and the id is &lt;init&gt;(...)
+  const html = '<section id="&lt;init&gt;(com.codeborne.selenide.Config)">';
+  assert.equal(hasAnchor(html, decodeAnchor('#%3Cinit%3E(com.codeborne.selenide.Config)')), true);
+  assert.equal(hasAnchor(html, '<init>(com.codeborne.selenide.Config,java.util.List)'), false);
+});

@@ -155,7 +155,7 @@ void tearDown() {
       platform: 'web',
       desc: 'An explicit browser object with its own config, for tests that drive two or more browsers at once, such as a chat between two users.',
       tip: 'new SelenideConfig() starts from selenide.properties and -Dselenide.* values, not from what you set on Configuration. The unprefixed $() and open() still use the default browser. For a short block in a second browser, inNewBrowser(() -> ...) opens one and closes it afterwards.',
-      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideDriver.html#constructor-detail',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideDriver.html#%3Cinit%3E(com.codeborne.selenide.Config)',
       code: `import com.codeborne.selenide.SelenideConfig;
 import com.codeborne.selenide.SelenideDriver;
 
