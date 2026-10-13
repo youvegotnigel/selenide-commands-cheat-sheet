@@ -3,7 +3,13 @@
 // =============================================================
 
 import { categories } from './data/index.js';
-import { highlight, highlightShell } from './highlight.js';
+import {
+  highlight,
+  highlightShell,
+  highlightXml,
+  pickHighlighter,
+  highlightFor,
+} from './highlight.js';
 import * as popularCmds from './popular-commands.js';
 
 // Expose as a global so data-integrity tests can access it via page.evaluate()
@@ -11,6 +17,9 @@ window.categories = categories;
 // Expose for tests via page.evaluate() (same rationale as window.categories)
 window.highlight = highlight;
 window.highlightShell = highlightShell;
+window.highlightXml = highlightXml;
+window.pickHighlighter = pickHighlighter;
+window.highlightFor = highlightFor;
 // Expose for tests via page.evaluate() (same rationale as window.categories)
 window.popularCommands = popularCmds;
 
@@ -148,12 +157,8 @@ function openModal(item) {
   document.getElementById('modal').style.display = 'flex';
   document.getElementById('m-title').innerHTML = item.name;
   document.getElementById('m-desc').innerText = item.desc;
-  // Shell highlighter for CLI snippets: the CLI category, or any code that
-  // starts with an npx command or a shell '#' comment (e.g. moved trace commands).
-  const isShell = item.cls === 'cli' || /^\s*(npx|#)/.test(item.code);
-  document.getElementById('m-code').innerHTML = isShell
-    ? highlightShell(item.code)
-    : highlight(item.code);
+  // Java, shell or XML, chosen from the category and the snippet's first line
+  document.getElementById('m-code').innerHTML = highlightFor(item);
   document.getElementById('btn-docs').href = item.docs;
 
   // Difficulty badge
