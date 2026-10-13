@@ -1,7 +1,8 @@
-# Task: sync the Playwright cheat sheet with current Playwright
+# Task: sync the Selenide cheat sheet with current Selenide
 
 You are running headless in GitHub Actions. Keep this repo's command data
-(`js/data/*.js`) accurate against the **latest stable** Playwright release and
+(`js/data/*.js`) accurate against the **latest** Selenide release on Maven Central (selenide-appium
+ships with the same version) and
 open a **pre-validated pull request** with the changes.
 
 **You never merge, and never push to `master` or `develop`.** Every change goes
@@ -11,7 +12,7 @@ protection.
 
 ## How to do the sync
 
-Read `.claude/skills/playwright-release-sync/SKILL.md` and its
+Read `.claude/skills/selenide-release-sync/SKILL.md` and its
 `references/quality-bar.md`, then follow the workflow exactly. They are the
 single source of truth for what to change and to what standard. Also obey
 `CLAUDE.md` and `AGENTS.md`.
@@ -27,11 +28,13 @@ outside the repo. Read it first:
 
 CI differences from the skill:
 
-- Browsers for chromium and webkit are already installed for the version in
-  `package-lock.json`. After a version bump, run
-  `npx playwright install chromium webkit` again.
-- Gate with `npm run lint`, `npm run format:check`, `npm run test:chromium`, and
-  the link checker. The two mobile projects add cost without catching data
+- Browsers for chromium and webkit and the pinned sources (`.cache/sources/`) are
+  already installed. After bumping `js/versions.json`, run `npm run fetch:sources`
+  again.
+- Use only the approved sources listed in the skill. If you need another source,
+  do not use it: list it in the PR body under "Wanted sources".
+- Gate with `npm run lint`, `npm run format:check`, `npm run test:chromium`,
+  `npm run test:scripts`, and the link checker. The two mobile projects add cost without catching data
   issues. They run on the human side.
 - Keep changes scoped. Do not rename categories, change `cls`/`color`,
   restructure files, or touch the highlighter or UI. Propose a new category
@@ -51,11 +54,11 @@ changed:
      `bot/cheatsheet-sync-`. If one exists, update that branch instead of
      stacking a duplicate. Otherwise create `bot/cheatsheet-sync-<YYYY-MM-DD>`.
   2. Commit as the bot identity with a Conventional Commit message
-     (`chore: sync cheat sheet with Playwright vX.Y.Z`). The body is the skill's
+     (`chore: sync cheat sheet with Selenide vX.Y.Z`). The body is the skill's
      step 11 report.
   3. Push and open a PR against the default branch with `gh pr create`. The PR
      body is the same report, with "New entries", "Updated", "Fixed" and
-     "Deliberately left out" sections.
+     "Deliberately left out", "Conflicts" and "Wanted sources" sections.
 - **`DRY_RUN` is `false` but a gate fails and you cannot legitimately fix it:**
   open the PR as a **draft** (`gh pr create --draft`), prefix the title with
   `[CI FAILING]`, try `gh pr edit --add-label ci-failing` (ignore it if the label

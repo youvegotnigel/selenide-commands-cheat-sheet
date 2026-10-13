@@ -1,14 +1,15 @@
 name: Cheat sheet sync
 
-# Keeps js/data/ in sync with Playwright releases. Every week a cheap,
-# deterministic "Detect drift" step checks whether a new Playwright release is
-# out or any docs link broke. Only then does Claude Code run the
-# playwright-release-sync skill (.claude/skills/playwright-release-sync/) and
-# open a pre-validated PR. It never merges. A no-drift week costs no agent run.
+# Keeps js/data/ in sync with Selenide releases (selenide-appium ships with the
+# same version). On the 1st and 15th of each month a cheap, deterministic
+# "Detect drift" step checks Maven Central for a new release and whether any
+# docs link broke. Only then does Claude Code run the selenide-release-sync
+# skill (.claude/skills/selenide-release-sync/) and open a pre-validated PR. It
+# never merges. A no-drift run costs no agent run.
 # CI-specific rules live in .github/prompts/cheatsheet-sync.md.
 on:
   schedule:
-    - cron: '0 6 * * 1' # 06:00 UTC every Monday; Playwright ships roughly monthly
+    - cron: '0 6 1,15 * *' # 06:00 UTC on the 1st and 15th; Selenide ships about monthly
   workflow_dispatch:
     inputs:
       dry_run:
@@ -47,7 +48,7 @@ jobs:
       - name: Detect drift
         id: drift
         env:
-          SCRIPTS: .claude/skills/playwright-release-sync/scripts
+          SCRIPTS: .claude/skills/selenide-release-sync/scripts
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           report="$RUNNER_TEMP/drift-report.txt"
@@ -75,6 +76,10 @@ jobs:
       - name: Install dependencies
         if: steps.drift.outputs.run == 'true'
         run: npm ci
+
+      - name: Fetch sources
+        if: steps.drift.outputs.run == 'true'
+        run: npm run fetch:sources
 
       - name: Install Playwright browsers
         if: steps.drift.outputs.run == 'true'
