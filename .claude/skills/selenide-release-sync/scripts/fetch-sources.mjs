@@ -30,6 +30,8 @@ const SELENIDE_MODULES = [
   'selenide-video-recorder',
   'selenide-full-screenshot',
   'selenide-clear-with-shortcut',
+  'selenide-cli',
+  'selenide-mcp',
 ];
 const JARS = [
   ...SELENIDE_MODULES.map((artifact) => ({
