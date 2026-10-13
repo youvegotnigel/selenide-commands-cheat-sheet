@@ -15,6 +15,7 @@ import windowCat from './window.js';
 import file from './file.js';
 import javascript from './javascript.js';
 import framework from './framework.js';
+import remote from './remote.js';
 
 /** @type {Category[]} */
 export const categories = [
@@ -30,4 +31,5 @@ export const categories = [
   file,
   javascript,
   framework,
+  remote,
 ];
