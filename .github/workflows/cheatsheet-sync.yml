@@ -1,0 +1,112 @@
+name: Cheat sheet sync
+
+# Keeps js/data/ in sync with Playwright releases. Every week a cheap,
+# deterministic "Detect drift" step checks whether a new Playwright release is
+# out or any docs link broke. Only then does Claude Code run the
+# playwright-release-sync skill (.claude/skills/playwright-release-sync/) and
+# open a pre-validated PR. It never merges. A no-drift week costs no agent run.
+# CI-specific rules live in .github/prompts/cheatsheet-sync.md.
+on:
+  schedule:
+    - cron: '0 6 * * 1' # 06:00 UTC every Monday; Playwright ships roughly monthly
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Scan and print the proposed diff to the job summary without opening a PR'
+        type: boolean
+        default: false
+
+# Least privilege: edit files on a branch and open a PR, nothing more.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: cheatsheet-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Default GITHUB_TOKEN lets the agent push a branch. Supplying a PAT
+          # here instead also makes the existing Tests workflow run on the PR.
+          token: ${{ secrets.PAT || github.token }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Both scripts need only Node and the network, so this runs before any
+      # install. Link checker exit codes: 0 ok, 1 broken links, 2 could not run
+      # (network). A network failure is not drift.
+      - name: Detect drift
+        id: drift
+        env:
+          SCRIPTS: .claude/skills/playwright-release-sync/scripts
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          report="$RUNNER_TEMP/drift-report.txt"
+          version=$(node "$SCRIPTS/release-delta.mjs" --check)
+          set +e
+          links=$(node "$SCRIPTS/check-docs-links.mjs")
+          links_exit=$?
+          set -e
+          { echo "$version"; echo; echo "$links"; } | tee "$report"
+
+          run=false
+          if [[ "$version" == *"behind=true"* ]]; then run=true; fi
+          if [[ "$links_exit" == 1 ]]; then run=true; fi
+          if [[ "$MANUAL" == true ]]; then run=true; fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "report=$report" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Drift check"
+            echo '```'
+            cat "$report"
+            echo '```'
+            echo "Agent run: **$run**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install dependencies
+        if: steps.drift.outputs.run == 'true'
+        run: npm ci
+
+      - name: Install Playwright browsers
+        if: steps.drift.outputs.run == 'true'
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Run cheat sheet sync agent
+        if: steps.drift.outputs.run == 'true'
+        uses: anthropics/claude-code-action@v1
+        env:
+          # Expanded inside .github/cheatsheet-sync.mcp.json as ${CONTEXT7_API_KEY}.
+          CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
+          # Read by the agent to decide whether to open a PR. False on schedule.
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+          DRIFT_REPORT: ${{ steps.drift.outputs.report }}
+          # gh pr create needs this; falls back to GITHUB_TOKEN when no PAT is set.
+          GH_TOKEN: ${{ secrets.PAT || github.token }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.PAT || github.token }}
+          prompt: |
+            Follow the instructions in .github/prompts/cheatsheet-sync.md exactly.
+            The DRY_RUN environment variable controls whether you open a PR.
+          # Haiku 4.5 keeps a run well under $0.50, and the drift gate above means
+          # a no-drift week costs nothing. The human PR review, the full test gate
+          # and the skill's scripted checks cover the lower model tier.
+          # Bump --model to claude-sonnet-5-5 (or claude-opus-5-5) for more quality.
+          # --max-turns was 40 and that was too low: the 2026-08-01 run read the
+          # ~20 mandated files, verified via Context7, edited, linted, committed
+          # and pushed, then hit the limit before `gh pr create` and failed the
+          # job with the work stranded on the branch. 120 leaves real headroom.
+          claude_args: |
+            --model claude-haiku-4-5
+            --max-turns 120
+            --mcp-config .github/cheatsheet-sync.mcp.json
+            --allowedTools Read,Edit,Write,Bash,mcp__context7

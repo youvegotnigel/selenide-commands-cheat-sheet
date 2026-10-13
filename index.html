@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎭 Playwright Commands Dashboard </title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <img class="header-logo" src="images/playwright-logo.svg" alt="Playwright logo" width="44" height="44" />
+  <span>Playwright Commands Dashboard</span>
+  <img class="header-logo" src="images/playwright-logo.svg" alt="" aria-hidden="true" width="44" height="44" />
+</header>
+
+<div class="meta-bar">
+  <span class="meta-badge"><span class="k">playwright</span><span class="v" style="background:#22c55e" id="pw-version">v1.64.0</span></span>
+  <span class="meta-badge"><span class="k">last updated</span><span class="v" style="background:#38bdf8" id="last-updated">2026-10-11</span></span>
+  <span class="meta-badge"><span class="k">commands</span><span class="v" style="background:#a855f7" id="cmd-count">299</span></span>
+  <span class="meta-badge visitor-counter"><span class="k">visitors</span><span class="v" style="background:#fb923c" id="visitor-count-number">—</span></span>
+</div>
+
+<div class="container">
+  <div class="search-wrap">
+    <input type="text" id="search-input" placeholder="Search commands, descriptions, tips..." aria-label="Search commands">
+    <span class="search-shortcut" id="search-shortcut"></span>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div class="toolbar">
+    <button class="view-btn active" id="btnFlat">Flat</button>
+    <button class="view-btn"        id="btnGrouped">Grouped</button>
+  </div>
+  <div id="grid"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close-icon" id="btn-close-icon">×</span>
+    <div class="modal-header">
+      <h3 class="modal-title" id="m-title"></h3>
+      <span class="level-badge" id="m-level"></span>
+    </div>
+    <p   class="modal-desc" id="m-desc"></p>
+    <pre                    id="m-code"></pre>
+    <div class="modal-tip"  id="m-tip"></div>
+    <div class="modal-footer">
+      <button class="btn-copy"  id="btn-copy">Copy</button>
+      <a      class="btn-docs"  id="btn-docs" href="#" target="_blank">Docs ↗</a>
+      <button class="btn-close" id="btn-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+<script src="js/visitor-counter.js" defer></script>
+<script src="js/visitor-display.js" defer></script>
+
+</body>
+</html>
