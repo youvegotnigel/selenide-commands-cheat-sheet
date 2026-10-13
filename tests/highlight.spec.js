@@ -98,16 +98,4 @@ test.describe('highlightShell() — CLI snippets', () => {
     }, code);
     expect(text).toBe(code);
   });
-
-  test('CLI commands render with the shell highlighter in the modal', async ({ page }) => {
-    await page.locator('.filter-btn', { hasText: 'Tracing' }).click();
-    await page.locator('.tile', { hasText: 'codegen' }).first().click();
-    // shell '#' comment lines ARE dimmed
-    await expect(page.locator('#m-code .tok-comment').first()).toContainText('# Record');
-    // ...but the URL's '//' is NOT swallowed into a comment
-    const comments = (await page.locator('#m-code .tok-comment').allInnerTexts()).join('\n');
-    expect(comments).not.toContain('example.com');
-    // the full URL is still present in the rendered code
-    await expect(page.locator('#m-code')).toContainText('https://example.com');
-  });
 });

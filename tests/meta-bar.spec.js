@@ -110,7 +110,8 @@ test.describe('Meta bar', () => {
 });
 
 /* ── VISITOR COUNTER: DISPLAY ──────────────────────────────────── */
-test.describe('Visitor counter — display', () => {
+// Supabase deferred (plan Task 8): re-enable together with ENABLED = true.
+test.describe.skip('Visitor counter — display', () => {
   test('shows the live count, formatted with separators', async ({ page }) => {
     await mockBackends(page, { count: 12345 });
     await page.goto('/');
@@ -134,7 +135,7 @@ test.describe('Visitor counter — display', () => {
     await page.goto('/');
 
     // Core content still renders regardless of the counter
-    expect(await page.locator('.tile').count()).toBeGreaterThan(10);
+    expect(await page.locator('.tile').count()).toBeGreaterThan(0);
   });
 });
 
@@ -148,7 +149,8 @@ async function poseAsRealVisitor(page) {
   );
 }
 
-test.describe('Visitor counter — increment', () => {
+// Supabase deferred (plan Task 8): re-enable together with ENABLED = true.
+test.describe.skip('Visitor counter — increment', () => {
   test('does NOT increment in automated browsers (CI / bots)', async ({ page }) => {
     const state = await mockBackends(page);
     await page.goto('/'); // navigator.webdriver is true under Playwright
@@ -189,5 +191,30 @@ test.describe('Visitor counter — increment', () => {
     expect(state.posts).toBe(1);
 
     await ctx.close();
+  });
+});
+
+/* ── ANALYTICS PLACEHOLDER (Supabase deferred, plan Task 8) ────── */
+test.describe('Analytics placeholder', () => {
+  test('sends no request to Supabase, even for a real visitor opening a command', async ({
+    page,
+  }) => {
+    await poseAsRealVisitor(page);
+    const hits = [];
+    await page.route('**tilbhgcncnwibnfgebkg.supabase.co/**', (route) => {
+      hits.push(route.request().url());
+      route.abort();
+    });
+    await page.goto('/');
+    await page.locator('.tile').first().click();
+    await page.waitForTimeout(500);
+    expect(hits).toEqual([]);
+  });
+
+  test('hides the Popular filter and keeps the visitor badge placeholder', async ({ page }) => {
+    await page.route('**tilbhgcncnwibnfgebkg.supabase.co/**', (route) => route.abort());
+    await page.goto('/');
+    await expect(page.locator('.filter-btn[data-filter="popular"]')).toHaveCount(0);
+    await expect(page.locator('#visitor-count-number')).toHaveText('—');
   });
 });

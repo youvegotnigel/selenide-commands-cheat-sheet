@@ -1,5 +1,8 @@
 // Live Visitor Counter Display
 (function initVisitorDisplay() {
+  // SUPABASE PLACEHOLDER (deferred, see plan Task 8): no requests until re-enabled.
+  const ENABLED = false;
+  if (!ENABLED) return;
   const SUPABASE_URL = 'https://tilbhgcncnwibnfgebkg.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_yCaOt8Z9sl-JEQC5wZ6_sQ_jZi610z1';
   const UPDATE_INTERVAL = 30000;

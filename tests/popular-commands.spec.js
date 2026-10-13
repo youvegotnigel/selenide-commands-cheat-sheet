@@ -76,7 +76,8 @@ async function poseAsRealVisitor(page) {
   );
 }
 
-test.describe('Popular commands — record opens', () => {
+// Supabase deferred (plan Task 8): re-enable together with ENABLED = true.
+test.describe.skip('Popular commands — record opens', () => {
   test('does NOT record opens in automated browsers (CI / bots)', async ({ page }) => {
     const state = await mockBackends(page);
     await page.goto('/'); // navigator.webdriver is true under Playwright
@@ -119,7 +120,8 @@ test.describe('Popular commands — record opens', () => {
   });
 });
 
-test.describe('Popular commands — badge + filter', () => {
+// Supabase deferred (plan Task 8): re-enable together with ENABLED = true.
+test.describe.skip('Popular commands — badge + filter', () => {
   // Returns the flat list of { id, name } for every command, in render order.
   async function allCommands(page) {
     return page.evaluate(() =>

@@ -1,41 +1,11 @@
 /**
- * @typedef {{ name: string, level: 'beginner'|'intermediate'|'advanced', desc: string, tip: string, docs: string, code: string }} Item
+ * @typedef {{ name: string, level: 'beginner'|'intermediate'|'advanced', platform: 'web'|'mobile'|'both', desc: string, tip: string, docs: string, code: string }} Item
  * @typedef {{ cat: string, cls: string, color: string, items: Item[] }} Category
  */
 
 import config from './config.js';
-import setup from './setup.js';
-import actions from './actions.js';
-import queries from './queries.js';
-import assertions from './assertions.js';
-import utility from './utility.js';
-import network from './network.js';
-import api from './api.js';
-import accessibility from './accessibility.js';
-import fixtures from './fixtures.js';
-import clock from './clock.js';
-import tracing from './tracing.js';
-import component from './component.js';
-import media from './media.js';
-import patterns from './patterns.js';
-import cli from './cli.js';
+import navigation from './navigation.js';
+import condition from './condition.js';
 
 /** @type {Category[]} */
-export const categories = [
-  config,
-  setup,
-  actions,
-  queries,
-  assertions,
-  utility,
-  network,
-  api,
-  accessibility,
-  fixtures,
-  clock,
-  tracing,
-  component,
-  media,
-  patterns,
-  cli,
-];
+export const categories = [config, navigation, condition];

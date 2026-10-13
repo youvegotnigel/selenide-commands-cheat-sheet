@@ -252,7 +252,7 @@ function buildFilters() {
   const defs = [
     { label: 'All', filter: 'all', color: null },
     { label: '⭐ Start Here', filter: 'beginner', color: null },
-    { label: '🔥 Popular', filter: 'popular', color: null },
+    ...(popularCmds.ENABLED ? [{ label: '🔥 Popular', filter: 'popular', color: null }] : []),
     ...categories.map((c) => ({ label: c.cat, filter: c.cat, color: c.color })),
   ];
   defs.forEach(({ label, filter, color }) => {

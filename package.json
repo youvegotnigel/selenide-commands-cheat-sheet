@@ -1,5 +1,5 @@
 {
-  "name": "playwright-commands-cheat-sheet",
+  "name": "selenide-commands-cheat-sheet",
   "version": "1.0.0",
   "private": true,
   "scripts": {

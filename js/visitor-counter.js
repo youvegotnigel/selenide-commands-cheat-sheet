@@ -1,5 +1,8 @@
 // Visitor Counter - Increment once per tab session
 (function initVisitorCounter() {
+  // SUPABASE PLACEHOLDER (deferred, see plan Task 8): no requests until re-enabled.
+  const ENABLED = false;
+  if (!ENABLED) return;
   const SUPABASE_FUNCTION_URL =
     'https://tilbhgcncnwibnfgebkg.supabase.co/functions/v1/increment-visitor';
   const SESSION_KEY = 'visitor-counted-session';
