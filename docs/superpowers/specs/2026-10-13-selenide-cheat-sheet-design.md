@@ -251,17 +251,21 @@ Copy (`innerText`) returns `item.code`.
 
 Generics need no rule: `<` and `>` are escaped plain text.
 
-**`highlightShell(code)`** keeps today's behaviour (`#` comments, quoted strings, flags as
-`tok-keyword`, numbers, `//` not a comment). Program set: `mvn`, `gradle`, `gradlew`,
+**`highlightShell(code)`** keeps today's behaviour (quoted strings, flags as `tok-keyword`,
+numbers, `//` not a comment) with two changes: `#` starts a comment only at line start or
+after whitespace (so `mvn test -Dtest=LoginTest#login` stays plain), and flags may contain
+dots (`-Dselenide.browser` is one flag). Program set: `mvn`, `gradle`, `gradlew`,
 `./gradlew` (own alternative, since `.` and `/` are not identifier characters), `java`,
 `emulator`, `npm`, `npx`, `git`.
 
 **`highlightXml(code)`**, for `pom.xml` snippets: `<!-- -->` → `tok-comment`; tag names →
 `tok-keyword` (the surrounding `<`, `</`, `>`, `/>` are escaped plain); attribute names →
-`tok-fn`; quoted attribute values → `tok-string`; `${...}` → `tok-api` (inside text content
-too); other text plain.
+`tok-fn`; quoted values **directly after `=`** → `tok-string` (so an apostrophe in text
+content never pairs up); `${...}` → `tok-api` (inside text content too); other text plain.
 
-**Routing.** `app.js` exports `pickHighlighter(item)` (also on `window` for tests):
+**Routing.** `highlight.js` exports `pickHighlighter(item)` returning `'shell' | 'xml' |
+'java'`, and `highlightFor(item)` applying it. Both are on `window` for tests. They live in
+`highlight.js` rather than `app.js` so they can be tested without the app's side effects:
 
 - shell when `item.cls === 'cli'`, or the code matches
   `/^\s*(?:(?:mvn|gradle|\.\/gradlew|emulator|npm|npx)\s|#)/`
@@ -328,10 +332,12 @@ Idempotent: skips anything already present. `.cache/` is gitignored. npm script:
 fetches each page once (concurrency 6, 3 retries, 20 s timeout), and for each `#fragment`:
 decodes it, then matches `id="<exact>"` literally (no regex built from the anchor, because
 Javadoc anchors like `shouldHave(com.codeborne.selenide.WebElementCondition...)` contain
-metacharacters). Javadoc ids are quoted. For `github.com` README anchors the checker must
-classify a known-good and a known-bad anchor correctly; the mechanism (rendered
-`user-content-` ids, or slugs derived from the raw file's headings at the same ref) is chosen
-in phase 4b by testing both against a real README. Redirects to a different path count as
+metacharacters). Javadoc ids are quoted. For `github.com` README anchors the checker looks
+for `user-content-<anchor>`: a GitHub blob page embeds the rendered README in JSON, where
+heading ids appear escaped as `id=\"user-content-features\"` (observed on
+`selenide/selenide/blob/main/modules/appium/README.md`). GitHub `docs` links use
+`blob/main/...`. The matching logic lives in `scripts/lib/anchors.mjs` with `node:test` unit
+tests (`npm run test:scripts`), which `test.yml` runs on the chromium job. Redirects to a different path count as
 broken. `--only=<cat,cat>` limits the run. Exit codes: 0 all good, 1 broken links, 2 could not
 run (every request failed). npm script: `check:links`.
 
@@ -341,8 +347,9 @@ Also reads `selenide-appium`'s metadata and warns if its latest differs from cor
 
 - `--check` prints `pinned=7.19.0 latest=X.Y.Z behind=true|false`.
 - Without flags it prints every `## X.Y.Z (date)` section of `CHANGELOG.md` at tag
-  `vX.Y.Z` that is newer than the pinned version and not newer than latest, plus the matching
-  sections of `modules/appium/CHANGELOG`.
+  `vX.Y.Z` that is newer than the pinned version and not newer than latest. Appium changes are
+  listed there too: `modules/appium/CHANGELOG` stopped at 6.15.0, when selenide-appium merged
+  into the monorepo, so it is not read.
 - `--to=X.Y.Z` compares against a specific release.
 - Exit 0 on success, 2 when Maven Central or GitHub could not be reached.
 
@@ -370,8 +377,9 @@ step runs `release-delta.mjs --check` and `check-docs-links.mjs` before any inst
 agent runs only on `behind=true`, link exit code 1, or a manual run. The agent follows
 `selenide-release-sync`, opens a PR (draft with a `[CI FAILING]` title when a gate fails) and
 never merges or pushes to `master`/`develop`. `.github/prompts/cheatsheet-sync.md` is
-rewritten for Selenide. `.github/cheatsheet-sync.mcp.json` keeps Context7. `test.yml` and
-`stamp-date.yml` are unchanged.
+rewritten for Selenide. `.github/cheatsheet-sync.mcp.json` keeps Context7. The sync job also runs
+`npm run fetch:sources` before the agent. `test.yml` gains one step (`npm run test:scripts`
+on the chromium job); `stamp-date.yml` is unchanged.
 
 ## 10. Testing
 
@@ -403,11 +411,18 @@ they test rendering rather than any fact about an entry.
 
 ### Test files
 
-- `tests/data-integrity.spec.js`: the rules in section 4, plus one describe block per
-  category from phase 5 pinning the details that would be wrong if copied from an older or
-  unverified answer (for example `withTagAndContentDescription` and never
-  `withTagAndDescription`, `CombinedBy` code contains `.ios(`, the 7.19.0 entries exist with
-  the right level and `platform`).
+- `tests/helpers/schema.js` holds the section 4 rules as pure validators.
+  `tests/schema-rules.spec.js` proves each one against hand-written good and bad fixtures, and
+  `tests/data-integrity.spec.js` applies them to the real data.
+- `tests/content/<cls>.spec.js`, one file per category from phase 5 (separate files so
+  parallel content agents never edit the same test file), pinning the details that would be
+  wrong if copied from an older or unverified answer (for example
+  `withTagAndContentDescription` and never `withTagAndDescription`, `CombinedBy` code
+  contains `.ios(`, the 7.19.0 entries exist with the right level and `platform`).
+- UI tests that need exact, stable expectations load a hand-written fixture dataset through
+  `tests/helpers/fixture-data.js` (a `page.route` that serves it in place of
+  `js/data/index.js`).
+- `playwright.config.js` reads `PORT` (default 3000), so parallel worktrees never share a server.
 - `tests/highlight.spec.js`: section 7.
 - `tests/cheatsheet.spec.js`: tests that hard-code Playwright entry names are rewritten
   against Selenide entries or derived from `window.categories`. New: Mobile filter shows only
@@ -427,7 +442,7 @@ also `npm run check:links`), and is committed on `develop` as one commit.
 | # | Phase | Notes |
 |---|---|---|
 | 0 | Baseline commit on `master`, create `develop` | Done: `4a25ee9` |
-| 1 | Strip and rebrand | Delete the 16 Playwright modules, Playwright-specific tests, specs and plans. Three placeholder entries: "Static imports" (Setup & Config), `open()` (Navigation & Browser), `shouldHave(text())` (Conditions). Rebrand title, header, favicon, logo |
+| 1 | Strip and rebrand | Delete the 16 Playwright modules, Playwright-specific tests, specs and plans. Four placeholder entries: "Static imports" and `Configuration.timeout` (Setup & Config), `open()` (Navigation & Browser), `shouldHave(text())` (Conditions). The fourth (intermediate) keeps the "Start Here" filter a strict subset. Rebrand title, header, favicon, logo |
 | 2 | Schema | `platform`, URL allowlist, filter-name clash rule, no `<`/`>` in names, `Item` typedef |
 | 3 | Highlighter | Test-first: Java, shell, XML, routing, round-trip |
 | 4 | UI | Mobile filter, `versions.json` meta bar, gradient families, tests |
