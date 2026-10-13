@@ -8,7 +8,8 @@ import navigation from './navigation.js';
 import selector from './selector.js';
 import action from './action.js';
 import condition from './condition.js';
+import collection from './collection.js';
 import pageObject from './page-object.js';
 
 /** @type {Category[]} */
-export const categories = [config, navigation, selector, action, condition, pageObject];
+export const categories = [config, navigation, selector, action, condition, collection, pageObject];
