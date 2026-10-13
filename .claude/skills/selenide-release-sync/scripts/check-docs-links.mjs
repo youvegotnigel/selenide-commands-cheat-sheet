@@ -7,6 +7,7 @@
 // Usage (from the repo root):
 //   node .claude/skills/selenide-release-sync/scripts/check-docs-links.mjs
 //   node .claude/skills/selenide-release-sync/scripts/check-docs-links.mjs --only="Conditions,Mobile Gestures"
+//   ... --only="Windows, Frames, Alerts"   (a full name with commas)   ... --only=window,file   (cls values)
 //
 // Exit code 0 when every link is good, 1 when any page or anchor is missing,
 // 2 when the checker itself could not run (e.g. no network).
@@ -14,15 +15,14 @@
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { decodeAnchor, hasAnchor } from './lib/anchors.mjs';
+import { categoryFilter } from './lib/only.mjs';
 
 process.removeAllListeners('warning'); // silence the MODULE_TYPELESS_PACKAGE_JSON notice
 
 const repoRoot = process.cwd();
-const only = (process.argv.find((a) => a.startsWith('--only=')) ?? '')
-  .slice('--only='.length)
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
+const keep = categoryFilter(
+  process.argv.find((a) => a.startsWith('--only='))?.slice('--only='.length)
+);
 
 let categories;
 try {
@@ -35,8 +35,8 @@ try {
 
 // page URL (no fragment) -> [{ cat, name, anchor, docs }]
 const byPage = new Map();
-for (const { cat, items } of categories) {
-  if (only.length && !only.includes(cat)) continue;
+for (const { cat, cls, items } of categories) {
+  if (!keep({ cat, cls })) continue;
   for (const { name, docs } of items) {
     const url = new URL(docs);
     const anchor = decodeAnchor(url.hash);
