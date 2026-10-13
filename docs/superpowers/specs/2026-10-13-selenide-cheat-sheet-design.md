@@ -114,6 +114,7 @@ conditions, `should*` with `Duration`, collections).
 | `docs` | Parsed with `new URL()`. Protocol `https:`. Host `selenide.org`, **or** host `github.com` with a path starting `/selenide/` or `/selenide-examples/` |
 | `code` | At least 20 characters after trimming |
 | `name` | Unique within its category and across all categories |
+| `name` characters | Contains no `<` or `>`. `app.js` renders names with `innerHTML` (tile and modal title), so a generic such as `Container<T>` would be parsed as a tag and vanish. Write `Container (generic)` and show the generics in `code` |
 | `color` | `/^#[0-9a-fA-F]{6}$/` |
 | Category `cat` | Must not equal a quick-filter value: `all`, `beginner`, `popular`, `mobile` (filters are keyed by `cat`) |
 | All item fields | No em-dash or en-dash |
@@ -427,7 +428,7 @@ also `npm run check:links`), and is committed on `develop` as one commit.
 |---|---|---|
 | 0 | Baseline commit on `master`, create `develop` | Done: `4a25ee9` |
 | 1 | Strip and rebrand | Delete the 16 Playwright modules, Playwright-specific tests, specs and plans. Three placeholder entries: "Static imports" (Setup & Config), `open()` (Navigation & Browser), `shouldHave(text())` (Conditions). Rebrand title, header, favicon, logo |
-| 2 | Schema | `platform`, URL allowlist, filter-name clash rule, `Item` typedef |
+| 2 | Schema | `platform`, URL allowlist, filter-name clash rule, no `<`/`>` in names, `Item` typedef |
 | 3 | Highlighter | Test-first: Java, shell, XML, routing, round-trip |
 | 4 | UI | Mobile filter, `versions.json` meta bar, gradient families, tests |
 | 4b | Verification tooling | `fetch-sources.mjs`, `check-docs-links.mjs`, npm scripts, `.cache/` gitignored |
