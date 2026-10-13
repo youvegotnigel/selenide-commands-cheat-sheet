@@ -35,7 +35,8 @@ Read it before any task. Brief: [`docs/kickoff.md`](../../kickoff.md).
 - Mobile content is selenide-appium's own API only. `AppiumBy` and other java-client classes appear only inside Selenide calls or a `WebDriverProvider`.
 - **Test oracle rule:** every expected value is hand-written from an independent source (the sources jar with a citing comment, the spec's rules, literal HTML derived from the token rules). Never compute an expected value with the code under test, never paste current output as the expectation, never assert an entry's facts by reading the same entry. Every new test is run and seen to fail for the expected reason before the code that makes it pass.
 - `js/meta.json` is never hand-edited.
-- Supabase: nothing runs against the live project.
+- Supabase: nothing runs against the live project. **Task 8 is deferred by the user**: analytics
+  stay off behind `ENABLED = false` placeholders (Task 1 Step 7b) until it is picked up.
 
 ## Review Focus
 
@@ -332,23 +333,80 @@ the modal` (Task 3 rewrites the file).
 `tests/meta-bar.spec.js`: in `does not break the page when the backend is down` use
 `toBeGreaterThan(0)`.
 
-`tests/popular-commands.spec.js`:
-- `no badges and page still works…`: `toBeGreaterThan(0)`.
-- Replace both "20 commands" fixtures so they no longer need 20 real commands. Rows may name
-  ids that do not exist; `applyRows` ranks all rows with views:
+- [ ] **Step 7b: Switch analytics off behind a placeholder flag (Supabase deferred)**
+
+The user deferred Supabase (Task 8). Until then the client would talk to the **Playwright
+site's** tables, so any real-browser visit, even on localhost, would bump that site's
+visitor count and add Selenide ids to its `command_views`. Analytics are therefore off, with
+the switch in one obvious place per file.
+
+First the test (fails today, because `visitor-display.js` always sends a GET). Append to
+`tests/meta-bar.spec.js`:
 
 ```js
-    // 3 real commands with the highest counts + 17 unknown ids = 20 viewed rows,
-    // so the top ~10% is ceil(20 * 0.1) = 2: the two real commands with 30 and 29 views.
-    state.rows = [
-      { command_id: cmds[0].id, view_count: 30 },
-      { command_id: cmds[1].id, view_count: 29 },
-      { command_id: cmds[2].id, view_count: 1 },
-      ...Array.from({ length: 17 }, (_, i) => ({ command_id: `fake:${i}`, view_count: 2 })),
-    ];
+/* ── ANALYTICS PLACEHOLDER (Supabase deferred, plan Task 8) ────── */
+test.describe('Analytics placeholder', () => {
+  test('sends no request to Supabase, even for a real visitor opening a command', async ({
+    page,
+  }) => {
+    await poseAsRealVisitor(page);
+    const hits = [];
+    await page.route('**tilbhgcncnwibnfgebkg.supabase.co/**', (route) => {
+      hits.push(route.request().url());
+      route.abort();
+    });
+    await page.goto('/');
+    await page.locator('.tile').first().click();
+    await page.waitForTimeout(500);
+    expect(hits).toEqual([]);
+  });
+
+  test('hides the Popular filter and keeps the visitor badge placeholder', async ({ page }) => {
+    await page.route('**tilbhgcncnwibnfgebkg.supabase.co/**', (route) => route.abort());
+    await page.goto('/');
+    await expect(page.locator('.filter-btn[data-filter="popular"]')).toHaveCount(0);
+    await expect(page.locator('#visitor-count-number')).toHaveText('—');
+  });
+});
 ```
 
-  In the filter test the expected order is `names[0] === cmds[0].name` and `names.length === 2`.
+Run: `npx playwright test tests/meta-bar.spec.js -g "Analytics placeholder" --project=chromium`
+Expected: FAIL (`hits` contains the `rest/v1/visits` URL; the Popular button exists).
+
+Then the placeholder. `js/popular-commands.js`, after the constants:
+
+```js
+// SUPABASE PLACEHOLDER (deferred, see plan Task 8). Analytics stay off until the
+// Selenide-specific tables and Edge Functions exist. While off, nothing is sent,
+// so this site can never write into the Playwright cheat sheet's counters.
+export const ENABLED = false;
+```
+
+and make the first line of `loadCounts()` `if (!ENABLED) return Promise.resolve();` and the
+first line inside `recordOpen()`'s `try` `if (!ENABLED) return;`.
+
+`js/visitor-counter.js` and `js/visitor-display.js`: as the first two lines inside each IIFE:
+
+```js
+  // SUPABASE PLACEHOLDER (deferred, see plan Task 8): no requests until re-enabled.
+  const ENABLED = false;
+  if (!ENABLED) return;
+```
+
+`js/app.js` `buildFilters()`: replace the Popular def with
+`...(popularCmds.ENABLED ? [{ label: '🔥 Popular', filter: 'popular', color: null }] : []),`.
+
+Skip the analytics behaviour tests, each with the same comment line above it:
+
+```js
+// Supabase deferred (plan Task 8): re-enable together with ENABLED = true.
+```
+
+on `test.describe.skip('Visitor counter — display', …)`,
+`test.describe.skip('Visitor counter — increment', …)` in `tests/meta-bar.spec.js`, and both
+describes in `tests/popular-commands.spec.js`.
+
+Run the same command. Expected: PASS.
 
 - [ ] **Step 8: Run the gates**
 
@@ -1240,9 +1298,10 @@ test.describe('Mobile filter', () => {
     await page.goto('/');
   });
 
-  test('sits after Popular and shows only mobile and both items', async ({ page }) => {
+  test('sits after Start Here and shows only mobile and both items', async ({ page }) => {
     const labels = await page.locator('.filter-btn').allInnerTexts();
-    expect(labels.slice(0, 4)).toEqual(['All', '⭐ Start Here', '🔥 Popular', '📱 Mobile']);
+    // Popular is hidden while analytics are off (Task 1 Step 7b); Task 8 re-adds it here.
+    expect(labels.slice(0, 3)).toEqual(['All', '⭐ Start Here', '📱 Mobile']);
 
     await page.locator('.filter-btn[data-filter="mobile"]').click();
     await expect(page.locator('.tile-name')).toHaveText(['gamma()', 'delta()', 'epsilon()']);
@@ -2103,7 +2162,34 @@ first, the four violet/magenta mobile categories last. `#filter=mobile` shows on
 
 ---
 
-### Task 8: Supabase backend files and client renames
+### Task 8: Supabase backend files and client renames (DEFERRED by the user)
+
+> **Deferred.** Skip this task in the main run; Tasks 9 and 10 do not depend on it. When the
+> user picks it up, do these extra steps on top of the ones below:
+> 1. Set `ENABLED = true` in `js/popular-commands.js`, `js/visitor-counter.js` and
+>    `js/visitor-display.js` and remove the `SUPABASE PLACEHOLDER` comments.
+> 2. Remove `.skip` from the four analytics describes, and delete the `Analytics placeholder`
+>    describe in `tests/meta-bar.spec.js`.
+> 3. In the popularity tests, replace both "20 commands" fixtures (they no longer have 20
+>    real commands to use). Rows may name ids that do not exist; `applyRows` ranks every row
+>    with views:
+>
+>    ```js
+>        // 3 real commands with the highest counts + 17 unknown ids = 20 viewed rows,
+>        // so the top ~10% is ceil(20 * 0.1) = 2: the two real commands with 30 and 29 views.
+>        state.rows = [
+>          { command_id: cmds[0].id, view_count: 30 },
+>          { command_id: cmds[1].id, view_count: 29 },
+>          { command_id: cmds[2].id, view_count: 1 },
+>          ...Array.from({ length: 17 }, (_, i) => ({ command_id: `fake:${i}`, view_count: 2 })),
+>        ];
+>    ```
+>
+>    The filter test expects `names.length === 2` and `names[0] === cmds[0].name`; the
+>    "no badges" test uses `toBeGreaterThan(0)`.
+> 4. In `tests/cheatsheet.spec.js` `Mobile filter`, expect
+>    `['All', '⭐ Start Here', '🔥 Popular', '📱 Mobile']` for `labels.slice(0, 4)`.
+> 5. `CLAUDE.md` / `AGENTS.md`: replace the "analytics are off" note written in Task 10.
 
 **Files:**
 - Delete: `supabase/migrations/0001_visits_counter.sql`, `supabase/migrations/0002_command_views.sql`, `supabase/functions/increment-visitor/`, `supabase/functions/increment-command-view/`
@@ -2569,7 +2655,8 @@ updated for this project. Must include:
 - Data schema with `platform` and the full rule table from spec section 4 (including `<`/`>` in names and the filter-name clash).
 - The Java-in-template-literal gotchas (`\${selenide.version}`, `"\\d+"` written as `"\\\\d+"`, no backtick issue) and the snippet conventions (static imports, `# selenide.properties`, Kotlin DSL for Gradle).
 - Highlighting: three highlighters, `pickHighlighter` rules, the token table for Java/shell/XML.
-- Supabase: the `selenide_` names table from spec section 8.
+- Supabase: analytics are **off** (`ENABLED = false`, `SUPABASE PLACEHOLDER` comments) until
+  Task 8 is done; describe the planned `selenide_` names from spec section 8 as pending.
 - Sources policy (spec section 3) and the test oracle rule (spec section 10).
 - Mobile filter and the `#filter=mobile` hash.
 
@@ -2607,4 +2694,5 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - [ ] **Step 5: Hand over**
 
 Report to the user: entry total per category, any sources or conflicts raised during Task 7,
-the Supabase steps they must run themselves (Task 8), and that nothing has been pushed.
+a **reminder that Supabase (Task 8) is still deferred** and analytics are off, and that
+nothing has been pushed.
