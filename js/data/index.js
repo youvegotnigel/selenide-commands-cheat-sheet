@@ -10,6 +10,16 @@ import action from './action.js';
 import condition from './condition.js';
 import collection from './collection.js';
 import pageObject from './page-object.js';
+import windowCat from './window.js';
 
 /** @type {Category[]} */
-export const categories = [config, navigation, selector, action, condition, collection, pageObject];
+export const categories = [
+  config,
+  navigation,
+  selector,
+  action,
+  condition,
+  collection,
+  pageObject,
+  windowCat,
+];
