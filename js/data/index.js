@@ -8,6 +8,7 @@ import navigation from './navigation.js';
 import selector from './selector.js';
 import action from './action.js';
 import condition from './condition.js';
+import pageObject from './page-object.js';
 
 /** @type {Category[]} */
-export const categories = [config, navigation, selector, action, condition];
+export const categories = [config, navigation, selector, action, condition, pageObject];
