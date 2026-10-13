@@ -6,7 +6,8 @@
 import config from './config.js';
 import navigation from './navigation.js';
 import selector from './selector.js';
+import action from './action.js';
 import condition from './condition.js';
 
 /** @type {Category[]} */
-export const categories = [config, navigation, selector, condition];
+export const categories = [config, navigation, selector, action, condition];
