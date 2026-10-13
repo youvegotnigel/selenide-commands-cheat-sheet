@@ -1,20 +1,19 @@
 #!/usr/bin/env node
-// Verifies that every `docs` URL in js/data/ resolves on playwright.dev and,
-// when the URL has a #fragment, that the anchor exists on the page.
-//
-// data-integrity.spec.js only checks that a URL is https and mentions
-// playwright.dev. It cannot catch a renamed page or a moved heading, which is
-// exactly what drifts between Playwright releases.
+// Verifies that every `docs` URL in js/data/ resolves and, when the URL has a
+// #fragment, that the anchor exists on the page. data-integrity.spec.js only
+// checks that a URL is on the allowlist; it cannot catch a renamed Javadoc
+// method or a moved README heading, which is what drifts between releases.
 //
 // Usage (from the repo root):
-//   node .claude/skills/playwright-release-sync/scripts/check-docs-links.mjs
-//   node .claude/skills/playwright-release-sync/scripts/check-docs-links.mjs --only=Query,CLI
+//   node .claude/skills/selenide-release-sync/scripts/check-docs-links.mjs
+//   node .claude/skills/selenide-release-sync/scripts/check-docs-links.mjs --only="Conditions,Mobile Gestures"
 //
 // Exit code 0 when every link is good, 1 when any page or anchor is missing,
 // 2 when the checker itself could not run (e.g. no network).
 
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
+import { decodeAnchor, hasAnchor } from './lib/anchors.mjs';
 
 process.removeAllListeners('warning'); // silence the MODULE_TYPELESS_PACKAGE_JSON notice
 
@@ -22,6 +21,7 @@ const repoRoot = process.cwd();
 const only = (process.argv.find((a) => a.startsWith('--only=')) ?? '')
   .slice('--only='.length)
   .split(',')
+  .map((s) => s.trim())
   .filter(Boolean);
 
 let categories;
@@ -33,25 +33,19 @@ try {
   process.exit(2);
 }
 
-// page URL (no fragment) -> [{ cat, name, anchor }]
+// page URL (no fragment) -> [{ cat, name, anchor, docs }]
 const byPage = new Map();
 for (const { cat, items } of categories) {
   if (only.length && !only.includes(cat)) continue;
   for (const { name, docs } of items) {
     const url = new URL(docs);
-    const anchor = decodeURIComponent(url.hash.slice(1));
+    const anchor = decodeAnchor(url.hash);
     url.hash = '';
-    const key = url.href.replace(/\/$/, '');
+    const key = url.href;
     if (!byPage.has(key)) byPage.set(key, []);
     byPage.get(key).push({ cat, name, anchor, docs });
   }
 }
-
-// Docusaurus ships minified HTML, so ids appear both quoted and unquoted.
-const hasAnchor = (html, anchor) => {
-  const esc = anchor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`id=(?:"${esc}"|'${esc}'|${esc}(?=[\\s>]))`).test(html);
-};
 
 async function fetchPage(url, attempt = 1) {
   try {
@@ -76,21 +70,23 @@ await Promise.all(
   })
 );
 
-if ([...results.values()].every((r) => r.status === 0)) {
+if (pages.length && [...results.values()].every((r) => r.status === 0)) {
   console.error('Every request failed. Is the network available?');
   process.exit(2);
 }
 
+const samePath = (a, b) =>
+  new URL(a).pathname.replace(/\/$/, '') === new URL(b).pathname.replace(/\/$/, '');
 const failures = [];
 for (const [url, entries] of byPage) {
   const r = results.get(url);
+  const github = new URL(url).hostname === 'github.com';
   for (const e of entries) {
     if (r.status !== 200) {
       failures.push({ ...e, problem: `page returned ${r.status || r.error}` });
-    } else if (new URL(r.finalUrl).pathname.replace(/\/$/, '') !== new URL(url).pathname) {
-      // playwright.dev redirects unknown or renamed pages; treat as a move.
+    } else if (!samePath(r.finalUrl, url)) {
       failures.push({ ...e, problem: `page redirected to ${r.finalUrl}` });
-    } else if (e.anchor && !hasAnchor(r.html, e.anchor)) {
+    } else if (e.anchor && !hasAnchor(r.html, e.anchor, { github })) {
       failures.push({ ...e, problem: `anchor #${e.anchor} not found on page` });
     }
   }
@@ -101,9 +97,6 @@ if (!failures.length) {
   console.log(`OK: ${total} docs links across ${pages.length} pages all resolve.`);
   process.exit(0);
 }
-
 console.log(`FAIL: ${failures.length} of ${total} docs links are broken.\n`);
-for (const f of failures) {
-  console.log(`- [${f.cat}] ${f.name}\n    ${f.docs}\n    ${f.problem}`);
-}
+for (const f of failures) console.log(`- [${f.cat}] ${f.name}\n    ${f.docs}\n    ${f.problem}`);
 process.exit(1);
