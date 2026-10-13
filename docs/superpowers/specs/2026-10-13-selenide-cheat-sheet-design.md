@@ -374,6 +374,34 @@ rewritten for Selenide. `.github/cheatsheet-sync.mcp.json` keeps Context7. `test
 
 ## 10. Testing
 
+### Expected values come from an independent source
+
+A test is only as correct as its expected result. Every expected value is written by hand
+from a source that is independent of the code or data under test:
+
+| Test kind | Where the expected value comes from |
+|---|---|
+| Per-category entry guards | The 7.19.0 sources jar. Each expected API string carries a comment citing the jar file and the signature, e.g. `// selenide-appium 7.19.0 AppiumSelectors.java: public static By withTagAndContentDescription(String tag, String contentDescription)` |
+| Highlighter | The token rules in section 7, written out as literal expected HTML per input |
+| UI behaviour (filters, search, URL hash, meta bar) | The behaviour this spec defines, as literal values (e.g. `#filter=mobile`, `selenide v7.19.0` from a mocked `versions.json`) |
+| Schema rules | The rule tables in section 4 |
+
+Forbidden:
+
+- Computing the expected value with the code under test (`expect(highlight(x)).toBe(highlight(x))`
+  style), or copying the current output into the test as the expected value.
+- Asserting facts about an entry by reading the same entry (`expect(modalText).toBe(item.desc)`).
+  Such a test cannot fail when the entry is wrong.
+- Weakening or deleting an assertion to make a test pass. If an expected value turns out to
+  be wrong, re-check it against its source and record which source corrected it.
+
+Every new test is run and seen to **fail for the expected reason** before the code or entry
+that makes it pass is written (test-first). Structural checks that use the data only as
+input to the renderer (for example "tile count equals the number of items") stay, because
+they test rendering rather than any fact about an entry.
+
+### Test files
+
 - `tests/data-integrity.spec.js`: the rules in section 4, plus one describe block per
   category from phase 5 pinning the details that would be wrong if copied from an older or
   unverified answer (for example `withTagAndContentDescription` and never
