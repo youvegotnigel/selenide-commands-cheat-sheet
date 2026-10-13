@@ -5,7 +5,8 @@
 
 import config from './config.js';
 import navigation from './navigation.js';
+import selector from './selector.js';
 import condition from './condition.js';
 
 /** @type {Category[]} */
-export const categories = [config, navigation, condition];
+export const categories = [config, navigation, selector, condition];
