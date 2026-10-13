@@ -1,6 +1,15 @@
-# Playwright Commands Cheat Sheet — AI Assistant Guide
+# Selenide Commands Cheat Sheet — AI Assistant Guide
 
-A static, single-page interactive web dashboard providing a quick reference for Playwright testing commands. Users can browse, search, filter, and view syntax-highlighted code examples. Hosted on GitHub Pages at `https://youvegotnigel.github.io/playwright-commands-cheat-sheet/`. Command popularity and visitor counts are tracked via Supabase.
+A static, single-page interactive web dashboard providing a quick reference for **Selenide**
+(Java web UI testing) and **selenide-appium** (mobile testing through Selenide's own API).
+Users can browse, search, filter, and view syntax-highlighted Java code examples. Hosted on
+GitHub Pages at `https://youvegotnigel.github.io/selenide-commands-cheat-sheet/`.
+
+Pinned versions (single source of truth: `js/versions.json`): Selenide **7.19.0**,
+selenide-appium **7.19.0**, Appium java-client **11.0.0**.
+
+The site itself is plain JavaScript, so it is tested with **Playwright**, even though the
+content is about Selenide.
 
 ---
 
@@ -9,7 +18,9 @@ A static, single-page interactive web dashboard providing a quick reference for 
 - **No build step.** Pure vanilla ES modules. No bundler, no transpilation, no compilation.
 - **Zero runtime dependencies.** All `package.json` deps are `devDependencies` (Playwright, ESLint, Prettier, Serve).
 - **No CDN imports.** Everything loads from the repo or the browser's native APIs.
-- **Run the tests** before marking any change complete: `npm test`.
+- **What shipped is the truth.** Every API name, signature and default in `js/data/` is verified against the pinned release's sources jar (`.cache/sources/`), not memory, docs on `main`, or Context7.
+- **Approved sources only** (see "Sources policy"). Ask the user before using any other source.
+- **Run the tests** before marking any change complete: `npm test`, `npm run lint`, `npm run format:check`.
 
 ---
 
@@ -18,12 +29,13 @@ A static, single-page interactive web dashboard providing a quick reference for 
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Vanilla JavaScript (ES2022+ modules), HTML5, CSS3 |
-| Syntax highlighting | Custom dependency-free highlighter (`js/highlight.js`) |
-| Analytics backend | Supabase (PostgreSQL + Edge Functions on Deno) |
-| Testing | `@playwright/test` v1.64.0 |
+| Syntax highlighting | Custom dependency-free highlighter (`js/highlight.js`): Java, shell, XML |
+| Content | Selenide 7.19.0, selenide-appium 7.19.0 (Java 17+ snippets) |
+| Analytics backend | Supabase (**currently off**, see "Analytics") |
+| Testing | `@playwright/test` v1.64.0, `node:test` for the skill scripts |
 | Linting | ESLint 9 flat config |
 | Formatting | Prettier 3 |
-| Dev server | `npx serve` on port 3000 |
+| Dev server | `npx serve` on port 3000 (`PORT` overrides) |
 | Hosting | GitHub Pages |
 | CI/CD | GitHub Actions |
 
@@ -32,65 +44,45 @@ A static, single-page interactive web dashboard providing a quick reference for 
 ## Repository Layout
 
 ```
-playwright-commands-cheat-sheet/
-├── index.html                    # Main markup: header, meta-bar, search, filters, grid, modal
-├── style.css                     # Single stylesheet: dark theme, category tile gradients
+selenide-commands-cheat-sheet/
+├── index.html                    # Markup: header, meta-bar, search, filters, grid, modal
+├── style.css                     # Single stylesheet: dark theme, 21 category tile gradients
 ├── js/
-│   ├── app.js                    # Primary logic: render, filter, search, modal, meta-bar (~350 lines)
-│   ├── highlight.js              # Dependency-free syntax highlighter (JS/TS + shell, ~130 lines)
-│   ├── popular-commands.js       # Command open tracking via Supabase (~95 lines)
-│   ├── visitor-counter.js        # Visitor increment on page load (~40 lines)
-│   ├── visitor-display.js        # Live visitor count display, polls every 30s (~75 lines)
+│   ├── app.js                    # Render, filter (incl. Mobile), search, modal, meta-bar
+│   ├── highlight.js              # Java / shell / XML highlighters + pickHighlighter()
+│   ├── versions.json             # Pinned Selenide / selenide-appium / java-client versions
+│   ├── popular-commands.js       # Command open tracking via Supabase (off: ENABLED = false)
+│   ├── visitor-counter.js        # Visitor increment (off: ENABLED = false)
+│   ├── visitor-display.js        # Visitor count display (off: ENABLED = false)
 │   ├── meta.json                 # { "lastUpdated": "YYYY-MM-DD" } — auto-stamped by CI
 │   └── data/
-│       ├── index.js              # Imports and re-exports all category modules (order = display order)
-│       ├── config.js             # Config commands (baseURL, testDir, timeout, launchOptions…)
-│       ├── setup.js              # Setup commands (test(), describe(), beforeEach()…)
-│       ├── actions.js            # Action commands (click, fill, press, drag…)
-│       ├── queries.js            # Locator commands (getByRole, getByLabel, locator…)
-│       ├── assertions.js         # Assertion commands (toBeVisible, toHaveText…)
-│       ├── utility.js            # Utility commands (goto, screenshot, evaluate, events…) — largest file
-│       ├── network.js            # Network & Mocking (route, fulfill, HAR, WebSocket…)
-│       ├── api.js                # API commands (request.get/post/put/delete…)
-│       ├── accessibility.js      # Accessibility commands (ARIA roles, aria-*)
-│       ├── fixtures.js           # Fixtures (test.extend(), scopes, auto, option fixtures)
-│       ├── clock.js              # Clock & Time (clock.install(), setFixedTime, fastForward…)
-│       ├── tracing.js            # Tracing & Debugging (trace, pause(), codegen, show-trace…)
-│       ├── component.js          # Component Testing (stories model, mount(), migration…)
-│       ├── media.js              # Media & Audio (HTMLMediaElement state, AnalyserNode, getStats…)
-│       ├── patterns.js           # Common patterns (auth, POM, popups, WebAuthn…)
-│       └── cli.js                # CLI commands (npx playwright, flags…)
+│       ├── index.js              # Imports all categories; array order = display order
+│       ├── config.js … cli.js    # 17 web categories (see "Categories")
+│       └── appium-setup.js … mobile-context.js   # 4 mobile categories
 ├── tests/
-│   ├── cheatsheet.spec.js        # UI: page load, search, filters, modal, views, keyboard, URL state
-│   ├── data-integrity.spec.js    # Data: required fields, level enum, docs URLs, code validity
-│   ├── highlight.spec.js         # Highlighter: keywords, strings, comments, shell, escaping
-│   ├── meta-bar.spec.js          # Meta-bar: version badge, last-updated, command count, visitor counter
-│   └── popular-commands.spec.js  # Popularity: count loading, 🔥 badge, "Popular" filter, caching
-├── supabase/
-│   ├── migrations/
-│   │   ├── 0001_visits_counter.sql       # Visitor counter table + RPC + RLS
-│   │   └── 0002_command_views.sql        # Command views table + RPC + RLS
-│   └── functions/
-│       ├── increment-visitor/index.ts    # Edge Function: increment visitor count
-│       └── increment-command-view/index.ts  # Edge Function: record command open
-├── docs/superpowers/
-│   ├── plans/                    # Feature implementation plans
-│   └── specs/                    # Feature design specifications
-├── images/                       # Dashboard and modal screenshots
-├── .github/workflows/
-│   ├── test.yml                  # CI: run full test suite (chromium + 2 mobile) on push/PR
-│   ├── stamp-date.yml            # CI: auto-update js/meta.json on push to master
-│   └── cheatsheet-sync.yml       # CI: weekly drift check, agent sync PR on new Playwright releases
-├── .claude/skills/playwright-release-sync/
-│   ├── SKILL.md                  # How to sync js/data/ with a Playwright release (CI + local)
+│   ├── helpers/
+│   │   ├── schema.js             # Pure schema validators (the rules below)
+│   │   ├── fixture-data.js       # Hand-written dataset served in place of js/data/index.js
+│   │   └── items.js              # itemIn(page, cat, name) lookup for content tests
+│   ├── schema-rules.spec.js      # Validators vs hand-written good/bad fixtures
+│   ├── data-integrity.spec.js    # Validators vs the real data
+│   ├── content/<cls>.spec.js     # Per-category guards, expected values from the sources jar
+│   ├── cheatsheet.spec.js        # UI: load, search, filters (incl. Mobile), modal, hash, gradients
+│   ├── highlight.spec.js         # Highlighters, routing, round-trip over every entry
+│   ├── meta-bar.spec.js          # Meta-bar, versions.json, analytics placeholder
+│   └── popular-commands.spec.js  # Popularity (skipped while analytics are off)
+├── supabase/                     # Migrations + Edge Functions (still the Playwright names; Task 8)
+├── docs/
+│   ├── kickoff.md                # Original brief
+│   └── superpowers/{specs,plans}/ # Design spec and implementation plan
+├── .claude/skills/selenide-release-sync/
+│   ├── SKILL.md                  # How to sync js/data/ with a Selenide release
 │   ├── references/quality-bar.md # Entry writing rules, anchors, test template, report format
-│   └── scripts/                  # release-delta.mjs, check-docs-links.mjs (Node only, no deps)
-├── playwright.config.js          # Test config: webServer port 3000, 3 projects
+│   └── scripts/                  # fetch-sources, check-docs-links, release-delta (+ lib/ tests)
+├── .github/workflows/            # test.yml, stamp-date.yml, cheatsheet-sync.yml
+├── playwright.config.js          # webServer on PORT (default 3000), 3 projects
 ├── eslint.config.js              # Flat config: lints js/ only, per-block globals
-├── .prettierrc                   # singleQuote, semi, tabWidth: 2, trailingComma: es5
-├── package.json                  # devDependencies only; scripts: test, lint, format
-├── AGENTS.md                     # Comprehensive contributor guide
-└── readme.md                     # User-facing documentation
+└── package.json                  # devDependencies only
 ```
 
 ---
@@ -99,24 +91,23 @@ playwright-commands-cheat-sheet/
 
 ```bash
 # Testing
-npm test                          # Full suite (all 3 projects)
+npm test                          # Full suite (chromium, iPhone 16, Pixel 7)
 npm run test:chromium             # Desktop Chrome only
-npm run test:iphone               # iPhone 16 emulation
-npm run test:pixel                # Pixel 7 emulation
 npm run test:mobile               # Both mobile projects
-npm run test:ui                   # Interactive Playwright UI mode
-npm run test:report               # Show last HTML report
+npm run test:scripts              # node:test unit tests for the skill scripts
+PORT=3101 npm run test:chromium   # Use another port (parallel checkouts / worktrees)
 
 # Linting & formatting
 npm run lint                      # ESLint on js/
-npm run lint:fix                  # ESLint with --fix
 npm run format                    # Prettier on js/ and tests/
 npm run format:check              # Prettier check (no write)
 
-# Playwright release sync (see .claude/skills/playwright-release-sync/)
-npm run release:delta             # Release notes between pinned and latest Playwright
+# Selenide release sync (see .claude/skills/selenide-release-sync/)
+npm run fetch:sources             # Download + unzip pinned sources jars into .cache/sources/
+npm run release:delta             # Changelog between the pinned and the latest Selenide
 npm run release:delta -- --check  # One-line pinned/latest/behind summary
-npm run check:links               # Every docs URL and #anchor resolves on playwright.dev (network)
+npm run check:links               # Every docs URL and #anchor resolves (network)
+npm run check:links -- --only="Conditions,Mobile Gestures"
 ```
 
 ---
@@ -124,203 +115,228 @@ npm run check:links               # Every docs URL and #anchor resolves on playw
 ## Playwright Configuration
 
 - **Test directory:** `./tests/`
-- **Dev server:** `npx serve` auto-started on `http://localhost:3000`
-- **Projects:**
-  - `chromium` — desktop Chrome
-  - `iPhone 16` — mobile emulation
-  - `Pixel 7` — mobile emulation
+- **Dev server:** `npx serve` auto-started on `http://localhost:${PORT:-3000}`
+- **Projects:** `chromium`, `iPhone 16`, `Pixel 7`
 - **Reporter:** `github` when `process.env.CI` is set, otherwise `list` + `html`
-- **Artifacts:** test reports uploaded on failure, retained 14 days
 
 ---
 
 ## Data Schema
 
-Every command lives in a category module under `js/data/`. Each file exports a single `Category` object:
+Every command lives in a category module `js/data/<cls>.js`, exporting one `Category`:
 
 ```js
 /** @type {import('./index.js').Category} */
 export default {
-  cat: 'Display Name',     // shown in filter buttons and tiles
-  cls: 'css-class',        // matches CSS class for tile gradient
-  color: '#hexcolor',      // 6-digit hex, validated by the test suite
+  cat: 'Conditions',        // filter button and tile label
+  cls: 'condition',         // CSS class for the tile gradient (and the file name)
+  color: '#f97316',         // 6-digit hex, equal to the gradient start in style.css
   items: [
     {
-      name: 'commandName()',                    // display name, globally unique
-      level: 'beginner',                        // 'beginner' | 'intermediate' | 'advanced'
-      desc: 'What this does.',                  // short description
-      tip: 'Pro tip or warning.',               // pro tip / gotcha
-      docs: 'https://playwright.dev/docs/...',  // must be https and playwright.dev
-      code: `// JS/TS code example
-await page.doSomething();`,                     // template literal, min 20 chars
+      name: 'shouldHave(text())',  // display name, globally unique
+      level: 'beginner',           // 'beginner' | 'intermediate' | 'advanced'
+      platform: 'both',            // 'web' | 'mobile' | 'both'
+      desc: 'What this does.',
+      tip: 'The non-obvious part.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#text(java.lang.String)',
+      code: `$("#greeting").shouldHave(text("Hello"));`,
     },
   ],
 };
 ```
 
-**Every category module uses `export default`, not a named export.**
+**Every category module uses `export default`.** `platform`: `web` is browser-only,
+`mobile` is selenide-appium-only, `both` works the same on `SelenideElement` and
+`SelenideAppiumElement`.
 
-**All six item fields are required.** `data-integrity.spec.js` fails on a missing, blank, or whitespace-only value for any of `name`, `level`, `desc`, `tip`, `docs`, `code`. Beyond presence, it enforces:
+The rules live in `tests/helpers/schema.js` and are applied by `data-integrity.spec.js`:
 
 | Rule | Check |
 |------|-------|
-| `level` | one of `beginner` \| `intermediate` \| `advanced` |
-| `docs` | starts with `https://` **and** contains `playwright.dev` |
+| Required fields | `name`, `level`, `platform`, `desc`, `tip`, `docs`, `code` present, not blank |
+| `level` | `beginner` \| `intermediate` \| `advanced` |
+| `platform` | `web` \| `mobile` \| `both` |
+| `docs` | `https:`, host `selenide.org`, or `github.com` with a path starting `/selenide/` or `/selenide-examples/` |
 | `code` | at least 20 characters after trimming |
 | `name` | unique within its category **and** across every category |
-| `color` | matches `/^#[0-9a-fA-F]{6}$/` |
-| all fields | contain no em-dash `—` or en-dash `–` |
+| `name` characters | no `<` or `>` (names are rendered with `innerHTML`); write `Container (generic)` |
+| `color` | `/^#[0-9a-fA-F]{6}$/` |
+| category `cat` | must not equal a quick filter: `all`, `beginner`, `popular`, `mobile` |
+| all fields | no em-dash `—` or en-dash `–` |
 
-Because `code` is a template literal, escape any literal `${` as `\${` and any backslash sequence (e.g. a regex `\.`) as `\\.`.
+The tests check `code` length only. They do **not** compile the Java, so a syntax error
+ships silently. Read every snippet back as Java.
+
+### Java inside a template literal
+
+`code` is a JS template literal holding Java:
+
+- `$("#id")` and `$$(".row")` are fine. Only `${` needs escaping, which appears in Maven and
+  properties snippets: write `\${selenide.version}`. An unescaped `${...}` is evaluated as JS
+  and breaks the whole page on load.
+- Escape sequences double up: Java `"\\d+"` is written `"\\\\d+"`.
+- Backticks never appear in Java, so no escaping is needed there.
+
+### Snippet conventions
+
+- Java 17+. Snippets assume the static imports of `Selenide`, `Condition` and
+  `CollectionCondition` (shown once in the "Static imports" entry). Any other import that is
+  not obvious (`AppiumBy`, `CombinedBy`, `AppiumClickOptions`, `Selectors`) goes inside the
+  snippet.
+- One concept per snippet, no class boilerplate unless the concept is the class.
+- `selenide.properties` snippets start with `# selenide.properties`. Maven snippets are XML
+  starting with `<dependency>`. Gradle snippets use Kotlin DSL.
+- Mobile entries use selenide-appium's own API only. `AppiumBy` and other java-client
+  classes appear only inside Selenide calls or a `WebDriverProvider`.
 
 ### Adding a new category
 
-1. Create `js/data/mycategory.js` with `export default { cat, cls, color, items }`
-2. In `js/data/index.js`, add **both** the `import` line and an entry in the exported
-   `categories` array — array position controls display and filter-button order
-3. Add a gradient rule in `style.css` targeting `.mycategory` tiles, matching the
-   category's `color` as the gradient start
-4. Run `npm test` — `data-integrity.spec.js` will catch schema errors
-
-The filter button is built automatically from the `categories` array (`buildFilters()` in
-`app.js`), so no markup change is needed in `index.html`.
+1. Create `js/data/<cls>.js` with `export default { cat, cls, color, items }`
+2. In `js/data/index.js`, add the `import` and an entry in `categories` (position = display
+   order: web categories first, then mobile)
+3. Add a `.<cls>` gradient rule in `style.css` starting with the category's `color`, and add
+   it to the `PALETTE` table in `tests/cheatsheet.spec.js`
+4. Add `tests/content/<cls>.spec.js`
+5. Run `npm test`
 
 ### Adding commands to an existing category
 
-Append to the `items` array in the relevant `js/data/*.js` file. The `data-integrity.spec.js` test will validate the new entry automatically.
+Verify the API in `.cache/sources/` (`grep -rn`), write the guard test in
+`tests/content/<cls>.spec.js` first, then append the entry next to its closest relative.
+
+---
+
+## Sources policy
+
+| Source | Role |
+|---|---|
+| `.cache/sources/` (Maven Central sources jars, `npm run fetch:sources`) | **Final say** on names, signatures, defaults |
+| `CHANGELOG.md` at tag `vX.Y.Z` of `github.com/selenide/selenide` | Release notes |
+| Context7 `/selenide/selenide` | Discovery |
+| `selenide.org` (docs, `javadoc/current/`) | Discovery, primary `docs` link target |
+| `github.com/selenide/*`, `github.com/selenide-examples/selenide-appium` | Discovery, mobile setup patterns, `docs` links |
+
+Anything else (blogs, DeepWiki, `appium.io`, Q&A sites) is named to the user and approved
+before use. When Context7 or the docs disagree with the jar, the jar wins and the conflict is
+reported. The real Selenide code is in `selenide-core`; `com.codeborne:selenide` holds
+`Configuration`, `Selenide`, `WebDriverRunner` and the JUnit 5 extensions.
 
 ---
 
 ## Syntax Highlighting
 
-`js/highlight.js` exports two functions:
+`js/highlight.js` exports:
 
-- **`highlight(code)`** — for JavaScript/TypeScript snippets
-- **`highlightShell(code)`** — for CLI/shell snippets
+- **`highlight(code)`** — Java (also fine for Gradle Kotlin DSL)
+- **`highlightShell(code)`** — `mvn`, `./gradlew`, shell snippets
+- **`highlightXml(code)`** — `pom.xml` snippets
+- **`pickHighlighter(item)`** — `'shell'` when `item.cls === 'cli'` or the code starts with
+  `mvn `, `gradle `, `./gradlew `, `emulator `, `npm `, `npx ` or `#`; `'xml'` when it starts
+  with `<`; `'java'` otherwise
+- **`highlightFor(item)`** — applies the picked highlighter (used by the modal)
 
-`app.js` picks the shell highlighter when `item.cls === 'cli'` **or** the snippet starts with
-`npx` or a `#` comment (`/^\s*(npx|#)/`); everything else uses `highlight()`. Both return HTML
-with `<span class="tok-*">` tokens. The highlighter HTML-escapes all text and uses single-pass
-regex tokenization, so `Copy` always yields the original source exactly.
+All are single-pass regex tokenizers that HTML-escape every character exactly once, so Copy
+(`innerText`) always yields the original source; `highlight.spec.js` checks this round-trip
+for every entry.
 
-**Token CSS classes** (six, shared by both highlighters):
+| Class | Java | Shell | XML |
+|-------|------|-------|-----|
+| `tok-keyword` | keywords (incl. `var`, `record`, `sealed`, `permits`, `non-sealed`), annotations | flags (`-x`, `--xyz`, `-Dselenide.browser`) | tag names |
+| `tok-string` | `"..."`, `'c'`, text blocks `"""..."""` | quoted strings | attribute values after `=` |
+| `tok-comment` | `//`, `/* */`, `/** */` | `#` at line start or after whitespace (`Class#method` is not a comment; `//` never is) | `<!-- -->` |
+| `tok-number` | ints, `10L`, `1_000`, `0xFF`, `1.5f`, `2e3` | numbers | not used |
+| `tok-fn` | method names before `(` | not used | attribute names |
+| `tok-api` | Selenide / selenide-appium identifiers (`$`, `$$`, `open`, `Configuration`, `CombinedBy`, …) | program names (`mvn`, `./gradlew`, …) | `${property}` |
 
-| Class | JS/TS meaning | Shell meaning |
-|-------|---------------|---------------|
-| `tok-keyword` | language keywords | flags (`-x`, `--xyz`) |
-| `tok-string` | string literals | quoted strings |
-| `tok-comment` | `//` and `/* */` | `#` comments (`//` is **not** a comment) |
-| `tok-number` | numeric literals | numeric literals |
-| `tok-fn` | function names | not used |
-| `tok-api` | Playwright API identifiers | known program names |
-
----
-
-## Popular Commands Feature
-
-- Each time a user opens a command modal, `popular-commands.js` calls the Supabase Edge Function `increment-command-view`
-- Deduplication: one open per command per session (`sessionStorage`)
-- Bot guard: `navigator.webdriver` check skips automation runs
-- Counts are fetched from Supabase REST API and cached to `localStorage`
-- Commands in the top ~10% by view count receive a 🔥 badge and appear under the "Popular" filter
-- Stable command ID scheme: `` `${item.cls}:${item.name}` ``
+Unknown identifiers render plain. Add names to the `APIS` set as content needs them.
 
 ---
 
-## Visitor Counter
-
-- `visitor-counter.js` increments the Supabase counter once per page load
-- Deduplication: `sessionStorage` key prevents re-increment on reload
-- Bot guard: `navigator.webdriver` check
-- `visitor-display.js` polls the Supabase REST API every 30 seconds and updates the meta-bar
-- Falls back gracefully to `localStorage` cached value if Supabase is unavailable
-
----
-
-## State Management
+## Filters and URL state
 
 | Mechanism | Used for |
 |-----------|---------|
-| URL hash | Filter + search state (`#filter=beginner&search=goto`) |
-| `localStorage` | Popularity counts cache, visitor count cache |
-| `sessionStorage` | Per-session dedup for visitor increment and command opens |
-| `window.categories` | Exposed for test access (via `page.evaluate`) |
-| `window.highlight` / `window.highlightShell` | Exposed for test access |
-| `window.popularCommands` | Exposed for test access |
+| URL hash | Filter + search state (`#filter=mobile&search=tap`, `#filter=Setup+%26+Config`) |
+| Quick filters | All, ⭐ Start Here (`beginner`), 📱 Mobile (`mobile`: platform `mobile` or `both`), 🔥 Popular (`popular`, hidden while analytics are off) |
+| `window.categories`, `window.highlight*`, `window.pickHighlighter`, `window.highlightFor`, `window.popularCommands` | Exposed for test access |
+
+---
+
+## Analytics (Supabase) — currently off
+
+Analytics are **switched off** behind `ENABLED = false` flags marked `SUPABASE PLACEHOLDER`
+in `js/popular-commands.js`, `js/visitor-counter.js` and `js/visitor-display.js`. While off,
+no request is sent, the visitor badge shows `—`, and the Popular filter is hidden. The client
+still points at the Playwright site's tables, so **do not flip the flags** until the
+Selenide-specific backend exists: tables `selenide_visits` / `selenide_command_views`, RPCs
+`increment_selenide_visits` / `increment_selenide_command_view`, Edge Functions
+`increment-selenide-visitor` / `increment-selenide-command-view`. The steps are in the plan,
+Task 8 (`docs/superpowers/plans/2026-10-13-selenide-cheat-sheet.md`). The analytics tests are
+`test.describe.skip` until then, and `Analytics placeholder` in `meta-bar.spec.js` proves no
+request reaches Supabase.
 
 ---
 
 ## Testing Patterns
 
-### Accessing app internals
+### Expected values come from an independent source
 
-Tests reach internal state via window globals:
+Every expected value is hand-written from a source independent of the code or data under
+test: the sources jar (with a comment citing file and signature), the token rules (literal
+expected HTML), the spec's rules. Never compute an expected value with the code under test,
+never paste current output in as the expectation, never assert an entry's facts by reading
+the same entry. Write the test first and watch it fail.
+
+### Accessing app internals
 
 ```js
 const categories = await page.evaluate(() => window.categories);
-const highlighted = await page.evaluate(() => window.highlight('await page.click()'));
+const html = await page.evaluate(() => window.highlight('open("/login");'));
+```
+
+### Fixture data for exact UI expectations
+
+```js
+import { useFixtureData } from './helpers/fixture-data.js';
+await useFixtureData(page);
+await page.goto('/'); // full load; a hash-only goto is same-document and keeps the real data
 ```
 
 ### Mocking Supabase
 
-All tests that involve analytics mock both the REST API and Edge Functions using `page.route()` to avoid real increments and network dependency:
-
 ```js
-await page.route('**/rest/v1/**', route => route.fulfill({ json: [] }));
-await page.route('**/functions/v1/**', route => route.fulfill({ status: 200 }));
+await page.route('**/rest/v1/**', (route) => route.fulfill({ json: [] }));
+await page.route('**/functions/v1/**', (route) => route.fulfill({ status: 200 }));
 ```
 
-### Simulating real visitors
+### URL assertions
 
-The `poseAsRealVisitor` helper uses `addInitScript` to set `navigator.webdriver = false`, bypassing the bot guard:
-
-```js
-await page.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => false }); });
-```
+Use `await expect(page).toHaveURL(...)` (auto-retrying), never `expect(page.url())`:
+`history.replaceState` reaches Playwright asynchronously.
 
 ---
 
 ## Code Style
 
-- **Indentation:** 2 spaces
-- **Quotes:** single
-- **Semicolons:** required
-- **Trailing commas:** ES5 style
-- **Line length:** ~100 chars (Prettier enforced)
-- **No em-dashes or en-dashes in command data.** Never use `—` (em-dash) or `–` (en-dash) in any `js/data/` item field (`name`, `desc`, `tip`, `code`, etc.). Use a period, comma, or colon to break a sentence, and a hyphen `-` for ranges (e.g. `200-299`). `data-integrity.spec.js` enforces this — a stray dash fails the suite.
-- **ESLint globals:** `eslint.config.js` has two blocks, `js/**/*.js` and `tests/**/*.js`, each with its own explicit globals whitelist. There is no `env`, so a browser global not on the list is reported as `no-undef` — add it to the right block when you use a new one.
+- **Indentation:** 2 spaces · **Quotes:** single · **Semicolons:** required · **Trailing commas:** ES5 · **Line length:** ~100 chars (Prettier)
+- **No em-dashes or en-dashes in command data**, including code comments. Use a period, comma, or colon, and a hyphen for ranges.
+- **ESLint globals:** `eslint.config.js` has `js/**/*.js` and `tests/**/*.js` blocks with explicit globals. A browser global not on the list is `no-undef`.
 
 ---
 
 ## CI/CD
 
-### `test.yml`
-
-- Triggers: push to `master`, PR to `master`
-- Concurrency: superseded runs on the same ref are cancelled
-- Matrix: chromium, iPhone 16, Pixel 7
-- Steps: checkout → Node 20 → `npm ci` → install Playwright → run tests → upload report artifacts
-
-### `stamp-date.yml`
-
-- Triggers: push to `master` only
-- Writes today's date to `js/meta.json` and commits with `[skip ci]`
-- Keeps the "Last Updated" meta-bar badge accurate after every merge
-
-### `cheatsheet-sync.yml`
-
-- Triggers: weekly cron (06:00 UTC Mondays) plus manual `workflow_dispatch` (optional `dry_run`)
-- A deterministic "Detect drift" step runs `release:delta --check` and `check:links` first; the agent only runs when Playwright is behind, a docs link is broken, or the run is manual
-- The agent follows the `playwright-release-sync` skill and opens a PR (draft + `[CI FAILING]` if a gate fails); it never merges
-- To sync locally, ask Claude Code to "sync the cheat sheet to the latest Playwright"; the same skill applies
+- **`test.yml`** — push / PR to `master`: chromium, iPhone 16, Pixel 7 matrix; the chromium job also runs `npm run test:scripts`.
+- **`stamp-date.yml`** — push to `master`: writes `js/meta.json` and commits with `[skip ci]`.
+- **`cheatsheet-sync.yml`** — 06:00 UTC on the 1st and 15th, plus manual dispatch (`dry_run`). A deterministic "Detect drift" step runs `release:delta --check` and `check:links` first; the agent runs only on drift or a manual run, fetches sources, follows the `selenide-release-sync` skill, and opens a PR (draft + `[CI FAILING]` if a gate fails). It never merges. Locally, ask Claude Code to "sync the cheat sheet to the latest Selenide".
 
 ---
 
 ## Important Gotchas
 
-- **No build step.** Never introduce a bundler, transpiler, or import from a CDN. The app must work by opening `index.html` directly with a static file server.
-- **`npm run lint` covers `js/` only.** `eslint.config.js` does define a `tests/**/*.js` block, but the `lint` script runs `eslint js/`, so test files are Prettier-formatted and never linted in practice. Pass `npx eslint tests/` explicitly if you want them checked.
-- **`js/meta.json` is auto-updated by CI.** Do not manually edit it; the `stamp-date.yml` workflow overwrites it on every push to master. Those stamp commits land only on master, so a stale date on `develop` is expected, and editing the file there makes the PR conflict.
-- **Supabase URLs are public but RLS-protected.** The Supabase project URL and anon key are intentionally embedded in client-side JS. RLS policies ensure users can only increment counts, never read raw rows directly (aggregates only).
-- **`data-integrity.spec.js` is your schema enforcer.** Run it after any change to `js/data/`. It validates required fields, the level enum, docs URLs, global name uniqueness, and the dash ban. It checks `code` length only — it does **not** parse the snippet, so a syntax error in an example will ship silently. Read your example back before committing.
-- **Mobile tests use real device emulation.** The `playwright.config.js` uses `iPhone 16` and `Pixel 7` device descriptors. UI tests written for desktop may fail on mobile — check responsive behaviour.
+- **No build step.** Never introduce a bundler, transpiler, or CDN import.
+- **`npm run lint` covers `js/` only.** Test files and the skill scripts are Prettier-formatted, not linted (`npx prettier --check .claude/skills/selenide-release-sync/scripts/`).
+- **`js/meta.json` is auto-updated by CI.** Do not edit it; a stale date on `develop` is expected.
+- **`.cache/` is gitignored.** Run `npm run fetch:sources` after cloning and after bumping `js/versions.json`.
+- **Version bumps** touch `js/versions.json`, the `#selenide-version` and `#cmd-count` fallbacks in `index.html`, the readme badge, this file's tech table, the dependency snippets, and the pinned object in `meta-bar.spec.js`. Follow the skill.
+- **Mobile tests use real device emulation** (`iPhone 16`, `Pixel 7`). Desktop-only UI tests may fail on mobile.
