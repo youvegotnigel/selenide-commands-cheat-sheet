@@ -9,6 +9,7 @@ import selector from './selector.js';
 import action from './action.js';
 import condition from './condition.js';
 import collection from './collection.js';
+import wait from './wait.js';
 import pageObject from './page-object.js';
 import windowCat from './window.js';
 
@@ -20,6 +21,7 @@ export const categories = [
   action,
   condition,
   collection,
+  wait,
   pageObject,
   windowCat,
 ];
