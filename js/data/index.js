@@ -18,6 +18,12 @@ import javascript from './javascript.js';
 import report from './report.js';
 import framework from './framework.js';
 import remote from './remote.js';
+import pattern from './pattern.js';
+import cli from './cli.js';
+import appiumSetup from './appium-setup.js';
+import mobileSelector from './mobile-selector.js';
+import mobileGesture from './mobile-gesture.js';
+import mobileContext from './mobile-context.js';
 
 /** @type {Category[]} */
 export const categories = [
@@ -36,4 +42,10 @@ export const categories = [
   report,
   framework,
   remote,
+  pattern,
+  cli,
+  appiumSetup,
+  mobileSelector,
+  mobileGesture,
+  mobileContext,
 ];
