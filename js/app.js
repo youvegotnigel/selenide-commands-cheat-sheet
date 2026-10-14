@@ -3,7 +3,13 @@
 // =============================================================
 
 import { categories } from './data/index.js';
-import { highlight, highlightShell } from './highlight.js';
+import {
+  highlight,
+  highlightShell,
+  highlightXml,
+  pickHighlighter,
+  highlightFor,
+} from './highlight.js';
 import * as popularCmds from './popular-commands.js';
 
 // Expose as a global so data-integrity tests can access it via page.evaluate()
@@ -11,6 +17,9 @@ window.categories = categories;
 // Expose for tests via page.evaluate() (same rationale as window.categories)
 window.highlight = highlight;
 window.highlightShell = highlightShell;
+window.highlightXml = highlightXml;
+window.pickHighlighter = pickHighlighter;
+window.highlightFor = highlightFor;
 // Expose for tests via page.evaluate() (same rationale as window.categories)
 window.popularCommands = popularCmds;
 
@@ -41,6 +50,8 @@ function getItems() {
           popularCmds.getViewCount(popularCmds.commandId(b)) -
           popularCmds.getViewCount(popularCmds.commandId(a))
       );
+  } else if (activeFilter === 'mobile') {
+    items = items.filter((i) => i.platform === 'mobile' || i.platform === 'both');
   } else if (activeFilter !== 'all') {
     items = items.filter((i) => i.cat === activeFilter);
   }
@@ -148,12 +159,8 @@ function openModal(item) {
   document.getElementById('modal').style.display = 'flex';
   document.getElementById('m-title').innerHTML = item.name;
   document.getElementById('m-desc').innerText = item.desc;
-  // Shell highlighter for CLI snippets: the CLI category, or any code that
-  // starts with an npx command or a shell '#' comment (e.g. moved trace commands).
-  const isShell = item.cls === 'cli' || /^\s*(npx|#)/.test(item.code);
-  document.getElementById('m-code').innerHTML = isShell
-    ? highlightShell(item.code)
-    : highlight(item.code);
+  // Java, shell or XML, chosen from the category and the snippet's first line
+  document.getElementById('m-code').innerHTML = highlightFor(item);
   document.getElementById('btn-docs').href = item.docs;
 
   // Difficulty badge
@@ -252,7 +259,8 @@ function buildFilters() {
   const defs = [
     { label: 'All', filter: 'all', color: null },
     { label: '⭐ Start Here', filter: 'beginner', color: null },
-    { label: '🔥 Popular', filter: 'popular', color: null },
+    ...(popularCmds.ENABLED ? [{ label: '🔥 Popular', filter: 'popular', color: null }] : []),
+    { label: '📱 Mobile', filter: 'mobile', color: null },
     ...categories.map((c) => ({ label: c.cat, filter: c.cat, color: c.color })),
   ];
   defs.forEach(({ label, filter, color }) => {
@@ -295,23 +303,21 @@ document.getElementById('btn-copy').addEventListener('click', copyCode);
 buildFilters();
 
 /* ── META BAR ─────────────────────────────────────────────────── */
-// Command count comes from the data; the Playwright version and the
+// Command count comes from the data; the Selenide version and the
 // last-updated date are fetched at load so they never go stale. Both
 // fetches fail gracefully, leaving the fallback values present in the HTML.
 (function initMetaBar() {
   const countEl = document.getElementById('cmd-count');
   if (countEl) countEl.textContent = allItems.length;
 
-  // Playwright version — read from package.json's declared dependency
-  fetch('./package.json')
+  // Selenide version — js/versions.json is the single pinned source of truth,
+  // bumped by the selenide-release-sync skill together with the content.
+  fetch('./js/versions.json', { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-    .then((pkg) => {
-      const dep =
-        pkg.devDependencies?.['@playwright/test'] ?? pkg.dependencies?.['@playwright/test'];
-      if (!dep) return;
-      const clean = dep.replace(/^[\^~>=<\s]+/, ''); // strip range prefix
-      const el = document.getElementById('pw-version');
-      if (el) el.textContent = 'v' + clean;
+    .then((versions) => {
+      if (!versions?.selenide) return;
+      const el = document.getElementById('selenide-version');
+      if (el) el.textContent = 'v' + versions.selenide;
     })
     .catch(() => {});
 

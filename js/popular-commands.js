@@ -13,6 +13,11 @@ const REST_URL = `${SUPABASE_URL}/rest/v1/command_views?select=command_id,view_c
 const CACHE_KEY = 'command-views-cache';
 const SESSION_PREFIX = 'cmd-opened:';
 
+// SUPABASE PLACEHOLDER (deferred, see plan Task 8). Analytics stay off until the
+// Selenide-specific tables and Edge Functions exist. While off, nothing is sent,
+// so this site can never write into the Playwright cheat sheet's counters.
+export const ENABLED = false;
+
 // id -> view_count for the current load; `popular` is a Set of ids.
 let counts = new Map();
 let popular = new Set();
@@ -44,6 +49,7 @@ function applyRows(rows) {
 // Fetch all counts once. Resolves so the caller can re-render. Falls back to
 // the cached rows (then to empty) so the page never breaks on an outage.
 export function loadCounts() {
+  if (!ENABLED) return Promise.resolve();
   return fetch(`${REST_URL}&apikey=${SUPABASE_KEY}`, {
     signal: AbortSignal.timeout(5000),
   })
@@ -71,6 +77,7 @@ export function loadCounts() {
 // Record an open: once per session per command, never for automated browsers.
 export function recordOpen(item) {
   try {
+    if (!ENABLED) return;
     // Skip CI/Playwright/Selenium/most bots so they don't inflate counts.
     if (navigator.webdriver) return;
 

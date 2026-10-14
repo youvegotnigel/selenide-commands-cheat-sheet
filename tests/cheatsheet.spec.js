@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { useFixtureData } from './helpers/fixture-data.js';
 
 // Stub Supabase before every test. app.js re-renders the whole grid when
 // popularCmds.loadCounts() resolves, so a live response landing mid-test
@@ -14,11 +15,11 @@ test.beforeEach(async ({ page }) => {
 /* ── PAGE LOAD ─────────────────────────────────────────────────── */
 test.describe('Page load', () => {
   test('shows the header and title', async ({ page }) => {
-    await expect(page).toHaveTitle(/Playwright Commands Dashboard/);
-    await expect(page.locator('header')).toContainText('Playwright Commands Dashboard');
+    await expect(page).toHaveTitle(/Selenide Commands Dashboard/);
+    await expect(page.locator('header')).toContainText('Selenide Commands Dashboard');
   });
 
-  test('shows the Playwright logo twice beside the header title', async ({ page }) => {
+  test('shows the Selenide logo twice beside the header title', async ({ page }) => {
     const logos = page.locator('header img.header-logo');
     await expect(logos).toHaveCount(2);
     await expect(logos.first()).toBeVisible();
@@ -33,7 +34,7 @@ test.describe('Page load', () => {
   test('renders command tiles', async ({ page }) => {
     const tiles = page.locator('.tile');
     await expect(tiles).toHaveCount(await tiles.count()); // tiles exist
-    expect(await tiles.count()).toBeGreaterThan(10);
+    expect(await tiles.count()).toBeGreaterThan(0);
   });
 
   test('tile count matches the data', async ({ page }) => {
@@ -59,7 +60,7 @@ test.describe('Search', () => {
   test('filters tiles as user types', async ({ page }) => {
     const allCount = await page.locator('.tile').count();
 
-    await page.locator('#search-input').fill('goto');
+    await page.locator('#search-input').fill('open');
     const filtered = page.locator('.tile');
     expect(await filtered.count()).toBeLessThan(allCount);
     expect(await filtered.count()).toBeGreaterThan(0);
@@ -73,16 +74,16 @@ test.describe('Search', () => {
 
   test('restores all tiles after clearing search', async ({ page }) => {
     const allCount = await page.locator('.tile').count();
-    await page.locator('#search-input').fill('goto');
+    await page.locator('#search-input').fill('open');
     await page.locator('#search-input').clear();
     expect(await page.locator('.tile').count()).toBe(allCount);
   });
 
   test('is case-insensitive', async ({ page }) => {
-    await page.locator('#search-input').fill('goto');
+    await page.locator('#search-input').fill('open');
     const lower = await page.locator('.tile').count();
 
-    await page.locator('#search-input').fill('GOTO');
+    await page.locator('#search-input').fill('OPEN');
     const upper = await page.locator('.tile').count();
 
     expect(upper).toBe(lower);
@@ -94,7 +95,7 @@ test.describe('Search', () => {
     await page.locator('.filter-btn', { hasText: 'Start Here' }).click();
     const afterFilter = await page.locator('.tile').count();
 
-    await page.locator('#search-input').fill('page');
+    await page.locator('#search-input').fill('open');
     const afterSearch = await page.locator('.tile').count();
 
     // Search should narrow results further (or keep same if all match)
@@ -106,7 +107,7 @@ test.describe('Search', () => {
     await page.locator('.filter-btn', { hasText: 'Start Here' }).click();
     const afterFilter = await page.locator('.tile').count();
 
-    await page.locator('#search-input').fill('page');
+    await page.locator('#search-input').fill('open');
     await page.locator('#search-input').clear();
 
     // Tile count should return to the filtered count, not the full count
@@ -143,37 +144,6 @@ test.describe('Filters', () => {
     await page.locator('.filter-btn', { hasText: 'All' }).click();
     await expect(page.locator('.filter-btn', { hasText: 'All' })).toHaveClass(/active/);
   });
-});
-
-/* ── NEW CATEGORY FILTERS / TILES ──────────────────────────────── */
-test.describe('New category filters', () => {
-  // label = filter button text, cls = tile class, sample = a command tile in it
-  const cats = [
-    { label: 'Network & Mocking', cls: 'network', sample: 'page.routeWebSocket()' },
-    { label: 'Clock & Time', cls: 'clock', sample: 'clock.install()' },
-    { label: 'Fixtures', cls: 'fixture', sample: 'test.extend()' },
-    { label: 'Tracing & Debugging', cls: 'tracing', sample: 'codegen' },
-    { label: 'Component Testing', cls: 'component', sample: 'mount()' },
-    { label: 'Media & Audio', cls: 'media', sample: 'AnalyserNode peak amplitude' },
-  ];
-
-  for (const { label, cls, sample } of cats) {
-    test(`"${label}" filter renders only its tiles, including ${sample}`, async ({ page }) => {
-      const allCount = await page.locator('.tile').count();
-
-      const btn = page.locator('.filter-btn', { hasText: label });
-      await btn.click();
-      await expect(btn).toHaveClass(/active/);
-
-      const total = await page.locator('.tile').count();
-      const inCategory = await page.locator(`.tile.${cls}`).count();
-      expect(total).toBeGreaterThan(0);
-      expect(total).toBeLessThan(allCount); // a real subset of all tiles
-      expect(inCategory).toBe(total); // every visible tile belongs to the category
-
-      await expect(page.locator('.tile', { hasText: sample }).first()).toBeVisible();
-    });
-  }
 });
 
 /* ── VIEW TOGGLE ───────────────────────────────────────────────── */
@@ -291,39 +261,39 @@ test.describe('Modal', () => {
 /* ── URL DEEP-LINKING ──────────────────────────────────────────── */
 test.describe('URL deep-linking', () => {
   test('applying a category filter updates the URL hash', async ({ page }) => {
-    await page.locator('.filter-btn', { hasText: 'Action' }).click();
-    expect(page.url()).toContain('filter=Action');
+    await page.locator('.filter-btn', { hasText: 'Conditions' }).click();
+    await expect(page).toHaveURL(/filter=Conditions/);
   });
 
   test('typing in search updates the URL hash', async ({ page }) => {
-    await page.locator('#search-input').fill('click');
-    expect(page.url()).toContain('search=click');
+    await page.locator('#search-input').fill('text');
+    await expect(page).toHaveURL(/search=text/);
   });
 
   test('both filter and search are reflected in the URL hash', async ({ page }) => {
-    await page.locator('.filter-btn', { hasText: 'Action' }).click();
-    await page.locator('#search-input').fill('click');
-    await expect(page).toHaveURL(/filter=Action/);
-    await expect(page).toHaveURL(/search=click/);
+    await page.locator('.filter-btn', { hasText: 'Conditions' }).click();
+    await page.locator('#search-input').fill('text');
+    await expect(page).toHaveURL(/filter=Conditions/);
+    await expect(page).toHaveURL(/search=text/);
   });
 
   test('resetting to All removes filter from URL hash', async ({ page }) => {
-    await page.locator('.filter-btn', { hasText: 'Action' }).click();
+    await page.locator('.filter-btn', { hasText: 'Conditions' }).click();
     await page.locator('.filter-btn', { hasText: 'All' }).click();
-    expect(page.url()).not.toContain('filter=');
+    await expect(page).not.toHaveURL(/filter=/);
   });
 
   test('clearing search removes search from URL hash', async ({ page }) => {
-    await page.locator('#search-input').fill('click');
+    await page.locator('#search-input').fill('text');
     await page.locator('#search-input').clear();
-    expect(page.url()).not.toContain('search=');
+    await expect(page).not.toHaveURL(/search=/);
   });
 
   test('loading with #filter hash pre-applies the category filter', async ({ page }) => {
     const totalCount = await page.locator('.tile').count();
 
-    await page.goto('/#filter=Action');
-    await expect(page.locator('.filter-btn', { hasText: 'Action' })).toHaveClass(/active/);
+    await page.goto('/#filter=Conditions');
+    await expect(page.locator('.filter-btn', { hasText: 'Conditions' })).toHaveClass(/active/);
     const filteredCount = await page.locator('.tile').count();
     expect(filteredCount).toBeGreaterThan(0);
     expect(filteredCount).toBeLessThan(totalCount);
@@ -344,20 +314,33 @@ test.describe('URL deep-linking', () => {
   }) => {
     const totalCount = await page.locator('.tile').count();
 
-    await page.goto('/#search=click');
+    await page.goto('/#search=text');
     const inputValue = await page.locator('#search-input').inputValue();
-    expect(inputValue).toBe('click');
+    expect(inputValue).toBe('text');
     const filteredCount = await page.locator('.tile').count();
     expect(filteredCount).toBeGreaterThan(0);
     expect(filteredCount).toBeLessThan(totalCount);
   });
 
   test('loading with both #filter and #search applies both simultaneously', async ({ page }) => {
-    await page.goto('/#filter=Action&search=click');
-    await expect(page.locator('.filter-btn', { hasText: 'Action' })).toHaveClass(/active/);
+    await page.goto('/#filter=Conditions&search=text');
+    await expect(page.locator('.filter-btn', { hasText: 'Conditions' })).toHaveClass(/active/);
     const inputValue = await page.locator('#search-input').inputValue();
-    expect(inputValue).toBe('click');
+    expect(inputValue).toBe('text');
     expect(await page.locator('.tile').count()).toBeGreaterThan(0);
+  });
+  test('a category name with "&" and spaces round-trips through the hash', async ({ page }) => {
+    await useFixtureData(page);
+    await page.goto('/');
+    await page.locator('.filter-btn', { hasText: 'Setup & Config' }).click();
+    // URLSearchParams encodes a space as "+" and "&" as "%26" (WHATWG URL spec)
+    await expect(page).toHaveURL(/#filter=Setup\+%26\+Config$/);
+
+    // Fresh document load from the hash (not a same-document hashchange)
+    await page.goto('about:blank');
+    await page.goto('/#filter=Setup+%26+Config');
+    await expect(page.locator('.filter-btn', { hasText: 'Setup & Config' })).toHaveClass(/active/);
+    await expect(page.locator('.tile-name')).toHaveText(['alpha()', 'beta()']);
   });
 });
 
@@ -417,53 +400,107 @@ test.describe('Mobile', () => {
   });
 });
 
-/* ── NEW ASSERTIONS (from screenshot) ─────────────────────────── */
-test.describe('New assertion tiles', () => {
-  const newAssertions = [
-    'toBeFocused()',
-    'toBeOK()',
-    'toBe()',
-    'toContain()',
-    'toBeTruthy()',
-    'toHaveLength()',
-    'toMatchObject()',
-    'toBeGreaterThan()',
-    'expect().toPass()',
-    'expect.configure()',
+/* ── MOBILE FILTER (fixture data, hand-written expectations) ─────── */
+test.describe('Mobile filter', () => {
+  test.beforeEach(async ({ page }) => {
+    await useFixtureData(page);
+    await page.goto('/');
+  });
+
+  test('sits after Start Here and shows only mobile and both items', async ({ page }) => {
+    const labels = await page.locator('.filter-btn').allInnerTexts();
+    // Popular is hidden while analytics are off (Task 1 Step 7b); Task 8 re-adds it here.
+    expect(labels.slice(0, 3)).toEqual(['All', '⭐ Start Here', '📱 Mobile']);
+
+    await page.locator('.filter-btn[data-filter="mobile"]').click();
+    await expect(page.locator('.tile-name')).toHaveText(['gamma()', 'delta()', 'epsilon()']);
+    await expect(page).toHaveURL(/#filter=mobile$/);
+  });
+
+  test('#filter=mobile in the URL applies it on load', async ({ page }) => {
+    await page.goto('about:blank'); // force a fresh document load from the hash
+    await page.goto('/#filter=mobile');
+    await expect(page.locator('.filter-btn[data-filter="mobile"]')).toHaveClass(/active/);
+    await expect(page.locator('.tile-name')).toHaveText(['gamma()', 'delta()', 'epsilon()']);
+  });
+
+  test('search narrows the Mobile filter', async ({ page }) => {
+    await page.goto('/#filter=mobile&search=tap');
+    await expect(page.locator('.tile-name')).toHaveText(['delta()']);
+  });
+
+  test('grouped view under Mobile shows only categories with such items', async ({ page }) => {
+    await page.goto('/#filter=mobile');
+    await page.locator('#btnGrouped').click();
+    await expect(page.locator('.group-header')).toHaveText([
+      'Conditions (1)',
+      'Mobile Selectors (2)',
+    ]);
+  });
+});
+
+test.describe('Search with Selenide symbols (fixture data)', () => {
+  test('$$ matches only snippets containing $$', async ({ page }) => {
+    await useFixtureData(page);
+    await page.goto('/'); // full load so the fixture replaces the real data
+    await page.locator('#search-input').fill('$$');
+    await expect(page.locator('.tile-name')).toHaveText(['gamma()']);
+    await expect(page).toHaveURL(/#search=%24%24$/);
+  });
+});
+
+/* ── TILE GRADIENTS (expected values from the spec, section 6) ──── */
+test.describe('Tile gradients', () => {
+  // [cls, gradient start, gradient end], hand-copied from the spec's palette
+  const PALETTE = [
+    ['config', '#06b6d4', '#0e7490'],
+    ['navigation', '#0ea5e9', '#0369a1'],
+    ['selector', '#3b82f6', '#1d4ed8'],
+    ['action', '#22c55e', '#15803d'],
+    ['condition', '#f97316', '#c2410c'],
+    ['collection', '#eab308', '#a16207'],
+    ['wait', '#64748b', '#334155'],
+    ['page-object', '#f43f5e', '#be123c'],
+    ['window', '#10b981', '#047857'],
+    ['file', '#84cc16', '#4d7c0f'],
+    ['network', '#14b8a6', '#0f766e'],
+    ['javascript', '#f59e0b', '#b45309'],
+    ['report', '#ef4444', '#b91c1c'],
+    ['framework', '#a8a29e', '#57534e'],
+    ['remote', '#0891b2', '#164e63'],
+    ['pattern', '#fb7185', '#e11d48'],
+    ['cli', '#fbbf24', '#d97706'],
+    ['appium-setup', '#8b5cf6', '#1e1b4b'],
+    ['mobile-selector', '#a855f7', '#1e1b4b'],
+    ['mobile-gesture', '#c026d3', '#1e1b4b'],
+    ['mobile-context', '#db2777', '#1e1b4b'],
   ];
+  const rgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+  };
 
-  test('all 10 new assertion commands are rendered as tiles', async ({ page }) => {
-    await page.locator('.filter-btn', { hasText: 'Assertions' }).click();
-    for (const name of newAssertions) {
-      await expect(
-        page.locator('.tile', { hasText: name }),
-        `Expected tile for "${name}" to be visible`
-      ).toBeVisible();
-    }
-  });
-
-  test('Assertions category tile count matches data', async ({ page }) => {
-    await page.locator('.filter-btn', { hasText: 'Assertions' }).click();
-    const expected = await page.evaluate(
-      () => categories.find((c) => c.cat === 'Assertions').items.length
+  test('every category class renders its two-stop gradient', async ({ page }) => {
+    const actual = await page.evaluate(
+      (classes) =>
+        classes.map((cls) => {
+          const el = document.createElement('div');
+          el.className = `tile ${cls}`;
+          document.body.appendChild(el);
+          const bg = getComputedStyle(el).backgroundImage;
+          el.remove();
+          return bg;
+        }),
+      PALETTE.map(([cls]) => cls)
     );
-    await expect(page.locator('.tile')).toHaveCount(expected);
+    expect(actual).toEqual(
+      PALETTE.map(([, a, b]) => `linear-gradient(135deg, ${rgb(a)}, ${rgb(b)})`)
+    );
   });
 
-  for (const name of newAssertions) {
-    test(`modal for "${name}" shows description, code, and docs link`, async ({ page }) => {
-      await page.locator('.filter-btn', { hasText: 'Assertions' }).click();
-      await page.locator('.tile', { hasText: name }).click();
-
-      await expect(page.locator('#modal')).toBeVisible();
-      await expect(page.locator('#m-title')).toContainText(name);
-      await expect(page.locator('#m-desc')).not.toBeEmpty();
-      await expect(page.locator('#m-code')).not.toBeEmpty();
-
-      const href = await page.locator('#btn-docs').getAttribute('href');
-      expect(href).toMatch(/^https:\/\/playwright\.dev/);
-
-      await page.locator('.btn-close').click();
-    });
-  }
+  test("every data category's color is its gradient start", async ({ page }) => {
+    const cats = await page.evaluate(() => window.categories.map((c) => [c.cls, c.color]));
+    const start = Object.fromEntries(PALETTE.map(([cls, a]) => [cls, a]));
+    for (const [cls, color] of cats) expect(color.toLowerCase(), cls).toBe(start[cls]);
+  });
 });

@@ -1,0 +1,110 @@
+import { test, expect } from '@playwright/test';
+import { itemIn } from '../helpers/items.js';
+
+const CAT = 'Appium Setup';
+
+test.describe('Appium Setup entries (selenide-appium 7.19.0)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  test('"selenide-appium dependency (Maven)" exists at level beginner, platform mobile', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'selenide-appium dependency (Maven)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('mobile');
+    // Maven Central selenide-appium-7.19.0.pom: groupId com.codeborne, artifactId selenide-appium,
+    // and modules/appium/build.gradle at v7.19.0: ext { artifactId = 'selenide-appium' }
+    expect(entry.code.trim().startsWith('<dependency>')).toBe(true);
+    expect(entry.code).toContain('<groupId>com.codeborne</groupId>');
+    expect(entry.code).toContain('<artifactId>selenide-appium</artifactId>');
+    // selenide-appium versions track selenide exactly: 7.19.0, never an Appium-style 2.x or 7.18.2
+    expect(entry.code).toContain('<version>7.19.0</version>');
+    // selenide-appium 7.19.0 pom: java-client 11.0.0 comes transitively, so it is not redeclared
+    expect(entry.code).not.toContain('java-client');
+  });
+
+  test('"selenide-appium dependency (Gradle)" exists at level beginner, platform mobile', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'selenide-appium dependency (Gradle)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('mobile');
+    // Maven Central selenide-appium-7.19.0.pom: com.codeborne:selenide-appium:7.19.0
+    expect(entry.code).toContain('testImplementation("com.codeborne:selenide-appium:7.19.0")');
+  });
+
+  test('"WebDriverProvider (Android)" exists at level intermediate, platform mobile', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'WebDriverProvider (Android)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // selenide-core 7.19.0 WebDriverProvider.java:43: WebDriver createDriver(Capabilities capabilities);
+    expect(entry.code).toContain('implements WebDriverProvider');
+    expect(entry.code).toContain('public WebDriver createDriver(Capabilities capabilities)');
+    // java-client 11.0.0 UiAutomator2Options.java:223: public UiAutomator2Options(Capabilities source)
+    expect(entry.code).toContain('new UiAutomator2Options(capabilities)');
+    // java-client 11.0.0 AndroidDriver.java:104: public AndroidDriver(URL remoteAddress, Capabilities capabilities)
+    expect(entry.code).toContain('new AndroidDriver(');
+    // java-client 11.0.0 BaseOptions.java:116: public T merge(Capabilities extraCapabilities)
+    // returns a clone, so a bare "options.merge(capabilities);" statement drops Selenide's capabilities
+    expect(entry.code).not.toMatch(/^\s*options\.merge\(capabilities\);/m);
+    // java-client 11 builds sessions from typed options, not DesiredCapabilities;
+    // MobileElement does not exist in java-client-11.0.0 at all
+    expect(entry.code).not.toContain('DesiredCapabilities');
+    expect(entry.code).not.toContain('MobileElement');
+  });
+
+  test('"WebDriverProvider (iOS)" exists at level intermediate, platform mobile', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'WebDriverProvider (iOS)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 XCUITestOptions.java:245: public XCUITestOptions(Capabilities source)
+    expect(entry.code).toContain('new XCUITestOptions(capabilities)');
+    // java-client 11.0.0 IOSDriver.java:96: public IOSDriver(URL remoteAddress, Capabilities capabilities)
+    expect(entry.code).toContain('new IOSDriver(');
+    // java-client 11.0.0 ios/options/app/SupportsBundleIdOption.java:46: default T setBundleId(String identifier)
+    expect(entry.code).toContain('.setBundleId(');
+    expect(entry.code).not.toContain('DesiredCapabilities');
+    expect(entry.code).not.toContain('MobileElement');
+  });
+
+  test('"SelenideAppium.launchApp()" exists at level beginner, platform mobile', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'SelenideAppium.launchApp()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('mobile');
+    // selenide-appium 7.19.0 SelenideAppium.java:34: public static void launchApp() {
+    expect(entry.code).toContain('SelenideAppium.launchApp();');
+    // selenide-core 7.19.0 DefaultDriverFactory.java:27: if (WebDriverProvider.class.isAssignableFrom(clazz))
+    // the provider is chosen by class name
+    expect(entry.code).toContain('.class.getName()');
+  });
+
+  test('no entry in the category teaches raw Appium tooling', async ({ page }) => {
+    const items = await page.evaluate(
+      (c) => window.categories.find((x) => x.cat === c)?.items ?? [],
+      CAT
+    );
+    expect(items.length).toBeGreaterThanOrEqual(8);
+    for (const item of items) {
+      expect(item.platform).toBe('mobile');
+      // scope rule: selenide-appium API only, no Appium CLI, adb or simctl
+      expect(item.code).not.toMatch(
+        /appium driver install|npm i(nstall)? -g appium|\badb\b|simctl/
+      );
+      expect(item.code).not.toContain('DesiredCapabilities');
+      expect(item.code).not.toContain('MobileElement');
+    }
+  });
+});

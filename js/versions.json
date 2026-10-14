@@ -1,0 +1,5 @@
+{
+  "selenide": "7.19.0",
+  "selenideAppium": "7.19.0",
+  "appiumJavaClient": "11.0.0"
+}

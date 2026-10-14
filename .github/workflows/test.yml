@@ -38,6 +38,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Script unit tests
+        if: matrix.project == 'chromium'
+        run: npm run test:scripts
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit
 

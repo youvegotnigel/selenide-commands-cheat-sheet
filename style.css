@@ -1,7 +1,8 @@
 * { box-sizing: border-box; }
 body { font-family: Arial, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
 header { padding: 16px; text-align: center; font-size: 36px; font-weight: bold; background: #020617; color: #2ead33; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
-.header-logo { height: 44px; width: auto; flex-shrink: 0; }
+/* The official logo has a black wordmark, so it sits on a light backing to stay readable */
+.header-logo { height: 44px; width: auto; flex-shrink: 0; background: #f8fafc; border-radius: 8px; padding: 3px 6px; }
 
 .meta-bar { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 16px; background: #020617; border-top: 1px solid #1e293b; }
 
@@ -95,22 +96,29 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 }
 .tile:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
 
-.setup         { background: linear-gradient(135deg, #06b6d4, #0284c7); }
-.query         { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-.action        { background: linear-gradient(135deg, #22c55e, #16a34a); }
-.assertion     { background: linear-gradient(135deg, #fb923c, #ea580c); }
-.utility       { background: linear-gradient(135deg, #a855f7, #7e22ce); }
-.api           { background: linear-gradient(135deg, #ef4444, #dc2626); }
-.pattern       { background: linear-gradient(135deg, #ec4899, #be185d); }
-.cli           { background: linear-gradient(135deg, #f59e0b, #d97706); }
-.accessibility { background: linear-gradient(135deg, #10b981, #059669); }
-.config        { background: linear-gradient(135deg, #6366f1, #4338ca); }
-.network       { background: linear-gradient(135deg, #0d9488, #115e59); }
-.clock         { background: linear-gradient(135deg, #38bdf8, #0ea5e9); }
-.fixture       { background: linear-gradient(135deg, #84cc16, #4d7c0f); }
-.tracing       { background: linear-gradient(135deg, #64748b, #334155); }
-.component     { background: linear-gradient(135deg, #d946ef, #a21caf); }
-.media         { background: linear-gradient(135deg, #f43f5e, #be123c); }
+/* Web categories: same-hue gradients, hues outside violet/magenta */
+.config      { background: linear-gradient(135deg, #06b6d4, #0e7490); }
+.navigation  { background: linear-gradient(135deg, #0ea5e9, #0369a1); }
+.selector    { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.action      { background: linear-gradient(135deg, #22c55e, #15803d); }
+.condition   { background: linear-gradient(135deg, #f97316, #c2410c); }
+.collection  { background: linear-gradient(135deg, #eab308, #a16207); }
+.wait        { background: linear-gradient(135deg, #64748b, #334155); }
+.page-object { background: linear-gradient(135deg, #f43f5e, #be123c); }
+.window      { background: linear-gradient(135deg, #10b981, #047857); }
+.file        { background: linear-gradient(135deg, #84cc16, #4d7c0f); }
+.network     { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+.javascript  { background: linear-gradient(135deg, #f59e0b, #b45309); }
+.report      { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.framework   { background: linear-gradient(135deg, #a8a29e, #57534e); }
+.remote      { background: linear-gradient(135deg, #0891b2, #164e63); }
+.pattern     { background: linear-gradient(135deg, #fb7185, #e11d48); }
+.cli         { background: linear-gradient(135deg, #fbbf24, #d97706); }
+/* Mobile (selenide-appium) categories: violet/magenta starts, one shared deep indigo end */
+.appium-setup    { background: linear-gradient(135deg, #8b5cf6, #1e1b4b); }
+.mobile-selector { background: linear-gradient(135deg, #a855f7, #1e1b4b); }
+.mobile-gesture  { background: linear-gradient(135deg, #c026d3, #1e1b4b); }
+.mobile-context  { background: linear-gradient(135deg, #db2777, #1e1b4b); }
 
 .tile-level {
   position: absolute; top: 7px; right: 9px;
