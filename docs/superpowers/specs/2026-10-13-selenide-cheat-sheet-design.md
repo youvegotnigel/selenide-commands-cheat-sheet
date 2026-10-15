@@ -211,7 +211,9 @@ Everything not listed here is kept as-is (layout, dark theme, tile grid, modal, 
 - **Quick filters:** All · ⭐ Start Here · 🔥 Popular · **📱 Mobile** · one per category. Mobile
   shows `platform === 'mobile' || platform === 'both'` and round-trips through
   `#filter=mobile` like the others. Search applies on top of it.
-- **Gradients:** web categories keep the current style (bright, same-hue, two-stop
+- **Gradients:** *(Superseded by
+  [`2026-10-15-periodic-grid-refresh-design.md`](2026-10-15-periodic-grid-refresh-design.md),
+  section 6: flat family fills with dark text.)* Web categories kept the current style (bright, same-hue, two-stop
   gradients) with start hues **outside** the violet/magenta range (roughly 250 to 335
   degrees). The four mobile categories use start colors **inside** it (`#8b5cf6`, `#a855f7`,
   `#c026d3`, `#db2777`) and all end at the same deep indigo `#1e1b4b`. Each category's
