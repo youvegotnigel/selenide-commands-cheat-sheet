@@ -12,6 +12,7 @@ import {
 } from './highlight.js';
 import * as popularCmds from './popular-commands.js';
 import { splitName, buildTile } from './tile.js';
+import { initGridKeys, resetRoving } from './grid-keys.js';
 
 // Expose as a global so data-integrity tests can access it via page.evaluate()
 window.categories = categories;
@@ -100,6 +101,8 @@ function render() {
   } else {
     renderFlat(items, container);
   }
+
+  resetRoving(container);
 }
 
 function renderFlat(items, container) {
@@ -142,12 +145,16 @@ function renderGrouped(items, container) {
 /* ── TILE ─────────────────────────────────────────────────────── */
 function makeTile(item) {
   const tile = buildTile(item, { popular: popularCmds.isPopular(popularCmds.commandId(item)) });
-  tile.addEventListener('click', () => openModal(item));
+  tile.addEventListener('click', () => openModal(item, tile));
   return tile;
 }
 
 /* ── MODAL ────────────────────────────────────────────────────── */
-function openModal(item) {
+// The tile that opened the modal; focus returns to it on close
+let modalOpener = null;
+
+function openModal(item, opener) {
+  modalOpener = opener;
   document.getElementById('modal').style.display = 'flex';
   document.getElementById('m-title').innerHTML = item.name;
   document.getElementById('m-desc').innerText = item.desc;
@@ -177,13 +184,18 @@ function openModal(item) {
   const copyBtn = document.getElementById('btn-copy');
   copyBtn.textContent = 'Copy';
   copyBtn.className = 'btn-copy';
+  copyBtn.focus();
 
   // Record this open for the popularity counter (no-op for bots / repeat opens)
   popularCmds.recordOpen(item);
 }
 
 function closeModal() {
-  document.getElementById('modal').style.display = 'none';
+  const modal = document.getElementById('modal');
+  if (modal.style.display !== 'flex') return; // Escape with nothing open: leave focus alone
+  modal.style.display = 'none';
+  if (modalOpener?.isConnected) modalOpener.focus();
+  modalOpener = null;
 }
 
 function copyCode() {
@@ -293,6 +305,7 @@ document.getElementById('btn-close').addEventListener('click', closeModal);
 document.getElementById('btn-copy').addEventListener('click', copyCode);
 
 buildFilters();
+initGridKeys(document.getElementById('grid'));
 
 /* ── META BAR ─────────────────────────────────────────────────── */
 // Command count comes from the data; the Selenide version and the
