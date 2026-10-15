@@ -11,6 +11,7 @@ import {
   highlightFor,
 } from './highlight.js';
 import * as popularCmds from './popular-commands.js';
+import { splitName } from './tile.js';
 
 // Expose as a global so data-integrity tests can access it via page.evaluate()
 window.categories = categories;
@@ -22,6 +23,8 @@ window.pickHighlighter = pickHighlighter;
 window.highlightFor = highlightFor;
 // Expose for tests via page.evaluate() (same rationale as window.categories)
 window.popularCommands = popularCmds;
+// Expose for tests via page.evaluate() (same rationale as window.categories)
+window.splitName = splitName;
 
 /* ── STATE ────────────────────────────────────────────────────── */
 let activeFilter = 'all';
