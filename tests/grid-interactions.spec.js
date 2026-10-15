@@ -130,3 +130,74 @@ test.describe('Category highlight', () => {
     await expect(page.locator('.tile.dimmed')).toHaveCount(0);
   });
 });
+
+/* ── Inspector (spec section 7) ────────────────────────────────── */
+test.describe('Inspector', () => {
+  const PLACEHOLDER = 'Hover or focus a command to preview it.';
+
+  test('shows the placeholder before any hover', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'desktop only');
+    await expect(page.locator('#inspector')).toHaveText(PLACEHOLDER);
+  });
+
+  test('hovering a tile previews it', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'desktop only');
+    await tile(page, 'alpha()').hover();
+    await expect(page.locator('#inspector .ins-title')).toHaveText('alpha()');
+    await expect(page.locator('#inspector .ins-meta')).toHaveText('Setup & Config · Beginner');
+    await expect(page.locator('#inspector .ins-desc')).toHaveText('Fixture entry alpha().');
+    await expect(page.locator('#inspector .ins-code')).toHaveText('open("/alpha"); // first page');
+  });
+
+  test('focusing a tile previews it', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'desktop only');
+    await tile(page, 'beta()').focus();
+    await expect(page.locator('#inspector .ins-code')).toHaveText('Configuration.timeout = 6000;');
+  });
+
+  test('a re-render resets the placeholder', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'desktop only');
+    await tile(page, 'alpha()').hover();
+    await page.locator('#search-input').fill('beta');
+    await expect(page.locator('#inspector')).toHaveText(PLACEHOLDER);
+  });
+
+  test('clicking a tile still opens the modal', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'desktop only');
+    await tile(page, 'alpha()').click();
+    await expect(page.locator('#modal')).toBeVisible();
+  });
+
+  test('hidden on phones', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'phones only');
+    await expect(page.locator('#inspector')).toBeHidden();
+  });
+});
+
+/* ── First meaningful line (spec section 7) ───────────────────── */
+test.describe('firstMeaningfulLine', () => {
+  const CASES = [
+    ['open("/alpha"); // first page', 'open("/alpha"); // first page'],
+    [
+      'import static com.codeborne.selenide.Selenide.*;\n\n// open it\n$("#a").click();',
+      '$("#a").click();',
+    ],
+    ['/* note\n * more\n */\nopen("/");', 'open("/");'],
+    ['# selenide.properties\nselenide.browser=firefox', 'selenide.browser=firefox'],
+    ['<!-- pom -->\n<dependency>', '<dependency>'],
+    ['mvn test -Dselenide.browser=firefox', 'mvn test -Dselenide.browser=firefox'],
+    ['// only a comment', '// only a comment'],
+    ['\n   \n', ''],
+  ];
+
+  test('skips blanks, comments and imports, else falls back', async ({ page }) => {
+    const actual = await page.evaluate(
+      async (codes) => {
+        const { firstMeaningfulLine } = await import('/js/inspector.js');
+        return codes.map(firstMeaningfulLine);
+      },
+      CASES.map(([c]) => c)
+    );
+    expect(actual).toEqual(CASES.map(([, line]) => line));
+  });
+});

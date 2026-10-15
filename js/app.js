@@ -13,6 +13,7 @@ import {
 import * as popularCmds from './popular-commands.js';
 import { splitName, buildTile } from './tile.js';
 import { initGridKeys, resetRoving } from './grid-keys.js';
+import { showInspector, clearInspector } from './inspector.js';
 
 // Expose as a global so data-integrity tests can access it via page.evaluate()
 window.categories = categories;
@@ -31,6 +32,7 @@ window.splitName = splitName;
 let activeFilter = 'all';
 let activeView = 'flat';
 let searchVal = '';
+const inspectorEl = document.getElementById('inspector');
 
 // Flatten all items into a single array, tagging each with its category info and its
 // "atomic number": the 1-based position in the full dataset, stable across filters
@@ -87,6 +89,7 @@ function render() {
   const items = getItems();
 
   container.innerHTML = '';
+  clearInspector(inspectorEl);
 
   if (items.length === 0) {
     const wrap = document.createElement('div');
@@ -146,6 +149,8 @@ function renderGrouped(items, container) {
 function makeTile(item) {
   const tile = buildTile(item, { popular: popularCmds.isPopular(popularCmds.commandId(item)) });
   tile.addEventListener('click', () => openModal(item, tile));
+  tile.addEventListener('mouseenter', () => showInspector(inspectorEl, item));
+  tile.addEventListener('focus', () => showInspector(inspectorEl, item));
   return tile;
 }
 
