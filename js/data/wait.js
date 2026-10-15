@@ -2,7 +2,7 @@
 export default {
   cat: 'Waits & Timeouts',
   cls: 'wait',
-  color: '#64748b',
+  color: '#feb671',
   items: [
     {
       name: 'Implicit waits (should and actions)',

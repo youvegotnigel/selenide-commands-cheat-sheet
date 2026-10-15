@@ -2,7 +2,7 @@
 export default {
   cat: 'Mobile Gestures',
   cls: 'mobile-gesture',
-  color: '#c026d3',
+  color: '#e9aff2',
   items: [
     {
       name: 'tap()',

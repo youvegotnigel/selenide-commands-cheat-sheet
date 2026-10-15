@@ -11,6 +11,9 @@ import {
   highlightFor,
 } from './highlight.js';
 import * as popularCmds from './popular-commands.js';
+import { splitName, buildTile } from './tile.js';
+import { initGridKeys, resetRoving } from './grid-keys.js';
+import { showInspector, clearInspector } from './inspector.js';
 
 // Expose as a global so data-integrity tests can access it via page.evaluate()
 window.categories = categories;
@@ -22,17 +25,27 @@ window.pickHighlighter = pickHighlighter;
 window.highlightFor = highlightFor;
 // Expose for tests via page.evaluate() (same rationale as window.categories)
 window.popularCommands = popularCmds;
+// Expose for tests via page.evaluate() (same rationale as window.categories)
+window.splitName = splitName;
 
 /* ── STATE ────────────────────────────────────────────────────── */
 let activeFilter = 'all';
 let activeView = 'flat';
 let searchVal = '';
+const inspectorEl = document.getElementById('inspector');
 
-// Flatten all items into a single array, tagging each with its category info
+// Flatten all items into a single array, tagging each with its category info and its
+// "atomic number": the 1-based position in the full dataset, stable across filters
 const allItems = [];
 categories.forEach((sec) =>
   sec.items.forEach((item) =>
-    allItems.push({ ...item, cls: sec.cls, cat: sec.cat, color: sec.color })
+    allItems.push({
+      ...item,
+      cls: sec.cls,
+      cat: sec.cat,
+      color: sec.color,
+      num: allItems.length + 1,
+    })
   )
 );
 
@@ -76,6 +89,7 @@ function render() {
   const items = getItems();
 
   container.innerHTML = '';
+  clearInspector(inspectorEl);
 
   if (items.length === 0) {
     const wrap = document.createElement('div');
@@ -90,12 +104,14 @@ function render() {
   } else {
     renderFlat(items, container);
   }
+
+  resetRoving(container);
 }
 
 function renderFlat(items, container) {
   const grid = document.createElement('div');
   grid.className = 'grid';
-  items.forEach((item, i) => grid.appendChild(makeTile(item, i + 1)));
+  items.forEach((item) => grid.appendChild(makeTile(item)));
   container.appendChild(grid);
 }
 
@@ -122,7 +138,7 @@ function renderGrouped(items, container) {
 
     const grid = document.createElement('div');
     grid.className = 'grid';
-    groups[sec.cat].forEach((item, i) => grid.appendChild(makeTile(item, i + 1)));
+    groups[sec.cat].forEach((item) => grid.appendChild(makeTile(item)));
     section.appendChild(grid);
 
     container.appendChild(section);
@@ -130,32 +146,20 @@ function renderGrouped(items, container) {
 }
 
 /* ── TILE ─────────────────────────────────────────────────────── */
-function levelDots(level) {
-  if (level === 'beginner') return '<span style="color:#4ade80">●</span>';
-  if (level === 'intermediate') return '<span style="color:#fb923c">●●</span>';
-  if (level === 'advanced') return '<span style="color:#c084fc">●●●</span>';
-  return '';
-}
-
-function makeTile(item, n) {
-  const div = document.createElement('div');
-  div.className = `tile ${item.cls}`;
-  const popularBadge = popularCmds.isPopular(popularCmds.commandId(item))
-    ? '<span class="tile-popular" title="Popular">🔥</span>'
-    : '';
-  div.innerHTML = `
-    <span class="tile-level">${levelDots(item.level)}</span>
-    ${popularBadge}
-    <div class="tile-inner">
-      <span class="tile-num">#${n}</span>
-      <span class="tile-name">${item.name}</span>
-    </div>`;
-  div.addEventListener('click', () => openModal(item));
-  return div;
+function makeTile(item) {
+  const tile = buildTile(item, { popular: popularCmds.isPopular(popularCmds.commandId(item)) });
+  tile.addEventListener('click', () => openModal(item, tile));
+  tile.addEventListener('mouseenter', () => showInspector(inspectorEl, item));
+  tile.addEventListener('focus', () => showInspector(inspectorEl, item));
+  return tile;
 }
 
 /* ── MODAL ────────────────────────────────────────────────────── */
-function openModal(item) {
+// The tile that opened the modal; focus returns to it on close
+let modalOpener = null;
+
+function openModal(item, opener) {
+  modalOpener = opener;
   document.getElementById('modal').style.display = 'flex';
   document.getElementById('m-title').innerHTML = item.name;
   document.getElementById('m-desc').innerText = item.desc;
@@ -185,13 +189,18 @@ function openModal(item) {
   const copyBtn = document.getElementById('btn-copy');
   copyBtn.textContent = 'Copy';
   copyBtn.className = 'btn-copy';
+  copyBtn.focus();
 
   // Record this open for the popularity counter (no-op for bots / repeat opens)
   popularCmds.recordOpen(item);
 }
 
 function closeModal() {
-  document.getElementById('modal').style.display = 'none';
+  const modal = document.getElementById('modal');
+  if (modal.style.display !== 'flex') return; // Escape with nothing open: leave focus alone
+  modal.style.display = 'none';
+  if (modalOpener?.isConnected) modalOpener.focus();
+  modalOpener = null;
 }
 
 function copyCode() {
@@ -254,6 +263,17 @@ function setView(v) {
   render();
 }
 
+// Hovering a category pill dims the other categories in place (desktop only: on touch
+// devices a tap fires mouseenter too, and must not leave tiles dimmed)
+const desktopHover = window.matchMedia('(hover: hover) and (min-width: 900px)');
+
+function highlightCategory(cls) {
+  const on = cls !== null && desktopHover.matches;
+  document
+    .querySelectorAll('#grid .tile')
+    .forEach((t) => t.classList.toggle('dimmed', on && t.dataset.cls !== cls));
+}
+
 function buildFilters() {
   const container = document.getElementById('filters');
   const defs = [
@@ -261,13 +281,17 @@ function buildFilters() {
     { label: '⭐ Start Here', filter: 'beginner', color: null },
     ...(popularCmds.ENABLED ? [{ label: '🔥 Popular', filter: 'popular', color: null }] : []),
     { label: '📱 Mobile', filter: 'mobile', color: null },
-    ...categories.map((c) => ({ label: c.cat, filter: c.cat, color: c.color })),
+    ...categories.map((c) => ({ label: c.cat, filter: c.cat, color: c.color, cls: c.cls })),
   ];
-  defs.forEach(({ label, filter, color }) => {
+  defs.forEach(({ label, filter, color, cls }) => {
     const btn = document.createElement('button');
     btn.className = 'filter-btn' + (filter === 'all' ? ' active' : '');
     btn.dataset.filter = filter;
     btn.addEventListener('click', () => setFilter(filter));
+    if (cls) {
+      btn.addEventListener('mouseenter', () => highlightCategory(cls));
+      btn.addEventListener('mouseleave', () => highlightCategory(null));
+    }
     btn.innerHTML = color
       ? `<span class="filter-dot" style="background:${color}"></span>${label}`
       : label;
@@ -301,6 +325,7 @@ document.getElementById('btn-close').addEventListener('click', closeModal);
 document.getElementById('btn-copy').addEventListener('click', copyCode);
 
 buildFilters();
+initGridKeys(document.getElementById('grid'));
 
 /* ── META BAR ─────────────────────────────────────────────────── */
 // Command count comes from the data; the Selenide version and the

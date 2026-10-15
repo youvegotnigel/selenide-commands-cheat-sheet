@@ -104,7 +104,7 @@ export default {
 };
 ```
 
-Then register it in [js/data/index.js](js/data/index.js), add a `.category-css-class` gradient rule in [style.css](style.css) that starts with the same color, add a content spec in `tests/content/`, and run `npm test`.
+Then register it in [js/data/index.js](js/data/index.js), add a `.category-css-class` fill rule in [style.css](style.css) in the same color (dark text must reach 4.5:1 contrast), add a content spec in `tests/content/`, and run `npm test`.
 
 ### Keeping up with Selenide releases
 A scheduled workflow checks for drift on the 1st and 15th of each month and opens a pull request. To sync locally, ask Claude Code to "sync the cheat sheet to the latest Selenide".

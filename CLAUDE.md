@@ -46,10 +46,13 @@ content is about Selenide.
 ```
 selenide-commands-cheat-sheet/
 ├── index.html                    # Markup: header, meta-bar, search, filters, grid, modal
-├── style.css                     # Single stylesheet: dark theme, 21 category tile gradients
+├── style.css                     # Single stylesheet: dark theme, tile cells, 21 family fills, inspector
 ├── js/
 │   ├── app.js                    # Render, filter (incl. Mobile), search, modal, meta-bar
 │   ├── highlight.js              # Java / shell / XML highlighters + pickHighlighter()
+│   ├── tile.js                   # Periodic cell: splitName, <wbr> breaks, key size, buildTile
+│   ├── grid-keys.js              # Roving tabindex + arrow keys over the tile grid
+│   ├── inspector.js              # Desktop hover/focus preview panel
 │   ├── versions.json             # Pinned Selenide / selenide-appium / java-client versions
 │   ├── popular-commands.js       # Command open tracking via Supabase (off: ENABLED = false)
 │   ├── visitor-counter.js        # Visitor increment (off: ENABLED = false)
@@ -67,7 +70,9 @@ selenide-commands-cheat-sheet/
 │   ├── schema-rules.spec.js      # Validators vs hand-written good/bad fixtures
 │   ├── data-integrity.spec.js    # Validators vs the real data
 │   ├── content/<cls>.spec.js     # Per-category guards, expected values from the sources jar
-│   ├── cheatsheet.spec.js        # UI: load, search, filters (incl. Mobile), modal, hash, gradients
+│   ├── grid-cells.spec.js        # Cell helpers, anatomy, numbers, layout
+│   ├── grid-interactions.spec.js # Keyboard, category highlight, inspector
+│   ├── cheatsheet.spec.js        # UI: load, search, filters (incl. Mobile), modal, hash, tile colours
 │   ├── highlight.spec.js         # Highlighters, routing, round-trip over every entry
 │   ├── meta-bar.spec.js          # Meta-bar, versions.json, analytics placeholder
 │   └── popular-commands.spec.js  # Popularity (skipped while analytics are off)
@@ -129,8 +134,8 @@ Every command lives in a category module `js/data/<cls>.js`, exporting one `Cate
 /** @type {import('./index.js').Category} */
 export default {
   cat: 'Conditions',        // filter button and tile label
-  cls: 'condition',         // CSS class for the tile gradient (and the file name)
-  color: '#f97316',         // 6-digit hex, equal to the gradient start in style.css
+  cls: 'condition',         // CSS class for the tile fill (and the file name)
+  color: '#fb923c',         // 6-digit hex, equal to the tile fill in style.css
   items: [
     {
       name: 'shouldHave(text())',  // display name, globally unique
@@ -194,8 +199,10 @@ ships silently. Read every snippet back as Java.
 1. Create `js/data/<cls>.js` with `export default { cat, cls, color, items }`
 2. In `js/data/index.js`, add the `import` and an entry in `categories` (position = display
    order: web categories first, then mobile)
-3. Add a `.<cls>` gradient rule in `style.css` starting with the category's `color`, and add
-   it to the `PALETTE` table in `tests/cheatsheet.spec.js`
+3. Add a `.<cls>` fill rule in `style.css` under its family comment, using the category's
+   `color`. The fill must pass 4.5:1 against the tile text `#0f172a`; mobile categories stay
+   in OKLCH hue 288 to 340, web categories outside it. Add `[cls, fill]` to the `PALETTE`
+   table in `tests/cheatsheet.spec.js` at its display position
 4. Add `tests/content/<cls>.spec.js`
 5. Run `npm test`
 
@@ -252,13 +259,30 @@ Unknown identifiers render plain. Add names to the `APIS` set as content needs t
 
 ---
 
+## Tile grid
+
+Design: `docs/superpowers/specs/2026-10-15-periodic-grid-refresh-design.md`.
+
+- Each tile is a periodic-table cell: `button.tile` with a fixed number (position in the
+  full dataset), level dots, a small prefix and a large monospace key (`splitName`), and
+  the category. `.tile-name`'s `textContent` is always the full `name`.
+- Categories are coloured by family (Setup, Finding, Acting, Debugging, Checking,
+  Structure, Mobile), running around the colour wheel, and `js/data/index.js` keeps each
+  family contiguous. Fills are OKLCH-derived pastels (lightness 0.71 to 0.92) with dark
+  text `#0f172a`.
+- Keyboard: one tab stop, arrow keys, Home and End; the modal returns focus to its tile.
+- Desktop only (`(hover: hover) and (min-width: 900px)`): the sticky inspector and the
+  category highlight on pill hover.
+
+---
+
 ## Filters and URL state
 
 | Mechanism | Used for |
 |-----------|---------|
 | URL hash | Filter + search state (`#filter=mobile&search=tap`, `#filter=Setup+%26+Config`) |
 | Quick filters | All, ⭐ Start Here (`beginner`), 📱 Mobile (`mobile`: platform `mobile` or `both`), 🔥 Popular (`popular`, hidden while analytics are off) |
-| `window.categories`, `window.highlight*`, `window.pickHighlighter`, `window.highlightFor`, `window.popularCommands` | Exposed for test access |
+| `window.categories`, `window.highlight*`, `window.pickHighlighter`, `window.highlightFor`, `window.splitName`, `window.popularCommands` | Exposed for test access |
 
 ---
 

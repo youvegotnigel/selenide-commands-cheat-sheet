@@ -1,5 +1,10 @@
+:root {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
 * { box-sizing: border-box; }
-body { font-family: Arial, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+body { font-family: var(--font-sans); margin: 0; background: #0f172a; color: #e2e8f0; }
 header { padding: 16px; text-align: center; font-size: 36px; font-weight: bold; background: #020617; color: #2ead33; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
 /* The official logo has a black wordmark, so it sits on a light backing to stay readable */
 .header-logo { height: 44px; width: auto; flex-shrink: 0; background: #f8fafc; border-radius: 8px; padding: 3px 6px; }
@@ -10,7 +15,7 @@ header { padding: 16px; text-align: center; font-size: 36px; font-weight: bold; 
 .meta-badge {
   display: inline-flex; align-items: stretch;
   border-radius: 6px; overflow: hidden;
-  font-size: 12px; font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px; font-family: var(--font-mono);
   box-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 .meta-badge .k {
@@ -54,7 +59,7 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 .search-shortcut {
   position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
   background: #0f172a; border: 1px solid #334155; color: #475569;
-  padding: 2px 6px; border-radius: 4px; font-size: 11px; font-family: monospace;
+  padding: 2px 6px; border-radius: 4px; font-size: 11px; font-family: var(--font-mono);
   pointer-events: none; user-select: none;
 }
 
@@ -77,7 +82,11 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 }
 .view-btn.active { background: #1e293b; color: #e2e8f0; border-color: #475569; }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+/* Square cells, at least 2 columns at 320px (spec 2026-10-15, section 4) */
+.grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, calc(50% - 6px)), 1fr));
+}
 .group-section { margin-bottom: 28px; }
 .group-header {
   font-size: 12px; font-weight: 700; text-transform: uppercase;
@@ -86,51 +95,120 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 }
 .group-count { font-weight: 600; opacity: 0.7; }
 
+/* Periodic-table cell (spec 2026-10-15, section 3) */
 .tile {
-  border-radius: 12px; padding: 12px 10px; min-height: 80px;
-  text-align: center; cursor: pointer; font-weight: 500; font-size: 15px;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.15s, box-shadow 0.15s;
-  word-wrap: break-word; overflow-wrap: break-word;
-  white-space: normal; position: relative;
+  position: relative; aspect-ratio: 1; max-width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px; border: 0; border-radius: 12px; cursor: pointer;
+  color: #0f172a; font-family: var(--font-sans); text-align: center;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
-.tile:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+.tile:hover {
+  transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  outline: 2px solid rgba(255,255,255,0.85);
+}
+.tile:focus-visible { outline: 3px solid #f8fafc; outline-offset: 2px; }
+.tile.dimmed { opacity: 0.2; }
+@media (prefers-reduced-motion: reduce) {
+  .tile { transition: none; }
+  .tile:hover { transform: none; }
+}
 
-/* Web categories: same-hue gradients, hues outside violet/magenta */
-.config      { background: linear-gradient(135deg, #06b6d4, #0e7490); }
-.navigation  { background: linear-gradient(135deg, #0ea5e9, #0369a1); }
-.selector    { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-.action      { background: linear-gradient(135deg, #22c55e, #15803d); }
-.condition   { background: linear-gradient(135deg, #f97316, #c2410c); }
-.collection  { background: linear-gradient(135deg, #eab308, #a16207); }
-.wait        { background: linear-gradient(135deg, #64748b, #334155); }
-.page-object { background: linear-gradient(135deg, #f43f5e, #be123c); }
-.window      { background: linear-gradient(135deg, #10b981, #047857); }
-.file        { background: linear-gradient(135deg, #84cc16, #4d7c0f); }
-.network     { background: linear-gradient(135deg, #14b8a6, #0f766e); }
-.javascript  { background: linear-gradient(135deg, #f59e0b, #b45309); }
-.report      { background: linear-gradient(135deg, #ef4444, #b91c1c); }
-.framework   { background: linear-gradient(135deg, #a8a29e, #57534e); }
-.remote      { background: linear-gradient(135deg, #0891b2, #164e63); }
-.pattern     { background: linear-gradient(135deg, #fb7185, #e11d48); }
-.cli         { background: linear-gradient(135deg, #fbbf24, #d97706); }
-/* Mobile (selenide-appium) categories: violet/magenta starts, one shared deep indigo end */
-.appium-setup    { background: linear-gradient(135deg, #8b5cf6, #1e1b4b); }
-.mobile-selector { background: linear-gradient(135deg, #a855f7, #1e1b4b); }
-.mobile-gesture  { background: linear-gradient(135deg, #c026d3, #1e1b4b); }
-.mobile-context  { background: linear-gradient(135deg, #db2777, #1e1b4b); }
+/* Tile fills: one hue per family, one shade per category (spec 2026-10-15, section 6).
+   Every fill passes 4.5:1 against the tile text #0f172a. */
+/* Setup */
+.config       { background: #72a0f5; }
+.navigation   { background: #76bafe; }
+.remote       { background: #8ad1ff; }
+.cli          { background: #a3e7ff; }
+/* Finding */
+.selector     { background: #3bcddc; }
+.collection   { background: #75ecde; }
+/* Acting */
+.action       { background: #3ec87d; }
+.window       { background: #84d987; }
+.file         { background: #b8e688; }
+.javascript   { background: #e2f07d; }
+/* Debugging */
+.report       { background: #f4c43a; }
+.network      { background: #f4e886; }
+/* Checking */
+.condition    { background: #f98e52; }
+.wait         { background: #feb671; }
+/* Structure */
+.page-object  { background: #f0777a; }
+.pattern      { background: #f996a9; }
+.framework    { background: #ffb5cd; }
+/* Mobile (selenide-appium): violet to pink, hue 288 to 340 */
+.appium-setup { background: #9e92f3; }
+.mobile-selector { background: #c79ff4; }
+.mobile-gesture { background: #e9aff2; }
+.mobile-context { background: #ffc2e9; }
 
+.tile-num {
+  position: absolute; top: 8px; left: 9px; line-height: 1;
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.tile-popular { position: absolute; top: 6px; left: 34px; font-size: 11px; line-height: 1; }
 .tile-level {
-  position: absolute; top: 7px; right: 9px;
-  font-size: 8px; letter-spacing: 1px; line-height: 1;
+  position: absolute; top: 7px; right: 9px; line-height: 1;
+  font-size: 10px; letter-spacing: 2px;
 }
-.tile-popular {
-  position: absolute; top: 6px; left: 8px;
-  font-size: 11px; line-height: 1;
+.tile-name {
+  width: 100%; min-width: 0; margin-block: 14px; padding-inline: 2px;
+  font-family: var(--font-mono); overflow-wrap: break-word;
 }
-.tile-inner { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 100%; }
-.tile-num   { font-size: 11px; opacity: 0.65; }
-.tile-name  { font-size: 15px; overflow-wrap: anywhere; width: 100%; text-align: center; }
+.tile-prefix { display: block; margin-bottom: 2px; font-size: 11px; opacity: 0.7; }
+.tile-key    { display: block; font-weight: 600; line-height: 1.25; }
+.tile-key--s { font-size: 18px; }
+.tile-key--m { font-size: 15px; }
+.tile-key--l { font-size: 13px; }
+.tile-cat {
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Inspector: sticky preview of the hovered or focused tile, desktop only (spec section 7) */
+#inspector { display: none; }
+@media (hover: hover) and (min-width: 900px) {
+  #inspector {
+    display: flex; gap: 16px; align-items: stretch;
+    position: sticky; top: 8px; z-index: 10;
+    height: 104px; margin-bottom: 14px; padding: 10px 14px 10px 10px;
+    background: #1e293b; border-radius: 10px; border-left: 6px solid #334155;
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.6);
+  }
+  /* Keep a focused tile clear of the sticky inspector when focus scrolls it into view */
+  .tile { scroll-margin-top: 130px; }
+}
+.ins-cell {
+  flex: 0 0 120px; position: relative; padding: 4px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  border-radius: 8px; color: #0f172a; font-family: var(--font-mono); text-align: center;
+}
+.ins-num {
+  position: absolute; top: 5px; left: 6px;
+  font-family: var(--font-sans); font-size: 10px; font-weight: 700;
+}
+.ins-prefix { max-width: 100%; font-size: 9px; opacity: 0.7; overflow-wrap: break-word; }
+.ins-key {
+  max-width: 100%; font-size: 13px; font-weight: 700; line-height: 1.15;
+  overflow-wrap: break-word;
+}
+.ins-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+.ins-title {
+  font-family: var(--font-mono); font-size: 15px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ins-meta { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
+.ins-desc { font-size: 13px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ins-code {
+  padding: 3px 8px; border-radius: 6px; background: #020617;
+  font-family: var(--font-mono); font-size: 12.5px;
+  white-space: pre; overflow: hidden; text-overflow: ellipsis;
+}
+.ins-empty { align-self: center; padding-left: 8px; color: #64748b; font-size: 14px; }
 
 .modal {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -148,7 +226,7 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 .close-icon:hover { color: #e2e8f0; }
 
 .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
-.modal-title  { font-size: 20px; font-weight: 700; margin: 0; padding-right: 30px; }
+.modal-title  { font-family: var(--font-mono); font-size: 20px; font-weight: 700; margin: 0; padding-right: 30px; }
 
 .level-badge {
   font-size: 11px; padding: 3px 10px; border-radius: 999px;
@@ -160,17 +238,17 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 
 .modal-desc { color: #94a3b8; font-size: 14px; margin: 0 0 14px; line-height: 1.65; }
 pre {
-  background: #020617; padding: 14px; border-radius: 8px;
+  background: #020617; padding: 14px; border-radius: 8px; font-family: var(--font-mono);
   overflow: auto; white-space: pre-wrap; word-break: break-word;
   font-size: 13px; line-height: 1.65; margin: 0 0 14px;
 }
 /* Syntax highlighting tokens (see js/highlight.js) */
-#m-code .tok-keyword { color: #38bdf8; }
-#m-code .tok-string  { color: #4ade80; }
-#m-code .tok-api     { color: #c084fc; }
-#m-code .tok-number  { color: #fb923c; }
-#m-code .tok-comment { color: #64748b; font-style: italic; }
-#m-code .tok-fn      { color: #fbbf24; }
+#m-code .tok-keyword, .ins-code .tok-keyword { color: #38bdf8; }
+#m-code .tok-string, .ins-code .tok-string  { color: #4ade80; }
+#m-code .tok-api, .ins-code .tok-api     { color: #c084fc; }
+#m-code .tok-number, .ins-code .tok-number  { color: #fb923c; }
+#m-code .tok-comment, .ins-code .tok-comment { color: #64748b; font-style: italic; }
+#m-code .tok-fn, .ins-code .tok-fn      { color: #fbbf24; }
 .modal-tip {
   background: #0f172a; border-left: 3px solid #38bdf8;
   padding: 10px 14px; border-radius: 0 6px 6px 0;

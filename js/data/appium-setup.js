@@ -2,7 +2,7 @@
 export default {
   cat: 'Appium Setup',
   cls: 'appium-setup',
-  color: '#8b5cf6',
+  color: '#9e92f3',
   items: [
     {
       name: 'selenide-appium dependency (Maven)',

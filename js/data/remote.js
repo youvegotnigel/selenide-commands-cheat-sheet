@@ -2,7 +2,7 @@
 export default {
   cat: 'Remote & Grid',
   cls: 'remote',
-  color: '#0891b2',
+  color: '#8ad1ff',
   items: [
     {
       name: 'Selenium Grid',

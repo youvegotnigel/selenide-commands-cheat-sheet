@@ -2,7 +2,7 @@
 export default {
   cat: 'Collections',
   cls: 'collection',
-  color: '#eab308',
+  color: '#75ecde',
   items: [
     {
       name: 'ElementsCollection (lazy)',

@@ -2,7 +2,7 @@
 export default {
   cat: 'Patterns',
   cls: 'pattern',
-  color: '#fb7185',
+  color: '#f996a9',
   items: [
     {
       name: 'Page ready marker (no sleep)',

@@ -27,23 +27,30 @@ import mobileContext from './mobile-context.js';
 
 /** @type {Category[]} */
 export const categories = [
+  // Setup
   config,
   navigation,
+  remote,
+  cli,
+  // Finding
   selector,
-  action,
-  condition,
   collection,
-  wait,
-  pageObject,
+  // Acting
+  action,
   windowCat,
   file,
-  network,
   javascript,
+  // Debugging
   report,
-  framework,
-  remote,
+  network,
+  // Checking
+  condition,
+  wait,
+  // Structure
+  pageObject,
   pattern,
-  cli,
+  framework,
+  // Mobile
   appiumSetup,
   mobileSelector,
   mobileGesture,

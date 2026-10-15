@@ -2,7 +2,7 @@
 export default {
   cat: 'Mobile Selectors',
   cls: 'mobile-selector',
-  color: '#a855f7',
+  color: '#c79ff4',
   items: [
     {
       name: 'SelenideAppium.$()',

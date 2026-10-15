@@ -40,6 +40,36 @@ export const FIXTURE_CATEGORIES = [
   },
 ];
 
+// Names chosen for the cell rules in the 2026-10-15 spec, section 3: prefixes, a "(" after a
+// space, and key lengths 3, 11, 12, 13, 18, 24, 25 and 27 around the size boundaries (10/11 and 24/25).
+export const CELL_FIXTURE = [
+  {
+    cat: 'Setup & Config',
+    cls: 'config',
+    color: '#72a0f5',
+    items: [
+      item(
+        'Configuration.browserSize',
+        'intermediate',
+        'web',
+        'Configuration.browserSize = "1920x1080";'
+      ),
+      item('SelenideAppium.$()', 'beginner', 'mobile', 'SelenideAppium.$(By.id("x")).tap();'),
+      item('pageLoadTime', 'advanced', 'web', 'Configuration.pageLoadTimeout = 30000;'),
+      item('thirteen_char', 'beginner', 'web', 'open("/thirteen"); // fixture'),
+      item('twenty_four_characters_x', 'beginner', 'web', 'open("/twenty-four"); // fixture'),
+      item('twenty_five_characters_xy', 'beginner', 'web', 'open("/twenty-five"); // fixture'),
+      item('Selenide dependency (Maven)', 'beginner', 'web', '<dependency>fixture</dependency>'),
+    ],
+  },
+  {
+    cat: 'Conditions',
+    cls: 'condition',
+    color: '#fb923c',
+    items: [item('shouldHave(text())', 'beginner', 'both', '$("h1").shouldHave(text("Hi"));')],
+  },
+];
+
 export async function useFixtureData(page, categories = FIXTURE_CATEGORIES) {
   await page.route('**/js/data/index.js', (route) =>
     route.fulfill({

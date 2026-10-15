@@ -2,7 +2,7 @@
 export default {
   cat: 'JavaScript, Storage, Clipboard',
   cls: 'javascript',
-  color: '#f59e0b',
+  color: '#e2f07d',
   items: [
     {
       name: 'executeJavaScript()',

@@ -2,7 +2,7 @@
 export default {
   cat: 'Windows, Frames, Alerts',
   cls: 'window',
-  color: '#10b981',
+  color: '#84d987',
   items: [
     {
       name: 'switchTo().window(index)',

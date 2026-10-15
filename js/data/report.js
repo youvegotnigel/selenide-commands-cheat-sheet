@@ -2,7 +2,7 @@
 export default {
   cat: 'Reports & Debugging',
   cls: 'report',
-  color: '#ef4444',
+  color: '#f4c43a',
   items: [
     {
       name: 'Screenshot on failure',

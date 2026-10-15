@@ -2,7 +2,7 @@
 export default {
   cat: 'Test Frameworks',
   cls: 'framework',
-  color: '#a8a29e',
+  color: '#ffb5cd',
   items: [
     {
       name: 'ScreenShooterExtension',

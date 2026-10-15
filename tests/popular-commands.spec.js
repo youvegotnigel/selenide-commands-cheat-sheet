@@ -94,7 +94,7 @@ test.describe.skip('Popular commands — record opens', () => {
     await page.goto('/');
 
     const tile = page.locator('.tile').first();
-    const name = await tile.locator('.tile-name').innerText();
+    const name = await tile.locator('.tile-name').textContent();
     await tile.click();
     await expect(page.locator('#modal')).toBeVisible();
     await page.waitForTimeout(500);
