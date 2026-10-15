@@ -2,7 +2,7 @@
 export default {
   cat: 'Page Objects',
   cls: 'page-object',
-  color: '#f43f5e',
+  color: '#f0777a',
   items: [
     {
       name: 'Page object (plain $ fields)',

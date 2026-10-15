@@ -449,58 +449,84 @@ test.describe('Search with Selenide symbols (fixture data)', () => {
   });
 });
 
-/* ── TILE GRADIENTS (expected values from the spec, section 6) ──── */
-test.describe('Tile gradients', () => {
-  // [cls, gradient start, gradient end], hand-copied from the spec's palette
+/* ── TILE COLOURS (expected values from the 2026-10-15 spec, section 6) ──── */
+test.describe('Tile colours', () => {
+  // [cls, fill], hand-copied from the spec's colour-family table, in display order
   const PALETTE = [
-    ['config', '#06b6d4', '#0e7490'],
-    ['navigation', '#0ea5e9', '#0369a1'],
-    ['selector', '#3b82f6', '#1d4ed8'],
-    ['action', '#22c55e', '#15803d'],
-    ['condition', '#f97316', '#c2410c'],
-    ['collection', '#eab308', '#a16207'],
-    ['wait', '#64748b', '#334155'],
-    ['page-object', '#f43f5e', '#be123c'],
-    ['window', '#10b981', '#047857'],
-    ['file', '#84cc16', '#4d7c0f'],
-    ['network', '#14b8a6', '#0f766e'],
-    ['javascript', '#f59e0b', '#b45309'],
-    ['report', '#ef4444', '#b91c1c'],
-    ['framework', '#a8a29e', '#57534e'],
-    ['remote', '#0891b2', '#164e63'],
-    ['pattern', '#fb7185', '#e11d48'],
-    ['cli', '#fbbf24', '#d97706'],
-    ['appium-setup', '#8b5cf6', '#1e1b4b'],
-    ['mobile-selector', '#a855f7', '#1e1b4b'],
-    ['mobile-gesture', '#c026d3', '#1e1b4b'],
-    ['mobile-context', '#db2777', '#1e1b4b'],
+    ['config', '#72a0f5'],
+    ['navigation', '#76bafe'],
+    ['remote', '#8ad1ff'],
+    ['cli', '#a3e7ff'],
+    ['selector', '#3bcddc'],
+    ['collection', '#75ecde'],
+    ['action', '#3ec87d'],
+    ['window', '#84d987'],
+    ['file', '#b8e688'],
+    ['javascript', '#e2f07d'],
+    ['report', '#f4c43a'],
+    ['network', '#f4e886'],
+    ['condition', '#f98e52'],
+    ['wait', '#feb671'],
+    ['page-object', '#f0777a'],
+    ['pattern', '#f996a9'],
+    ['framework', '#ffb5cd'],
+    ['appium-setup', '#9e92f3'],
+    ['mobile-selector', '#c79ff4'],
+    ['mobile-gesture', '#e9aff2'],
+    ['mobile-context', '#ffc2e9'],
   ];
   const rgb = (hex) => {
     const n = parseInt(hex.slice(1), 16);
     return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
   };
-
-  test('every category class renders its two-stop gradient', async ({ page }) => {
-    const actual = await page.evaluate(
+  const styleOf = (page) =>
+    page.evaluate(
       (classes) =>
         classes.map((cls) => {
           const el = document.createElement('div');
           el.className = `tile ${cls}`;
           document.body.appendChild(el);
-          const bg = getComputedStyle(el).backgroundImage;
+          const s = getComputedStyle(el);
+          const out = { bg: s.backgroundColor, image: s.backgroundImage, color: s.color };
           el.remove();
-          return bg;
+          return out;
         }),
       PALETTE.map(([cls]) => cls)
     );
-    expect(actual).toEqual(
-      PALETTE.map(([, a, b]) => `linear-gradient(135deg, ${rgb(a)}, ${rgb(b)})`)
+
+  test('every category class renders a flat fill with dark text', async ({ page }) => {
+    expect(await styleOf(page)).toEqual(
+      PALETTE.map(([, fill]) => ({ bg: rgb(fill), image: 'none', color: 'rgb(15, 23, 42)' }))
     );
   });
 
-  test("every data category's color is its gradient start", async ({ page }) => {
+  test("every data category's color is its fill", async ({ page }) => {
     const cats = await page.evaluate(() => window.categories.map((c) => [c.cls, c.color]));
-    const start = Object.fromEntries(PALETTE.map(([cls, a]) => [cls, a]));
-    for (const [cls, color] of cats) expect(color.toLowerCase(), cls).toBe(start[cls]);
+    const fill = Object.fromEntries(PALETTE);
+    for (const [cls, color] of cats) expect(color.toLowerCase(), cls).toBe(fill[cls]);
+  });
+
+  test('categories are in family order', async ({ page }) => {
+    const order = await page.evaluate(() => window.categories.map((c) => c.cls));
+    expect(order).toEqual(PALETTE.map(([cls]) => cls));
+  });
+
+  // Guards future shade changes. WCAG 2.x relative luminance and contrast ratio.
+  test('every fill meets WCAG AA (4.5:1) against the tile text', async ({ page }) => {
+    const lum = (rgbStr) => {
+      const [r, g, b] = rgbStr
+        .match(/\d+/g)
+        .slice(0, 3)
+        .map((v) => {
+          const c = Number(v) / 255;
+          return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+        });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const styles = await styleOf(page);
+    styles.forEach(({ bg, color }, i) => {
+      const [hi, lo] = [lum(bg), lum(color)].sort((a, b) => b - a);
+      expect((hi + 0.05) / (lo + 0.05), PALETTE[i][0]).toBeGreaterThanOrEqual(4.5);
+    });
   });
 });

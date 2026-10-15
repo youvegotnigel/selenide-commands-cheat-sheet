@@ -2,7 +2,7 @@
 export default {
   cat: 'Proxy & Network',
   cls: 'network',
-  color: '#14b8a6',
+  color: '#f4e886',
   items: [
     {
       name: 'Selenide proxy (proxyEnabled)',

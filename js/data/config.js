@@ -2,7 +2,7 @@
 export default {
   cat: 'Setup & Config',
   cls: 'config',
-  color: '#06b6d4',
+  color: '#72a0f5',
   items: [
     {
       name: 'Static imports',

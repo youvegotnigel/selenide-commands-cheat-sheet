@@ -2,7 +2,7 @@
 export default {
   cat: 'Mobile Context & App',
   cls: 'mobile-context',
-  color: '#db2777',
+  color: '#ffc2e9',
   items: [
     {
       name: 'SelenideAppium.getContextHandles()',

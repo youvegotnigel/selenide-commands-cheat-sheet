@@ -2,7 +2,7 @@
 export default {
   cat: 'Build & Run',
   cls: 'cli',
-  color: '#fbbf24',
+  color: '#a3e7ff',
   items: [
     {
       name: 'mvn test (choose browser)',

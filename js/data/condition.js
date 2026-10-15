@@ -2,7 +2,7 @@
 export default {
   cat: 'Conditions',
   cls: 'condition',
-  color: '#f97316',
+  color: '#f98e52',
   items: [
     {
       name: 'shouldHave(text())',

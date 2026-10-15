@@ -2,7 +2,7 @@
 export default {
   cat: 'Selectors',
   cls: 'selector',
-  color: '#3b82f6',
+  color: '#3bcddc',
   items: [
     {
       name: '$(css)',

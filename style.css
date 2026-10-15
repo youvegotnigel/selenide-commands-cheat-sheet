@@ -88,7 +88,7 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 
 .tile {
   border-radius: 12px; padding: 12px 10px; min-height: 80px;
-  text-align: center; cursor: pointer; font-weight: 500; font-size: 15px;
+  text-align: center; cursor: pointer; font-weight: 500; font-size: 15px; color: #0f172a;
   display: flex; align-items: center; justify-content: center;
   transition: transform 0.15s, box-shadow 0.15s;
   word-wrap: break-word; overflow-wrap: break-word;
@@ -96,29 +96,36 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 }
 .tile:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
 
-/* Web categories: same-hue gradients, hues outside violet/magenta */
-.config      { background: linear-gradient(135deg, #06b6d4, #0e7490); }
-.navigation  { background: linear-gradient(135deg, #0ea5e9, #0369a1); }
-.selector    { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-.action      { background: linear-gradient(135deg, #22c55e, #15803d); }
-.condition   { background: linear-gradient(135deg, #f97316, #c2410c); }
-.collection  { background: linear-gradient(135deg, #eab308, #a16207); }
-.wait        { background: linear-gradient(135deg, #64748b, #334155); }
-.page-object { background: linear-gradient(135deg, #f43f5e, #be123c); }
-.window      { background: linear-gradient(135deg, #10b981, #047857); }
-.file        { background: linear-gradient(135deg, #84cc16, #4d7c0f); }
-.network     { background: linear-gradient(135deg, #14b8a6, #0f766e); }
-.javascript  { background: linear-gradient(135deg, #f59e0b, #b45309); }
-.report      { background: linear-gradient(135deg, #ef4444, #b91c1c); }
-.framework   { background: linear-gradient(135deg, #a8a29e, #57534e); }
-.remote      { background: linear-gradient(135deg, #0891b2, #164e63); }
-.pattern     { background: linear-gradient(135deg, #fb7185, #e11d48); }
-.cli         { background: linear-gradient(135deg, #fbbf24, #d97706); }
-/* Mobile (selenide-appium) categories: violet/magenta starts, one shared deep indigo end */
-.appium-setup    { background: linear-gradient(135deg, #8b5cf6, #1e1b4b); }
-.mobile-selector { background: linear-gradient(135deg, #a855f7, #1e1b4b); }
-.mobile-gesture  { background: linear-gradient(135deg, #c026d3, #1e1b4b); }
-.mobile-context  { background: linear-gradient(135deg, #db2777, #1e1b4b); }
+/* Tile fills: one hue per family, one shade per category (spec 2026-10-15, section 6).
+   Every fill passes 4.5:1 against the tile text #0f172a. */
+/* Setup */
+.config       { background: #72a0f5; }
+.navigation   { background: #76bafe; }
+.remote       { background: #8ad1ff; }
+.cli          { background: #a3e7ff; }
+/* Finding */
+.selector     { background: #3bcddc; }
+.collection   { background: #75ecde; }
+/* Acting */
+.action       { background: #3ec87d; }
+.window       { background: #84d987; }
+.file         { background: #b8e688; }
+.javascript   { background: #e2f07d; }
+/* Debugging */
+.report       { background: #f4c43a; }
+.network      { background: #f4e886; }
+/* Checking */
+.condition    { background: #f98e52; }
+.wait         { background: #feb671; }
+/* Structure */
+.page-object  { background: #f0777a; }
+.pattern      { background: #f996a9; }
+.framework    { background: #ffb5cd; }
+/* Mobile (selenide-appium): violet to pink, hue 288 to 340 */
+.appium-setup { background: #9e92f3; }
+.mobile-selector { background: #c79ff4; }
+.mobile-gesture { background: #e9aff2; }
+.mobile-context { background: #ffc2e9; }
 
 .tile-level {
   position: absolute; top: 7px; right: 9px;

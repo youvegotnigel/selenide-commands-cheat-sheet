@@ -2,7 +2,7 @@
 export default {
   cat: 'Files',
   cls: 'file',
-  color: '#84cc16',
+  color: '#b8e688',
   items: [
     {
       name: 'uploadFile()',

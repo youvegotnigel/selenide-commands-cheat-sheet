@@ -2,7 +2,7 @@
 export default {
   cat: 'Navigation & Browser',
   cls: 'navigation',
-  color: '#0ea5e9',
+  color: '#76bafe',
   items: [
     {
       name: 'open()',
