@@ -8,6 +8,7 @@ import navigation from './navigation.js';
 import selector from './selector.js';
 import action from './action.js';
 import condition from './condition.js';
+import collectionCondition from './collection-condition.js';
 import collection from './collection.js';
 import wait from './wait.js';
 import pageObject from './page-object.js';
@@ -45,6 +46,7 @@ export const categories = [
   network,
   // Checking
   condition,
+  collectionCondition,
   wait,
   // Structure
   pageObject,

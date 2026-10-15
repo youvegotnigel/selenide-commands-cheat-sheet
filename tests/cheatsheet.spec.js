@@ -261,8 +261,8 @@ test.describe('Modal', () => {
 /* ── URL DEEP-LINKING ──────────────────────────────────────────── */
 test.describe('URL deep-linking', () => {
   test('applying a category filter updates the URL hash', async ({ page }) => {
-    await page.locator('.filter-btn', { hasText: 'Conditions' }).click();
-    await expect(page).toHaveURL(/filter=Conditions/);
+    await page.locator('.filter-btn', { hasText: 'Element Conditions' }).click();
+    await expect(page).toHaveURL(/filter=Element\+Conditions/);
   });
 
   test('typing in search updates the URL hash', async ({ page }) => {
@@ -271,14 +271,14 @@ test.describe('URL deep-linking', () => {
   });
 
   test('both filter and search are reflected in the URL hash', async ({ page }) => {
-    await page.locator('.filter-btn', { hasText: 'Conditions' }).click();
+    await page.locator('.filter-btn', { hasText: 'Element Conditions' }).click();
     await page.locator('#search-input').fill('text');
-    await expect(page).toHaveURL(/filter=Conditions/);
+    await expect(page).toHaveURL(/filter=Element\+Conditions/);
     await expect(page).toHaveURL(/search=text/);
   });
 
   test('resetting to All removes filter from URL hash', async ({ page }) => {
-    await page.locator('.filter-btn', { hasText: 'Conditions' }).click();
+    await page.locator('.filter-btn', { hasText: 'Element Conditions' }).click();
     await page.locator('.filter-btn', { hasText: 'All' }).click();
     await expect(page).not.toHaveURL(/filter=/);
   });
@@ -292,11 +292,22 @@ test.describe('URL deep-linking', () => {
   test('loading with #filter hash pre-applies the category filter', async ({ page }) => {
     const totalCount = await page.locator('.tile').count();
 
-    await page.goto('/#filter=Conditions');
-    await expect(page.locator('.filter-btn', { hasText: 'Conditions' })).toHaveClass(/active/);
+    await page.goto('/#filter=Element+Conditions');
+    await expect(page.locator('.filter-btn', { hasText: 'Element Conditions' })).toHaveClass(
+      /active/
+    );
     const filteredCount = await page.locator('.tile').count();
     expect(filteredCount).toBeGreaterThan(0);
     expect(filteredCount).toBeLessThan(totalCount);
+  });
+
+  // "Conditions" was renamed to "Element Conditions": an old link must not open an empty grid.
+  test('loading with an unknown #filter falls back to All', async ({ page }) => {
+    const totalCount = await page.locator('.tile').count();
+
+    await page.goto('/#filter=Conditions');
+    await expect(page.locator('.filter-btn', { hasText: 'All' })).toHaveClass(/active/);
+    await expect(page.locator('.tile')).toHaveCount(totalCount);
   });
 
   test('loading with #filter=beginner hash applies the Start Here filter', async ({ page }) => {
@@ -323,8 +334,10 @@ test.describe('URL deep-linking', () => {
   });
 
   test('loading with both #filter and #search applies both simultaneously', async ({ page }) => {
-    await page.goto('/#filter=Conditions&search=text');
-    await expect(page.locator('.filter-btn', { hasText: 'Conditions' })).toHaveClass(/active/);
+    await page.goto('/#filter=Element+Conditions&search=text');
+    await expect(page.locator('.filter-btn', { hasText: 'Element Conditions' })).toHaveClass(
+      /active/
+    );
     const inputValue = await page.locator('#search-input').inputValue();
     expect(inputValue).toBe('text');
     expect(await page.locator('.tile').count()).toBeGreaterThan(0);
@@ -466,6 +479,7 @@ test.describe('Tile colours', () => {
     ['report', '#f4c43a'],
     ['network', '#f4e886'],
     ['condition', '#f98e52'],
+    ['collection-condition', '#fca25f'],
     ['wait', '#feb671'],
     ['page-object', '#f0777a'],
     ['pattern', '#f996a9'],

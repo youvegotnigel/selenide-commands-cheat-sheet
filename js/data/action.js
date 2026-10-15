@@ -100,7 +100,7 @@ $("#notes").shouldHave(value("Call back (updated)"));`,
       tip: 'It returns void, so it ends a chain. Underneath it calls WebElement.clear(), which some React and Vue inputs ignore. Add the selenide-clear-with-shortcut module for those.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#clear()',
       code: `$("#search").clear();
-$("#search").shouldBe(empty);`,
+$("#search").shouldHave(exactValue(""));`,
     },
     {
       name: 'selenide-clear-with-shortcut',

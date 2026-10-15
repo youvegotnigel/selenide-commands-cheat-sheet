@@ -232,13 +232,14 @@ function applyHashState() {
   const filter = params.get('filter');
   const search = params.get('search');
 
-  activeFilter = filter || 'all';
+  const buttons = [...document.querySelectorAll('.filter-btn')];
+
+  // An unknown filter (a renamed category in an old link) falls back to All
+  activeFilter = buttons.some((b) => b.dataset.filter === filter) ? filter : 'all';
   searchVal = search ? search.toLowerCase() : '';
   document.getElementById('search-input').value = search || '';
 
-  document
-    .querySelectorAll('.filter-btn')
-    .forEach((b) => b.classList.toggle('active', b.dataset.filter === activeFilter));
+  buttons.forEach((b) => b.classList.toggle('active', b.dataset.filter === activeFilter));
   render();
 }
 

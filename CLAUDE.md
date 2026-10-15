@@ -46,7 +46,7 @@ content is about Selenide.
 ```
 selenide-commands-cheat-sheet/
 ├── index.html                    # Markup: header, meta-bar, search, filters, grid, modal
-├── style.css                     # Single stylesheet: dark theme, tile cells, 21 family fills, inspector
+├── style.css                     # Single stylesheet: dark theme, tile cells, 22 family fills, inspector
 ├── js/
 │   ├── app.js                    # Render, filter (incl. Mobile), search, modal, meta-bar
 │   ├── highlight.js              # Java / shell / XML highlighters + pickHighlighter()
@@ -60,7 +60,7 @@ selenide-commands-cheat-sheet/
 │   ├── meta.json                 # { "lastUpdated": "YYYY-MM-DD" } — auto-stamped by CI
 │   └── data/
 │       ├── index.js              # Imports all categories; array order = display order
-│       ├── config.js … cli.js    # 17 web categories (see "Categories")
+│       ├── config.js … cli.js    # 18 web categories (see "Categories")
 │       └── appium-setup.js … mobile-context.js   # 4 mobile categories
 ├── tests/
 │   ├── helpers/

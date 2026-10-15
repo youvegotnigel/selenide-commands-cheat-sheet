@@ -134,6 +134,7 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 .network      { background: #f4e886; }
 /* Checking */
 .condition    { background: #f98e52; }
+.collection-condition { background: #fca25f; }
 .wait         { background: #feb671; }
 /* Structure */
 .page-object  { background: #f0777a; }

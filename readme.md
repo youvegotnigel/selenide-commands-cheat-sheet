@@ -22,7 +22,7 @@ Pinned versions: Selenide **7.19.0**, selenide-appium **7.19.0**, Appium java-cl
 - Direct links to the official Selenide docs and Javadoc
 
 ## Categories
-Setup & Config, Navigation & Browser, Selectors, Actions, Conditions, Collections, Waits & Timeouts, Page Objects, Windows/Frames/Alerts, Files, Proxy & Network, JavaScript/Storage/Clipboard, Reports & Debugging, Test Frameworks, Remote & Grid, Patterns, Build & Run, Appium Setup, Mobile Selectors, Mobile Gestures, Mobile Context & App
+Setup & Config, Navigation & Browser, Selectors, Actions, Element Conditions, Collection Conditions, Collections, Waits & Timeouts, Page Objects, Windows/Frames/Alerts, Files, Proxy & Network, JavaScript/Storage/Clipboard, Reports & Debugging, Test Frameworks, Remote & Grid, Patterns, Build & Run, Appium Setup, Mobile Selectors, Mobile Gestures, Mobile Context & App
 
 ## How to Use
 1. Open the [Selenide commands cheat sheet](https://youvegotnigel.github.io/selenide-commands-cheat-sheet/) in your browser
@@ -44,7 +44,7 @@ selenide-commands-cheat-sheet/
 │   ├── versions.json       # pinned Selenide / selenide-appium / java-client versions
 │   └── data/
 │       ├── index.js        # imports each category and exports `categories`
-│       ├── config.js ... cli.js              # 17 web categories
+│       ├── config.js ... cli.js              # 18 web categories
 │       └── appium-setup.js ... mobile-context.js   # 4 mobile categories
 ├── tests/
 │   ├── helpers/

@@ -1,6 +1,6 @@
 /** @type {import('./index.js').Category} */
 export default {
-  cat: 'Conditions',
+  cat: 'Element Conditions',
   cls: 'condition',
   color: '#f98e52',
   items: [
@@ -12,6 +12,20 @@ export default {
       tip: 'text() is a case-insensitive substring match that ignores repeated whitespace. Use exactText() for an exact match. An empty string is rejected.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#text(java.lang.String)',
       code: `$("#greeting").shouldHave(text("Hello"));`,
+    },
+    {
+      name: 'shouldHave(partialText())',
+      level: 'intermediate',
+      platform: 'both',
+      desc: 'Asserts that the element text contains the given substring, ignoring case and repeated whitespace. partialTextCaseSensitive() also compares case.',
+      tip: 'text() follows Configuration.textCheck, so under FULL_TEXT it becomes a whole-text match. partialText() is always a substring match, whatever the setting. Both reject an empty string, and on a select both read the selected option text.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#partialText(java.lang.String)',
+      code: `import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.TextCheck;
+
+Configuration.textCheck = TextCheck.FULL_TEXT; // text() now compares the whole text
+$("h1").shouldHave(partialText("ello Joh"));   // still a substring
+$("h1").shouldHave(partialTextCaseSensitive("Hello"));`,
     },
     {
       name: 'shouldBe(visible)',
@@ -55,6 +69,27 @@ $("#terms").click();
 $("#submit").shouldBe(enabled);`,
     },
     {
+      name: 'shouldBe(interactable)',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'interactable passes when the element is visible or is transparent, which a user can still click or type into. clickable (since 7.2.0) is interactable and enabled.',
+      tip: 'A transparent element, with opacity: 0, fails shouldBe(visible) but passes interactable. A styled file input hidden behind a button is the usual case. click() already waits for clickable, so assert it only when nothing else is done with the element.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#interactable',
+      code: `$("input[type=file]").shouldBe(interactable); // opacity: 0, so not visible
+$("#buy").shouldBe(clickable);`,
+    },
+    {
+      name: 'shouldBe(editable)',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'editable passes when the element is interactable, enabled and has no readonly attribute. readonly checks for the readonly attribute alone, with any value.',
+      tip: 'Use it when a form unlocks after an action, such as an Edit button. readonly looks at the HTML attribute only, not at aria-readonly or disabled, so a disabled field is not readonly.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#editable',
+      code: `$("#email").shouldBe(readonly);
+$("#edit-profile").click();
+$("#email").shouldBe(editable);`,
+    },
+    {
       name: 'shouldHave(exactText())',
       level: 'beginner',
       platform: 'both',
@@ -88,6 +123,43 @@ $(".title").shouldNotHave(visibleText("Headphones"));       // clipped away
 $("#badge").shouldHave(exactVisibleText("Paid"));`,
     },
     {
+      name: 'shouldHave(ownText())',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Checks only the text nodes of the element itself, leaving out the text of its child elements. ownText() is a substring match and exactOwnText() compares the whole own text; each has a CaseSensitive form.',
+      tip: 'Useful for a list item that also holds a counter badge, where text() would include the count. The own text is read with JavaScript, so this is browser only. ownText() rejects an empty string: use exactOwnText("") instead.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#ownText(java.lang.String)',
+      code: `// <li id="inbox">Inbox <span class="badge">3</span></li>
+$("#inbox").shouldHave(exactText("Inbox 3"));
+$("#inbox").shouldHave(exactOwnText("Inbox"));
+$("#inbox").shouldHave(ownText("inbox"));
+$("#inbox").shouldHave(ownTextCaseSensitive("Inbox"));
+$("#inbox").shouldHave(exactOwnTextCaseSensitive("Inbox"));`,
+    },
+    {
+      name: 'shouldHave(innerText())',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'Checks the text of an element that is hidden, where text() reads nothing because Selenium returns only displayed text.',
+      tip: 'Despite the name, Selenide reads the textContent attribute (innerText only on Internet Explorer), so text inside display: none children counts too. Case-insensitive, and it follows Configuration.textCheck like text().',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#innerText(java.lang.String)',
+      code: `// <div id="tooltip" style="display: none">Saved 3 minutes ago</div>
+$("#tooltip").shouldNotBe(visible);
+$("#tooltip").shouldHave(innerText("Saved"));`,
+    },
+    {
+      name: 'shouldHave(oneOfTexts())',
+      level: 'intermediate',
+      platform: 'both',
+      desc: 'Passes when the element text matches any one of the given texts. oneOfTexts() is a case-insensitive substring match and oneOfExactTexts() compares the whole text; each has a CaseSensitive form. Added in Selenide 7.0.3.',
+      tip: 'These ignore Configuration.textCheck: the name fixes substring or whole text. An empty list throws IllegalArgumentException, and oneOfTexts() also rejects blank strings. A test that accepts two outcomes is often a sign that it should control its data better.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#oneOfTexts(java.lang.String...)',
+      code: `$("#status").shouldHave(oneOfTexts("Saved", "Up to date"));
+$("#status").shouldHave(oneOfExactTexts("Saved", "Up to date"));
+$("#status").shouldHave(oneOfTextsCaseSensitive("OK", "DONE"));
+$("#status").shouldHave(oneOfExactTextsCaseSensitive("OK", "DONE"));`,
+    },
+    {
       name: 'shouldHave(matchText())',
       level: 'intermediate',
       platform: 'both',
@@ -108,6 +180,27 @@ $("#email").shouldHave(value("example.com"));
 $("#email").shouldHave(exactValue("ada@example.com"));`,
     },
     {
+      name: 'shouldHave(partialValue())',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Asserts that the value of an input contains the given substring, ignoring case and repeated whitespace.',
+      tip: 'value() follows Configuration.textCheck and becomes a whole-value match under FULL_TEXT. partialValue() is always a substring. An empty string throws: use shouldBe(empty) or exactValue("") for a cleared field.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#partialValue(java.lang.String)',
+      code: `$("#iban").setValue("GB33 BUKB 2020 1555 5555 55");
+$("#iban").shouldHave(partialValue("gb33"));`,
+    },
+    {
+      name: 'shouldHave(selectedText())',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'Checks the part of a text input or textarea that is currently selected (highlighted), for example after a double-click.',
+      tip: 'It reads value.substring(selectionStart, selectionEnd) with JavaScript, so it works on input and textarea, not on a select: use text() on the select for the chosen option. Case-sensitive, and a substring match under the default Configuration.textCheck.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#selectedText(java.lang.String)',
+      code: `$("#title").setValue("Draft");
+$("#title").doubleClick();
+$("#title").shouldHave(selectedText("Draft"));`,
+    },
+    {
       name: 'shouldHave(attribute())',
       level: 'beginner',
       platform: 'both',
@@ -117,6 +210,41 @@ $("#email").shouldHave(exactValue("ada@example.com"));`,
       code: `$("#save").shouldHave(attribute("data-loading"));
 $("#save").shouldHave(attribute("aria-pressed", "true"));
 $("#ticket").shouldHave(attributeMatching("data-id", "T-\\\\d+"));`,
+    },
+    {
+      name: 'shouldHave(href())',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Checks the href of a link. Unlike attribute("href", ...), it accepts the relative URL written in the HTML.',
+      tip: 'Selenium returns href as an absolute URL, so attribute("href", "/docs") fails. href() passes when the decoded URL ends with the expected value, with or without a trailing slash, so "/pricing" also matches "/en/pricing".',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#href(java.lang.String)',
+      code: `// <a id="docs" href="/docs/quick-start">Docs</a>
+$("#docs").shouldHave(href("/docs/quick-start"));`,
+    },
+    {
+      name: 'id(), name(), type() and tagName()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Shortcuts for common checks: id(), name() and type() are attribute("id", ...), attribute("name", ...) and attribute("type", ...). tagName() checks the element tag.',
+      tip: 'All four compare exactly, case included, and tagName() expects the tag as the browser reports it, which is lower case for HTML. Selenium also has By.id() and By.name(), but those are locators, not conditions.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#id(java.lang.String)',
+      code: `$("form input").shouldHave(name("email"));
+$("form input").shouldHave(type("email"));
+$("label[for=email] + input").shouldHave(id("email"));
+$(".btn-primary").shouldHave(tagName("button"));`,
+    },
+    {
+      name: 'shouldHave(domAttribute())',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'domAttribute() reads an attribute as written in the HTML, and domProperty() the live JavaScript property. With one argument each checks presence, with two the value. Added in Selenide 7.4.0.',
+      tip: 'attribute() uses WebElement.getAttribute(), which mixes the two. The difference shows on an input the user typed into: the value attribute still holds the initial HTML value, the value property the current one. Both compare exactly.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#domAttribute(java.lang.String,java.lang.String)',
+      code: `// <input id="qty" value="1">
+$("#qty").setValue("5");
+$("#qty").shouldHave(domAttribute("value", "1"));
+$("#qty").shouldHave(domProperty("value", "5"));
+$("#menu").shouldHave(domAttribute("hidden"));`,
     },
     {
       name: 'shouldHave(cssClass())',
@@ -139,15 +267,27 @@ $("#tab-profile").shouldNotHave(cssClass("active"));`,
 $("#sidebar").shouldHave(cssValue("display", "none"));`,
     },
     {
+      name: 'shouldHave(pseudo())',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'Checks a computed CSS property of a pseudo-element such as ::before or ::after. With two arguments it checks the content property.',
+      tip: 'Use it for required-field asterisks and CSS-only icons, which text() cannot see. The value is compared ignoring case, and content comes back with its quotes, so the expected Java string holds escaped quotes.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#pseudo(java.lang.String,java.lang.String,java.lang.String)',
+      code: `$("label.required").shouldHave(pseudo("::after", "color", "rgb(220, 38, 38)"));
+$("label.required").shouldHave(pseudo("::after", "\\"*\\""));`,
+    },
+    {
       name: 'shouldBe(empty)',
       level: 'intermediate',
       platform: 'web',
       desc: 'Passes when an input has no value, or when another element has no text.',
-      tip: 'text("") and value("") throw IllegalArgumentException under the default partial text check, because every string contains "". shouldBe(empty) is the way to assert a cleared field.',
+      tip: 'text("") and value("") throw IllegalArgumentException under the default partial text check, because every string contains "". shouldBe(empty) is the way to assert a cleared field. CollectionCondition has an empty too, so with both imported statically write Condition.empty.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#empty',
-      code: `$("#search").clear();
-$("#search").shouldBe(empty);
-$("#cart-items").shouldBe(empty);`,
+      code: `import com.codeborne.selenide.Condition;
+
+$("#search").clear();
+$("#search").shouldBe(Condition.empty);
+$("#cart-items").shouldBe(Condition.empty);`,
     },
     {
       name: 'shouldBe(checked)',
@@ -160,6 +300,39 @@ $("#cart-items").shouldBe(empty);`,
 $("#remember-me").shouldBe(checked);
 $("#newsletter").shouldNotBe(checked);
 $("#country option[value=NZ]").shouldBe(selected);`,
+    },
+    {
+      name: 'shouldBe(focused)',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Asserts that the element has keyboard focus, by comparing it with document.activeElement.',
+      tip: 'Use it to test autofocus, focus traps in dialogs and Tab order. On failure the message names the element that does have focus, which makes a wrong Tab order easy to spot.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#focused',
+      code: `open("/login");
+$("#username").shouldBe(focused); // autofocus
+$("#username").pressTab();
+$("#password").shouldBe(focused);`,
+    },
+    {
+      name: 'shouldBe(image)',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Asserts that an img element has finished loading with a non-zero natural width, so a broken image fails.',
+      tip: 'Only img elements can pass: a CSS background image or an inline svg always fails. An image with loading="lazy" is not fetched until it nears the viewport, so scroll to it first.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#image',
+      code: `$("img.avatar").shouldBe(image);
+$$("#gallery img").filterBy(not(image)).shouldHave(size(0)); // no broken images`,
+    },
+    {
+      name: 'shouldNotBe(animated)',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'animated passes while the element moves or changes size between two animation frames. shouldNotBe(animated) waits until a slide-in or expand animation has finished. Added in Selenide 7.0.7.',
+      tip: 'It compares getBoundingClientRect() across two requestAnimationFrame callbacks, so colour and opacity transitions do not count. In a background tab it throws IllegalStateException, because browsers pause animation frames there.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#animated',
+      code: `$("#drawer-toggle").click();
+$("#drawer").shouldNotBe(animated);
+$("#drawer a.settings").click();`,
     },
     {
       name: 'shouldNotHave(text())',
@@ -194,7 +367,8 @@ $("#email").shouldBe(validInput);`,
       code: `import com.codeborne.selenide.WebElementCondition;
 
 WebElementCondition readyToSubmit = and("ready to submit", visible, enabled, cssClass("primary"));
-$("#submit").shouldBe(readyToSubmit);`,
+$("#submit").shouldBe(readyToSubmit);
+$("#submit").shouldBe(allOf(visible, enabled)); // synonym, the name is optional`,
     },
     {
       name: 'or()',
@@ -204,9 +378,29 @@ $("#submit").shouldBe(readyToSubmit);`,
       tip: 'The Selenide Javadoc calls an "or" check probably a flag of bad test design: a test should know which state to expect. Consider splitting it into two tests.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#or(java.lang.String,com.codeborne.selenide.WebElementCondition,com.codeborne.selenide.WebElementCondition,com.codeborne.selenide.WebElementCondition...)',
       code: `$("#result").shouldHave(or("saved or unchanged", text("Saved"), text("No changes")));
+$("#result").shouldHave(anyOf(text("Saved"), text("No changes"))); // synonym, no name
 
 // instance form
 $("#result").shouldHave(text("Saved").or(text("No changes")));`,
+    },
+    {
+      name: 'be() and have()',
+      level: 'intermediate',
+      platform: 'both',
+      desc: 'be() and have() wrap a condition so that a should() with several conditions reads like a sentence. They change only the wording of the error message, not the check.',
+      tip: 'shouldBe() and shouldHave() already add the word, so wrapping only helps with plain should(). appear is literally be(visible), and disappear is be(hidden).',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#be(com.codeborne.selenide.WebElementCondition)',
+      code: `$("#greeting").should(be(visible), have(text("Hello")));`,
+    },
+    {
+      name: 'because()',
+      level: 'intermediate',
+      platform: 'both',
+      desc: 'because("reason") attaches an explanation to a condition, shown in the error message when the check fails: in brackets after an element condition, on a Because: line for a collection condition.',
+      tip: 'On an element condition because() returns a new condition. On a collection condition it stores the reason on the same object and returns it, so CollectionCondition.empty.because(...) changes the shared empty for every later check. Call it on a fresh one, such as size(0).',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/WebElementCondition.html#because(java.lang.String)',
+      code: `$("#pay").shouldBe(enabled.because("the cart has items"));
+$$(".error").shouldHave(size(0).because("the form was filled in correctly"));`,
     },
     {
       name: 'should(match())',
