@@ -98,3 +98,35 @@ test.describe('Keyboard', () => {
     await expect(tile(page, 'alpha()')).toHaveAttribute('tabindex', '0');
   });
 });
+
+/* ── Category highlight (spec section 7) ───────────────────────── */
+test.describe('Category highlight', () => {
+  test('hovering a category pill dims the other categories', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'hover is desktop only');
+    await page.locator('.filter-btn', { hasText: 'Conditions' }).hover();
+    await expect(page.locator('.tile.dimmed')).toHaveCount(4);
+    await expect(tile(page, 'gamma()')).not.toHaveClass(/dimmed/);
+    await page.locator('header').hover();
+    await expect(page.locator('.tile.dimmed')).toHaveCount(0);
+  });
+
+  test('hover neither filters nor changes the URL', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'hover is desktop only');
+    await page.locator('.filter-btn', { hasText: 'Conditions' }).hover();
+    await expect(page.locator('.tile')).toHaveCount(5);
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test('hovering a quick filter dims nothing', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'hover is desktop only');
+    await page.locator('.filter-btn', { hasText: 'Start Here' }).hover();
+    await expect(page.locator('.tile.dimmed')).toHaveCount(0);
+  });
+
+  // A tap fires mouseenter before click; on touch devices it must never dim.
+  test('mouseenter on a phone dims nothing', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'touch devices only');
+    await page.locator('.filter-btn', { hasText: 'Conditions' }).dispatchEvent('mouseenter');
+    await expect(page.locator('.tile.dimmed')).toHaveCount(0);
+  });
+});

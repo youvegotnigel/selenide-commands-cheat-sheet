@@ -258,6 +258,17 @@ function setView(v) {
   render();
 }
 
+// Hovering a category pill dims the other categories in place (desktop only: on touch
+// devices a tap fires mouseenter too, and must not leave tiles dimmed)
+const desktopHover = window.matchMedia('(hover: hover) and (min-width: 900px)');
+
+function highlightCategory(cls) {
+  const on = cls !== null && desktopHover.matches;
+  document
+    .querySelectorAll('#grid .tile')
+    .forEach((t) => t.classList.toggle('dimmed', on && t.dataset.cls !== cls));
+}
+
 function buildFilters() {
   const container = document.getElementById('filters');
   const defs = [
@@ -265,13 +276,17 @@ function buildFilters() {
     { label: '⭐ Start Here', filter: 'beginner', color: null },
     ...(popularCmds.ENABLED ? [{ label: '🔥 Popular', filter: 'popular', color: null }] : []),
     { label: '📱 Mobile', filter: 'mobile', color: null },
-    ...categories.map((c) => ({ label: c.cat, filter: c.cat, color: c.color })),
+    ...categories.map((c) => ({ label: c.cat, filter: c.cat, color: c.color, cls: c.cls })),
   ];
-  defs.forEach(({ label, filter, color }) => {
+  defs.forEach(({ label, filter, color, cls }) => {
     const btn = document.createElement('button');
     btn.className = 'filter-btn' + (filter === 'all' ? ' active' : '');
     btn.dataset.filter = filter;
     btn.addEventListener('click', () => setFilter(filter));
+    if (cls) {
+      btn.addEventListener('mouseenter', () => highlightCategory(cls));
+      btn.addEventListener('mouseleave', () => highlightCategory(null));
+    }
     btn.innerHTML = color
       ? `<span class="filter-dot" style="background:${color}"></span>${label}`
       : label;
