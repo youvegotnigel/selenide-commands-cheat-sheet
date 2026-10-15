@@ -48,3 +48,55 @@ export function keySize(key) {
   if (key.length <= 24) return 'm';
   return 'l';
 }
+
+export const LEVEL_LABELS = {
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+};
+const LEVEL_DOTS = { beginner: '●', intermediate: '●●', advanced: '●●●' };
+
+function span(cls, text) {
+  const el = document.createElement('span');
+  el.className = cls;
+  if (text !== undefined) el.textContent = text;
+  return el;
+}
+
+/**
+ * Builds the periodic-table cell for one item. The caller attaches listeners.
+ * @param {{ name: string, level: string, cat: string, cls: string, num: number }} item
+ * @param {{ popular?: boolean }} [opts]
+ */
+export function buildTile(item, { popular = false } = {}) {
+  const tile = document.createElement('button');
+  tile.type = 'button';
+  tile.className = `tile ${item.cls}`;
+  tile.dataset.cls = item.cls;
+  tile.setAttribute('aria-label', `${item.name}, ${item.cat}, ${LEVEL_LABELS[item.level]}`);
+
+  tile.appendChild(span('tile-num', String(item.num)));
+  if (popular) {
+    const fire = span('tile-popular', '🔥');
+    fire.title = 'Popular';
+    tile.appendChild(fire);
+  }
+  const level = span('tile-level', LEVEL_DOTS[item.level]);
+  level.setAttribute('aria-hidden', 'true');
+  tile.appendChild(level);
+
+  const { prefix, key } = splitName(item.name);
+  const name = span('tile-name');
+  if (prefix) {
+    const prefixEl = span('tile-prefix');
+    appendWithBreaks(prefixEl, prefix);
+    name.appendChild(prefixEl);
+  }
+  const keyEl = span(`tile-key tile-key--${keySize(key)}`);
+  appendWithBreaks(keyEl, key);
+  name.appendChild(keyEl);
+  tile.appendChild(name);
+
+  tile.appendChild(span('tile-cat', item.cat));
+  return tile;
+}

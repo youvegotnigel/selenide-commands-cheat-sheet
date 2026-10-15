@@ -11,7 +11,7 @@ import {
   highlightFor,
 } from './highlight.js';
 import * as popularCmds from './popular-commands.js';
-import { splitName } from './tile.js';
+import { splitName, buildTile } from './tile.js';
 
 // Expose as a global so data-integrity tests can access it via page.evaluate()
 window.categories = categories;
@@ -31,11 +31,18 @@ let activeFilter = 'all';
 let activeView = 'flat';
 let searchVal = '';
 
-// Flatten all items into a single array, tagging each with its category info
+// Flatten all items into a single array, tagging each with its category info and its
+// "atomic number": the 1-based position in the full dataset, stable across filters
 const allItems = [];
 categories.forEach((sec) =>
   sec.items.forEach((item) =>
-    allItems.push({ ...item, cls: sec.cls, cat: sec.cat, color: sec.color })
+    allItems.push({
+      ...item,
+      cls: sec.cls,
+      cat: sec.cat,
+      color: sec.color,
+      num: allItems.length + 1,
+    })
   )
 );
 
@@ -98,7 +105,7 @@ function render() {
 function renderFlat(items, container) {
   const grid = document.createElement('div');
   grid.className = 'grid';
-  items.forEach((item, i) => grid.appendChild(makeTile(item, i + 1)));
+  items.forEach((item) => grid.appendChild(makeTile(item)));
   container.appendChild(grid);
 }
 
@@ -125,7 +132,7 @@ function renderGrouped(items, container) {
 
     const grid = document.createElement('div');
     grid.className = 'grid';
-    groups[sec.cat].forEach((item, i) => grid.appendChild(makeTile(item, i + 1)));
+    groups[sec.cat].forEach((item) => grid.appendChild(makeTile(item)));
     section.appendChild(grid);
 
     container.appendChild(section);
@@ -133,28 +140,10 @@ function renderGrouped(items, container) {
 }
 
 /* ── TILE ─────────────────────────────────────────────────────── */
-function levelDots(level) {
-  if (level === 'beginner') return '<span style="color:#4ade80">●</span>';
-  if (level === 'intermediate') return '<span style="color:#fb923c">●●</span>';
-  if (level === 'advanced') return '<span style="color:#c084fc">●●●</span>';
-  return '';
-}
-
-function makeTile(item, n) {
-  const div = document.createElement('div');
-  div.className = `tile ${item.cls}`;
-  const popularBadge = popularCmds.isPopular(popularCmds.commandId(item))
-    ? '<span class="tile-popular" title="Popular">🔥</span>'
-    : '';
-  div.innerHTML = `
-    <span class="tile-level">${levelDots(item.level)}</span>
-    ${popularBadge}
-    <div class="tile-inner">
-      <span class="tile-num">#${n}</span>
-      <span class="tile-name">${item.name}</span>
-    </div>`;
-  div.addEventListener('click', () => openModal(item));
-  return div;
+function makeTile(item) {
+  const tile = buildTile(item, { popular: popularCmds.isPopular(popularCmds.commandId(item)) });
+  tile.addEventListener('click', () => openModal(item));
+  return tile;
 }
 
 /* ── MODAL ────────────────────────────────────────────────────── */

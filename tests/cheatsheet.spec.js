@@ -175,7 +175,7 @@ test.describe('View toggle', () => {
 test.describe('Modal', () => {
   test('opens when a tile is clicked and shows title/code', async ({ page }) => {
     const firstTile = page.locator('.tile').first();
-    const tileName = await firstTile.locator('.tile-name').innerText();
+    const tileName = await firstTile.locator('.tile-name').textContent();
 
     await firstTile.click();
 
@@ -238,8 +238,8 @@ test.describe('Modal', () => {
 
   test('opening a different tile shows its content', async ({ page }) => {
     const tiles = page.locator('.tile');
-    const firstName = await tiles.nth(0).locator('.tile-name').innerText();
-    const secondName = await tiles.nth(1).locator('.tile-name').innerText();
+    const firstName = await tiles.nth(0).locator('.tile-name').textContent();
+    const secondName = await tiles.nth(1).locator('.tile-name').textContent();
 
     await tiles.nth(0).click();
     await expect(page.locator('#m-title')).toContainText(firstName);

@@ -1,5 +1,10 @@
+:root {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
 * { box-sizing: border-box; }
-body { font-family: Arial, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+body { font-family: var(--font-sans); margin: 0; background: #0f172a; color: #e2e8f0; }
 header { padding: 16px; text-align: center; font-size: 36px; font-weight: bold; background: #020617; color: #2ead33; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
 /* The official logo has a black wordmark, so it sits on a light backing to stay readable */
 .header-logo { height: 44px; width: auto; flex-shrink: 0; background: #f8fafc; border-radius: 8px; padding: 3px 6px; }
@@ -10,7 +15,7 @@ header { padding: 16px; text-align: center; font-size: 36px; font-weight: bold; 
 .meta-badge {
   display: inline-flex; align-items: stretch;
   border-radius: 6px; overflow: hidden;
-  font-size: 12px; font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px; font-family: var(--font-mono);
   box-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 .meta-badge .k {
@@ -54,7 +59,7 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 .search-shortcut {
   position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
   background: #0f172a; border: 1px solid #334155; color: #475569;
-  padding: 2px 6px; border-radius: 4px; font-size: 11px; font-family: monospace;
+  padding: 2px 6px; border-radius: 4px; font-size: 11px; font-family: var(--font-mono);
   pointer-events: none; user-select: none;
 }
 
@@ -77,7 +82,11 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 }
 .view-btn.active { background: #1e293b; color: #e2e8f0; border-color: #475569; }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+/* Square cells, at least 2 columns at 320px (spec 2026-10-15, section 4) */
+.grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, calc(50% - 6px)), 1fr));
+}
 .group-section { margin-bottom: 28px; }
 .group-header {
   font-size: 12px; font-weight: 700; text-transform: uppercase;
@@ -86,15 +95,23 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 }
 .group-count { font-weight: 600; opacity: 0.7; }
 
+/* Periodic-table cell (spec 2026-10-15, section 3) */
 .tile {
-  border-radius: 12px; padding: 12px 10px; min-height: 80px;
-  text-align: center; cursor: pointer; font-weight: 500; font-size: 15px; color: #0f172a;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.15s, box-shadow 0.15s;
-  word-wrap: break-word; overflow-wrap: break-word;
-  white-space: normal; position: relative;
+  position: relative; aspect-ratio: 1; max-width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px; border: 0; border-radius: 12px; cursor: pointer;
+  color: #0f172a; font-family: var(--font-sans); text-align: center;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
-.tile:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+.tile:hover {
+  transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  outline: 2px solid rgba(255,255,255,0.85);
+}
+.tile:focus-visible { outline: 3px solid #f8fafc; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .tile { transition: none; }
+  .tile:hover { transform: none; }
+}
 
 /* Tile fills: one hue per family, one shade per category (spec 2026-10-15, section 6).
    Every fill passes 4.5:1 against the tile text #0f172a. */
@@ -127,17 +144,29 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 .mobile-gesture { background: #e9aff2; }
 .mobile-context { background: #ffc2e9; }
 
+.tile-num {
+  position: absolute; top: 8px; left: 9px; line-height: 1;
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.tile-popular { position: absolute; top: 6px; left: 34px; font-size: 11px; line-height: 1; }
 .tile-level {
-  position: absolute; top: 7px; right: 9px;
-  font-size: 8px; letter-spacing: 1px; line-height: 1;
+  position: absolute; top: 7px; right: 9px; line-height: 1;
+  font-size: 10px; letter-spacing: 2px;
 }
-.tile-popular {
-  position: absolute; top: 6px; left: 8px;
-  font-size: 11px; line-height: 1;
+.tile-name {
+  width: 100%; min-width: 0; margin-block: 14px; padding-inline: 2px;
+  font-family: var(--font-mono); overflow-wrap: break-word;
 }
-.tile-inner { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 100%; }
-.tile-num   { font-size: 11px; opacity: 0.65; }
-.tile-name  { font-size: 15px; overflow-wrap: anywhere; width: 100%; text-align: center; }
+.tile-prefix { display: block; margin-bottom: 2px; font-size: 11px; opacity: 0.7; }
+.tile-key    { display: block; font-weight: 600; line-height: 1.25; }
+.tile-key--s { font-size: 18px; }
+.tile-key--m { font-size: 15px; }
+.tile-key--l { font-size: 13px; }
+.tile-cat {
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 .modal {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -155,7 +184,7 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 .close-icon:hover { color: #e2e8f0; }
 
 .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
-.modal-title  { font-size: 20px; font-weight: 700; margin: 0; padding-right: 30px; }
+.modal-title  { font-family: var(--font-mono); font-size: 20px; font-weight: 700; margin: 0; padding-right: 30px; }
 
 .level-badge {
   font-size: 11px; padding: 3px 10px; border-radius: 999px;
@@ -167,7 +196,7 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 
 .modal-desc { color: #94a3b8; font-size: 14px; margin: 0 0 14px; line-height: 1.65; }
 pre {
-  background: #020617; padding: 14px; border-radius: 8px;
+  background: #020617; padding: 14px; border-radius: 8px; font-family: var(--font-mono);
   overflow: auto; white-space: pre-wrap; word-break: break-word;
   font-size: 13px; line-height: 1.65; margin: 0 0 14px;
 }
