@@ -68,14 +68,33 @@ test.describe('appendWithBreaks', () => {
 
 /* ── keySize (spec section 3, "Symbol size") ───────────────────── */
 test.describe('keySize', () => {
-  test('1-12 chars is s, 13-24 is m, 25+ is l', async ({ page }) => {
+  // [key, expected]. Size is the larger of two classes:
+  //   by total length: 1-10 s, 11-24 m, 25+ l
+  //   by longest unbreakable run (split at spaces, hyphens, after "." "," and call "(",
+  //   and before a capital after a lowercase letter): 1-10 s, 11 m, 12+ l
+  const CASES = [
+    ['x', 's'],
+    ['xxxxxxxxxx', 's'], // 10 chars, one run
+    ['xxxxxxxxxxx', 'm'], // 11 chars, one run of 11
+    ['xxxxxxxxxxxx', 'l'], // one unbreakable run of 12
+    ['browserSize', 'm'], // 11 chars, runs "browser" and "Size": length decides
+    ['shouldHave(text())', 'm'], // 18 chars, short runs
+    ['sleep(milliseconds)', 'l'], // 19 chars but the run "milliseconds)" is 13
+    ['selenide-clear-with-shortcut', 'l'], // 28 chars: length decides
+    ['x'.repeat(24), 'l'], // run of 24
+    ['click(Click Options)', 'm'], // 20 chars, short runs
+  ];
+
+  test('size follows total length and the longest unbreakable run', async ({ page }) => {
     await page.goto('/');
-    const lengths = [1, 3, 12, 13, 24, 25, 51];
-    const actual = await page.evaluate(async (lens) => {
-      const { keySize } = await import('/js/tile.js');
-      return lens.map((n) => keySize('x'.repeat(n)));
-    }, lengths);
-    expect(actual).toEqual(['s', 's', 's', 'm', 'm', 'l', 'l']);
+    const actual = await page.evaluate(
+      async (keys) => {
+        const { keySize } = await import('/js/tile.js');
+        return keys.map(keySize);
+      },
+      CASES.map(([k]) => k)
+    );
+    expect(actual).toEqual(CASES.map(([, size]) => size));
   });
 });
 
@@ -121,10 +140,10 @@ test.describe('Tile cells', () => {
     const sizes = await page
       .locator('.tile-key')
       .evaluateAll((els) => els.map((e) => e.className.match(/tile-key--(\w)/)[1]));
-    // keys: browserSize 11, $() 3, pageLoadTime 12, thirteen_char 13,
-    // twenty_four_characters_x 24, twenty_five_characters_xy 25,
-    // Selenide dependency (Maven) 27, shouldHave(text()) 18
-    expect(sizes).toEqual(['s', 's', 's', 'm', 'm', 'l', 'l', 'm']);
+    // keys: browserSize 11 (m), $() 3 (s), pageLoadTime 12 (m, short runs), thirteen_char (l,
+    // one run of 13), twenty_four_characters_x (l, run 24), twenty_five_characters_xy (l),
+    // Selenide dependency (Maven) 27 (l), shouldHave(text()) 18 (m)
+    expect(sizes).toEqual(['m', 's', 'm', 'l', 'l', 'l', 'l', 'm']);
   });
 
   test('level shows as dots and in the accessible name', async ({ page }) => {
@@ -236,5 +255,31 @@ test.describe('Grid layout', () => {
     await page.goto('/');
     expect(await columns(page)).toBe(2);
     await noSidewaysScroll(page);
+  });
+});
+
+/* ── No mid-word breaks at the narrowest width (spec section 1, real data) ── */
+test.describe('No mid-word breaks', () => {
+  test('every real command fits its cell without breaking inside a word at 320px with a scrollbar', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'desktop viewport sizes');
+    // 305px = a 320px screen minus a classic 15px scrollbar (Windows, macOS "always show")
+    await page.setViewportSize({ width: 305, height: 800 });
+    await page.goto('/');
+    // With overflow-wrap: normal a word that is too wide overflows instead of breaking,
+    // so scrollWidth > clientWidth names exactly the tiles that need a mid-word break.
+    const tooWide = await page.locator('.tile-name').evaluateAll((els) =>
+      els
+        .filter((el) => {
+          el.style.overflowWrap = 'normal';
+          const overflows = el.scrollWidth > el.clientWidth;
+          el.style.overflowWrap = '';
+          return overflows;
+        })
+        .map((el) => el.textContent)
+    );
+    expect(tooWide).toEqual([]);
   });
 });

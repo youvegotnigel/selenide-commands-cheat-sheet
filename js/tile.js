@@ -42,11 +42,22 @@ export function appendWithBreaks(parent, text) {
   flush();
 }
 
-/** Size class for the key: 's' (1-12 chars), 'm' (13-24), 'l' (25+). */
+// Where the key can wrap: spaces, hyphens, after "." and ",", after a call "(" and before a
+// capital that follows a lowercase letter (the same points appendWithBreaks marks with <wbr>)
+const BREAK_RE = /[ -]|(?<=[.,])|(?<=[\w$]\()|(?<=[a-z])(?=[A-Z])/;
+
+const SIZES = ['s', 'm', 'l'];
+
+/**
+ * Size class for the key: the larger of the class by total length (1-10 s, 11-24 m, 25+ l)
+ * and the class by longest unbreakable run (1-10 s, 11 m, 12+ l). A long unbreakable word
+ * must shrink, or it would break mid-word in a narrow cell.
+ */
 export function keySize(key) {
-  if (key.length <= 12) return 's';
-  if (key.length <= 24) return 'm';
-  return 'l';
+  const byLength = key.length <= 10 ? 0 : key.length <= 24 ? 1 : 2;
+  const run = Math.max(...key.split(BREAK_RE).map((part) => part.length));
+  const byRun = run <= 10 ? 0 : run <= 11 ? 1 : 2;
+  return SIZES[Math.max(byLength, byRun)];
 }
 
 export const LEVEL_LABELS = {

@@ -84,6 +84,24 @@ test.describe('Keyboard', () => {
     }
   });
 
+  test('browser shortcuts with a modifier key are not swallowed', async ({ page }) => {
+    await tile(page, 'alpha()').focus();
+    const result = await page.evaluate(() => {
+      const el = document.activeElement;
+      return ['altKey', 'metaKey', 'ctrlKey'].map((mod) => {
+        const ev = new KeyboardEvent('keydown', {
+          key: 'ArrowLeft',
+          [mod]: true,
+          bubbles: true,
+          cancelable: true,
+        });
+        el.dispatchEvent(ev);
+        return ev.defaultPrevented;
+      });
+    });
+    expect(result).toEqual([false, false, false]);
+  });
+
   test('Escape with no modal open leaves focus where it is', async ({ page }) => {
     await tile(page, 'delta()').focus();
     await page.keyboard.press('Escape');
@@ -158,6 +176,9 @@ test.describe('Inspector', () => {
   test('a re-render resets the placeholder', async ({ page, isMobile }) => {
     test.skip(isMobile, 'desktop only');
     await tile(page, 'alpha()').hover();
+    // Move the pointer off the grid first: a pointer left over a re-rendered tile fires
+    // mouseenter on it, and the inspector then rightly shows that tile
+    await page.mouse.move(0, 0);
     await page.locator('#search-input').fill('beta');
     await expect(page.locator('#inspector')).toHaveText(PLACEHOLDER);
   });

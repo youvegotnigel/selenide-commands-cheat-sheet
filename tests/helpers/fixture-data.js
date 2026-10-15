@@ -41,7 +41,7 @@ export const FIXTURE_CATEGORIES = [
 ];
 
 // Names chosen for the cell rules in the 2026-10-15 spec, section 3: prefixes, a "(" after a
-// space, and key lengths 3, 11, 12, 13, 18, 24, 25 and 27 around the size boundaries.
+// space, and key lengths 3, 11, 12, 13, 18, 24, 25 and 27 around the size boundaries (10/11 and 24/25).
 export const CELL_FIXTURE = [
   {
     cat: 'Setup & Config',

@@ -119,16 +119,20 @@ only.
 
 ### Symbol size
 
-The key's size class comes from its length:
+The key's size class is the larger of two classes:
 
-| Key length | Class | Font size |
-|---|---|---|
-| 1 to 12 | `tile-key--s` | 18px |
-| 13 to 24 | `tile-key--m` | 15px |
-| 25+ | `tile-key--l` | 13px |
+| Key length | Longest unbreakable run | Class | Font size |
+|---|---|---|---|
+| 1 to 10 | 1 to 10 | `tile-key--s` | 18px |
+| 11 to 24 | 11 | `tile-key--m` | 15px |
+| 25+ | 12+ | `tile-key--l` | 13px |
 
-The longest current key is 51 characters, about four to five lines at 13px in a 139px cell.
-That still fits, and section 4's `aspect-ratio` lets a cell grow if it ever does not.
+An unbreakable run is a stretch with no space, hyphen or `<wbr>` point. A long word must get
+a smaller size, or it breaks mid-word in a narrow cell: `sleep(milliseconds)` is 19
+characters but its run `milliseconds)` is 13, so it is `l`. The limits keep a run inside the
+119px of text space of a 320px phone even with a 15px classic scrollbar (found in the final
+review). The longest current key is 51 characters; five lines at 13px fit a 139px cell, and
+section 4's `aspect-ratio` lets a cell grow if it ever does not.
 
 ### Level marker
 
@@ -229,6 +233,7 @@ Between families the step is at least 7.7. The contrast column is against the te
 
 - Exactly one tile has `tabindex="0"` (initially the first rendered tile). The rest have
   `tabindex="-1"`, so Tab enters and leaves the grid in one step.
+- Arrow keys pressed with Alt, Ctrl or Cmd are left to the browser (Alt+Left is Back).
 - `ArrowLeft` / `ArrowRight`: previous / next tile in DOM order, across group sections.
 - `ArrowUp` / `ArrowDown`: the nearest tile in the row above / below, by horizontal centre
   (geometry, so it works across group sections and any column count).

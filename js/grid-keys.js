@@ -47,6 +47,8 @@ export function initGridKeys(root) {
 
   root.addEventListener('keydown', (e) => {
     if (!e.target.classList.contains('tile')) return;
+    // Leave browser shortcuts alone (Alt+Left is Back, Cmd+Left is Back on macOS)
+    if (e.altKey || e.metaKey || e.ctrlKey) return;
     const tiles = tilesIn(root);
     const i = tiles.indexOf(e.target);
     const moves = {
