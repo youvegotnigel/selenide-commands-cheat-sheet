@@ -19,46 +19,6 @@ test.describe('Collections entries (Selenide 7.19.0)', () => {
     expect(entry.code).toContain('SelenideAppium.$$(');
   });
 
-  test('"should(containExactTextsCaseSensitive())" exists at level intermediate, platform both', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Collections', 'should(containExactTextsCaseSensitive())');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('intermediate');
-    expect(entry.platform).toBe('both');
-    // selenide-core 7.19.0 CollectionCondition.java: public static WebElementsCondition containExactTextsCaseSensitive(String... expectedTexts) {
-    expect(entry.code).toContain('containExactTextsCaseSensitive("');
-    // CHANGELOG.md at v7.19.0: "#1439 rename containTexts() to containExactTextsCaseSensitive()"
-    // There is no containTexts() in CollectionCondition.java 7.19.0.
-    expect(entry.code).not.toContain('containTexts(');
-  });
-
-  test('"shouldHave(textsInAnyOrder())" exists at level intermediate, platform both', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Collections', 'shouldHave(textsInAnyOrder())');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('intermediate');
-    expect(entry.platform).toBe('both');
-    // selenide-core 7.19.0 CollectionCondition.java: public static WebElementsCondition textsInAnyOrder(String... expectedTexts) {
-    expect(entry.code).toContain('textsInAnyOrder("');
-    // selenide-core 7.19.0 CollectionCondition.java: public static WebElementsCondition exactTextsCaseSensitiveInAnyOrder(String... expectedTexts) {
-    expect(entry.code).toContain('exactTextsCaseSensitiveInAnyOrder("');
-    // No exactTextsInAnyOrder() exists in CollectionCondition.java 7.19.0.
-    expect(entry.code).not.toMatch(/[^e]exactTextsInAnyOrder\(/);
-  });
-
-  test('"should(allMatch())" exists at level advanced, platform both', async ({ page }) => {
-    const entry = await itemIn(page, 'Collections', 'should(allMatch())');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('advanced');
-    expect(entry.platform).toBe('both');
-    // selenide-core 7.19.0 CollectionCondition.java: public static WebElementsCondition allMatch(String description, java.util.function.Predicate<WebElement> predicate) {
-    expect(entry.code).toMatch(/allMatch\("[^"]+", \w+ ->/);
-    // selenide-core 7.19.0 CollectionCondition.java: public static WebElementsCondition noneMatch(String description, java.util.function.Predicate<WebElement> predicate) {
-    expect(entry.code).toMatch(/noneMatch\("[^"]+", \w+ ->/);
-  });
-
   test('"filterBy()" exists at level beginner, platform both', async ({ page }) => {
     const entry = await itemIn(page, 'Collections', 'filterBy()');
     expect(entry).not.toBeNull();

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { itemIn } from '../helpers/items.js';
 
-test.describe('Conditions entries (Selenide 7.19.0)', () => {
+test.describe('Element Conditions entries (Selenide 7.19.0)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
@@ -9,7 +9,7 @@ test.describe('Conditions entries (Selenide 7.19.0)', () => {
   test('"shouldHave(visibleText())" exists at level intermediate, platform web', async ({
     page,
   }) => {
-    const entry = await itemIn(page, 'Conditions', 'shouldHave(visibleText())');
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(visibleText())');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     // selenide-core 7.19.0 GetVisibleText.java: private static final JavaScript js = new JavaScript("visible-text.js");
@@ -24,7 +24,7 @@ test.describe('Conditions entries (Selenide 7.19.0)', () => {
   });
 
   test('"Custom WebElementCondition" exists at level advanced, platform both', async ({ page }) => {
-    const entry = await itemIn(page, 'Conditions', 'Custom WebElementCondition');
+    const entry = await itemIn(page, 'Element Conditions', 'Custom WebElementCondition');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('advanced');
     expect(entry.platform).toBe('both');
@@ -42,7 +42,7 @@ test.describe('Conditions entries (Selenide 7.19.0)', () => {
   });
 
   test('"should(match())" exists at level intermediate, platform both', async ({ page }) => {
-    const entry = await itemIn(page, 'Conditions', 'should(match())');
+    const entry = await itemIn(page, 'Element Conditions', 'should(match())');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('both');
@@ -53,7 +53,7 @@ test.describe('Conditions entries (Selenide 7.19.0)', () => {
   test('"should(condition, Duration)" exists at level intermediate, platform both', async ({
     page,
   }) => {
-    const entry = await itemIn(page, 'Conditions', 'should(condition, Duration)');
+    const entry = await itemIn(page, 'Element Conditions', 'should(condition, Duration)');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('both');
@@ -64,7 +64,7 @@ test.describe('Conditions entries (Selenide 7.19.0)', () => {
   });
 
   test('"and()" exists at level intermediate, platform both', async ({ page }) => {
-    const entry = await itemIn(page, 'Conditions', 'and()');
+    const entry = await itemIn(page, 'Element Conditions', 'and()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('both');
@@ -75,11 +75,320 @@ test.describe('Conditions entries (Selenide 7.19.0)', () => {
   });
 
   test('"or()" exists at level intermediate, platform both', async ({ page }) => {
-    const entry = await itemIn(page, 'Conditions', 'or()');
+    const entry = await itemIn(page, 'Element Conditions', 'or()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('both');
     // selenide-core 7.19.0 Condition.java: public static WebElementCondition or(String name, WebElementCondition condition1, WebElementCondition condition2,
     expect(entry.code).toMatch(/\bor\("[^"]+", /);
+  });
+
+  // Every public static member of selenide-core 7.19.0 Condition.java, copied from the sources
+  // jar and cross-checked against javadoc/current/.../Condition.html.
+  const FACTORIES = [
+    'attribute',
+    'attributeMatching',
+    'href',
+    'value',
+    'partialValue',
+    'pseudo',
+    'exactValue',
+    'name',
+    'type',
+    'id',
+    'matchText',
+    'oneOfTexts',
+    'oneOfTextsCaseSensitive',
+    'oneOfExactTexts',
+    'oneOfExactTextsCaseSensitive',
+    'partialText',
+    'partialTextCaseSensitive',
+    'text',
+    'selectedText',
+    'textCaseSensitive',
+    'exactText',
+    'innerText',
+    'visibleText',
+    'exactVisibleText',
+    'ownText',
+    'ownTextCaseSensitive',
+    'exactOwnText',
+    'exactOwnTextCaseSensitive',
+    'exactTextCaseSensitive',
+    'tagName',
+    'cssClass',
+    'cssValue',
+    'domAttribute',
+    'domProperty',
+    'match',
+    'not',
+    'and',
+    'allOf',
+    'or',
+    'anyOf',
+    'be',
+    'have',
+  ];
+  const FIELDS = [
+    'visible',
+    'exist',
+    'hidden',
+    'appear',
+    'disappear',
+    'interactable',
+    'readonly',
+    'editable',
+    'animated',
+    'empty',
+    'image',
+    'focused',
+    'enabled',
+    'disabled',
+    'selected',
+    'checked',
+    'clickable',
+  ];
+
+  test('every Condition factory and field appears in a snippet', async ({ page }) => {
+    const code = await page.evaluate(() =>
+      window.categories
+        .find((c) => c.cat === 'Element Conditions')
+        .items.map((i) => i.code)
+        .join('\n')
+    );
+    const missing = [
+      ...FACTORIES.filter((f) => !new RegExp(`\\b${f}\\(`).test(code)),
+      // A field is used as an argument: shouldBe(visible), and("x", visible, enabled),
+      // shouldBe(Condition.empty)
+      ...FIELDS.filter((f) => !new RegExp(`[(,] ?(Condition\\.)?${f}\\b`).test(code)),
+    ];
+    expect(missing).toEqual([]);
+  });
+
+  // selenide-core 7.19.0 Condition.java: public static final WebElementCondition empty = and(...);
+  // selenide-core 7.19.0 CollectionCondition.java: public static WebElementsCondition empty = size(0);
+  // Under the "Static imports" entry (Condition.* and CollectionCondition.*), javac 17 rejects a
+  // bare empty: "reference to empty is ambiguous". Snippets must qualify it.
+  test('no snippet uses a bare empty', async ({ page }) => {
+    const offenders = await page.evaluate(() =>
+      window.categories.flatMap((c) =>
+        c.items
+          .filter((i) => /[(,] ?empty\b/.test(i.code.replace(/\/\/.*$/gm, '')))
+          .map((i) => `${c.cat} / ${i.name}`)
+      )
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  test('"shouldHave(partialText())" exists at level intermediate, platform both', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(partialText())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition partialText(String expectedText) {
+    expect(entry.code).toContain('partialText("');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition partialTextCaseSensitive(String expectedText) {
+    expect(entry.code).toContain('partialTextCaseSensitive("');
+    // PartialText.java extends TextCondition and overrides match(actual, expected) only, so
+    // Configuration.textCheck never applies; text() extends CaseInsensitiveTextCondition, which
+    // switches on it.
+    expect(entry.code).toContain('TextCheck.FULL_TEXT');
+  });
+
+  test('"shouldHave(ownText())" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(ownText())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    // selenide-core 7.19.0 GetOwnText.java: private static final JavaScript js = new JavaScript("get-own-text.js");
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: ownText, ownTextCaseSensitive, exactOwnText, exactOwnTextCaseSensitive (String text)
+    for (const f of [
+      'ownText',
+      'ownTextCaseSensitive',
+      'exactOwnText',
+      'exactOwnTextCaseSensitive',
+    ]) {
+      expect(entry.code).toMatch(new RegExp(`\\b${f}\\("`));
+    }
+  });
+
+  test('"shouldHave(innerText())" exists at level advanced, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(innerText())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    // selenide-core 7.19.0 GetInnerText.java: return requireNonNull(element.getAttribute("textContent"));
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition innerText(String text) {
+    expect(entry.code).toContain('innerText("');
+    // The text is textContent (outside IE), not the rendered innerText.
+    expect(entry.tip).toContain('textContent');
+  });
+
+  test('"shouldHave(oneOfTexts())" exists at level intermediate, platform both', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(oneOfTexts())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition oneOfTexts(String... texts) {
+    expect(entry.code).toMatch(/\boneOfTexts\("[^"]+", "/);
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition oneOfExactTexts(String... texts) {
+    expect(entry.code).toMatch(/\boneOfExactTexts\("/);
+    // Condition.java Javadoc: @since 7.0.3
+    expect(entry.desc).toMatch(/Added in Selenide 7\.0\.3\./);
+  });
+
+  test('"shouldHave(selectedText())" exists at level advanced, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(selectedText())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    // selenide-core 7.19.0 SelectedText.java: private final JavaScript js = new JavaScript("get-selected-text.js");
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition selectedText(String expectedText) {
+    expect(entry.code).toContain('selectedText("');
+    // get-selected-text.js: element.value.substring(element.selectionStart, element.selectionEnd)
+    // It reads a text field selection, not the chosen option of a select.
+    expect(entry.code).not.toMatch(/\$\("select[^"]*"\)\.shouldHave\(selectedText/);
+  });
+
+  test('"shouldHave(partialValue())" exists at level intermediate, platform web', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(partialValue())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition partialValue(String expectedValue) {
+    expect(entry.code).toContain('partialValue("');
+  });
+
+  test('"id(), name(), type() and tagName()" exists at level intermediate, platform web', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'id(), name(), type() and tagName()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: id(String id), name(String name), type(String type), tagName(String cssClass)
+    for (const f of ['id', 'name', 'type', 'tagName']) {
+      expect(entry.code).toMatch(new RegExp(`shouldHave\\(${f}\\("`));
+    }
+  });
+
+  test('"shouldHave(href())" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(href())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition href(String href) {
+    expect(entry.code).toMatch(/shouldHave\(href\("\//);
+  });
+
+  test('"shouldHave(domAttribute())" exists at level advanced, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(domAttribute())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition domAttribute(String domAttributeName, @Nullable String expectedDomAttributeValue) {
+    expect(entry.code).toMatch(/domAttribute\("[^"]+", "/);
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition domProperty(String domPropertyName, @Nullable String expectedDomPropertyValue) {
+    expect(entry.code).toMatch(/domProperty\("[^"]+", "/);
+    // The Javadoc samples name domAttributeValue() and domPropertyValue(), which do not exist.
+    expect(entry.code).not.toMatch(/dom(Attribute|Property)Value\(/);
+    // Condition.java Javadoc: @since 7.4.0
+    expect(entry.desc).toMatch(/Added in Selenide 7\.4\.0\./);
+  });
+
+  test('"shouldHave(pseudo())" exists at level advanced, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(pseudo())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition pseudo(String pseudoElementName, String propertyName, String expectedValue) {
+    expect(entry.code).toMatch(/pseudo\("::?\w+", "[\w-]+", "/);
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition pseudo(String pseudoElementName, String expectedValue) {
+    // content comes back quoted, so the Java string holds escaped quotes
+    expect(entry.code).toMatch(/pseudo\("::?\w+", "(\\"|[^"])*"\)\)/);
+  });
+
+  test('"shouldBe(focused)" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldBe(focused)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    // selenide-core 7.19.0 Focused.java: driver.executeJavaScript("return document.activeElement")
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static final WebElementCondition focused = new Focused();
+    expect(entry.code).toContain('shouldBe(focused)');
+  });
+
+  test('"shouldBe(interactable)" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldBe(interactable)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static final WebElementCondition interactable = new Interactable();
+    expect(entry.code).toContain('shouldBe(interactable)');
+    // selenide-core 7.19.0 Condition.java: public static final WebElementCondition clickable = and("clickable", interactable, enabled);
+    expect(entry.code).toContain('shouldBe(clickable)');
+    // Interactable.java: super("interactable", asList(new Visible(), new CssValue("opacity", "0")));
+    expect(entry.tip).toContain('opacity');
+  });
+
+  test('"shouldBe(editable)" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldBe(editable)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static final WebElementCondition editable = new Editable();
+    expect(entry.code).toContain('shouldBe(editable)');
+    // selenide-core 7.19.0 Condition.java: public static final WebElementCondition readonly = new Readonly();
+    expect(entry.code).toContain('shouldBe(readonly)');
+  });
+
+  test('"shouldNotBe(animated)" exists at level advanced, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldNotBe(animated)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    // Condition.java Javadoc: "Implemented for web browser context only."
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static final WebElementCondition animated = new Animated();
+    expect(entry.code).toContain('shouldNotBe(animated)');
+    // Condition.java Javadoc: @since v7.0.7
+    expect(entry.desc).toMatch(/Added in Selenide 7\.0\.7\./);
+  });
+
+  test('"shouldBe(image)" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldBe(image)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    // selenide-core 7.19.0 IsImageLoaded.java: private static final JavaScript js = new JavaScript("is-image.js");
+    expect(entry.platform).toBe('web');
+    // selenide-core 7.19.0 Condition.java: public static final WebElementCondition image = new IsImageLoaded();
+    expect(entry.code).toMatch(/\$\("img[^"]*"\)\.shouldBe\(image\)/);
+  });
+
+  test('"be() and have()" exists at level intermediate, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'be() and have()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition be(WebElementCondition delegate) {
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition have(WebElementCondition delegate) {
+    expect(entry.code).toMatch(/\.should\(be\(\w+\), have\(\w+\(/);
+  });
+
+  test('"because()" exists at level intermediate, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'because()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    // selenide-core 7.19.0 WebElementCondition.java: public WebElementCondition because(String message) {
+    expect(entry.code).toMatch(/\)\.because\("[^"]+"\)\)/);
+    // selenide-core 7.19.0 WebElementsCondition.java: public WebElementsCondition because(String explanation) {
+    //   this.explanation = explanation; return this;
+    expect(entry.tip).toContain('CollectionCondition.empty');
   });
 });
