@@ -192,7 +192,9 @@ ships silently. Read every snippet back as Java.
 - `selenide.properties` snippets start with `# selenide.properties`. Maven snippets are XML
   starting with `<dependency>`. Gradle snippets use Kotlin DSL.
 - Mobile entries use selenide-appium's own API only. `AppiumBy` and other java-client
-  classes appear only inside Selenide calls or a `WebDriverProvider`.
+  classes appear only inside Selenide calls, a `WebDriverProvider`, or a cast of
+  `WebDriverRunner.getWebDriver()` to a java-client interface (the replacement that
+  `AppiumDriverRunner.getAndroidDriver()`'s 7.19.0 deprecation note prescribes).
 
 ### Adding a new category
 
