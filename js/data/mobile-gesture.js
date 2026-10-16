@@ -181,6 +181,26 @@ $(AppiumBy.accessibilityId("username")).setValue("standard_user").hideKeyboard()
 $(AppiumBy.accessibilityId("Login")).tap();`,
     },
     {
+      name: 'setValue() and type() (Appium)',
+      level: 'intermediate',
+      platform: 'mobile',
+      desc: 'How text entry works in a native session: setValue(text) clears the field and sends the whole text at once, while type(text) clears it and types one character at a time with a 200 ms pause between characters.',
+      tip: 'On a mobile driver, setValue() accepts only plain text. setValue(SetValueOptions), such as withText(...).sensitive(), fails with ClassCastException because the Appium command casts its argument to CharSequence. To keep a password out of the report, use type(TypeOptions.text(...).sensitive()). On Android, type() taps the field before every character, so each keystroke goes to that field. clearFirst(false) keeps the existing text.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppiumElement.html#type(com.codeborne.selenide.TypeOptions)',
+      code: `import com.codeborne.selenide.TypeOptions;
+import io.appium.java_client.AppiumBy;
+import java.time.Duration;
+import static com.codeborne.selenide.appium.SelenideAppium.$;
+
+$(AppiumBy.accessibilityId("username")).setValue("standard_user");
+$(AppiumBy.accessibilityId("password")).type(TypeOptions.text("secret_sauce").sensitive());
+
+// slow autocomplete: longer pauses, keep what is already typed
+$(AppiumBy.accessibilityId("search"))
+  .type(TypeOptions.text("Back").withDelay(Duration.ofMillis(400)).clearFirst(false));
+$(AppiumBy.accessibilityId("Sauce Labs Backpack")).shouldBe(visible);`,
+    },
+    {
       name: 'dragAndDrop() (Appium)',
       level: 'intermediate',
       platform: 'mobile',
