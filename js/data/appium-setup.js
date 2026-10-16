@@ -103,6 +103,67 @@ public class IosDriverProvider implements WebDriverProvider {
 }`,
     },
     {
+      name: 'Permissions and alerts (provider options)',
+      level: 'intermediate',
+      platform: 'mobile',
+      desc: 'Keeps system dialogs from covering the app: setAutoGrantPermissions(true) on UiAutomator2Options grants every permission the Android app requests when the session starts, and setAutoAcceptAlerts(true) on XCUITestOptions accepts iOS alerts as they appear.',
+      tip: 'Both are false by default. The iOS option accepts every alert, privacy prompts for location, contacts and photos included, so leave it off in the test that checks such a prompt and tap its button there. Both are java-client options: set them where the provider builds its options.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverProvider.html#createDriver(org.openqa.selenium.Capabilities)',
+      code: `import io.appium.java_client.android.options.UiAutomator2Options;
+import io.appium.java_client.ios.options.XCUITestOptions;
+
+// in AndroidDriverProvider.createDriver(capabilities)
+UiAutomator2Options android = new UiAutomator2Options(capabilities)
+  .setApp("build/apps/shop-debug.apk")
+  .setAutoGrantPermissions(true); // no runtime permission dialogs
+
+// in IosDriverProvider.createDriver(capabilities)
+XCUITestOptions ios = new XCUITestOptions(capabilities)
+  .setBundleId("com.example.shop")
+  .setAutoAcceptAlerts(true); // accepts every alert, privacy prompts too`,
+    },
+    {
+      name: 'Animations off (provider options)',
+      level: 'intermediate',
+      platform: 'mobile',
+      desc: 'Turns off motion that makes taps miss: setDisableWindowAnimation(true) on UiAutomator2Options and setReduceMotion(true) on XCUITestOptions.',
+      tip: 'tap() reads the centre of the element once and touches those coordinates, so an element that is still sliding in can be missed even though shouldBe(visible) passed. The Android option disables window animations when the UiAutomator2 instrumentation starts (false by default). The iOS option switches on the Reduce Motion accessibility setting on simulators only: a real iPhone keeps animating.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverProvider.html#createDriver(org.openqa.selenium.Capabilities)',
+      code: `import io.appium.java_client.android.options.UiAutomator2Options;
+import io.appium.java_client.ios.options.XCUITestOptions;
+
+UiAutomator2Options android = new UiAutomator2Options(capabilities)
+  .setApp("build/apps/shop-debug.apk")
+  .setDisableWindowAnimation(true);
+
+XCUITestOptions ios = new XCUITestOptions(capabilities)
+  .setBundleId("com.example.shop")
+  .setReduceMotion(true); // simulators only`,
+    },
+    {
+      name: 'Faster session start (provider options)',
+      level: 'advanced',
+      platform: 'mobile',
+      desc: 'Cuts session start-up time by skipping work Appium otherwise repeats: setSkipServerInstallation(true) and setSkipDeviceInitialization(true) on Android, setUsePrebuiltWda(true) on iOS, and setNoReset(true) on both.',
+      tip: 'Each one trades a safety check for speed. Skipping the server installation assumes the right UiAutomator2 server is already on the device: a missing or wrong version fails later with an unexpected error. usePrebuiltWda skips building WebDriverAgent, so building it becomes your job. noReset skips the app reset, so data and logins carry over between sessions and tests must clean up after themselves. Use them on devices you prepare, not on fresh emulators.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverProvider.html#createDriver(org.openqa.selenium.Capabilities)',
+      code: `import io.appium.java_client.android.options.UiAutomator2Options;
+import io.appium.java_client.ios.options.XCUITestOptions;
+
+// Android: the UiAutomator2 server and Settings app are already on this device
+UiAutomator2Options android = new UiAutomator2Options(capabilities)
+  .setApp("build/apps/shop-debug.apk")
+  .setSkipServerInstallation(true)
+  .setSkipDeviceInitialization(true)
+  .setNoReset(true);
+
+// iOS: WebDriverAgent was built once, before the run
+XCUITestOptions ios = new XCUITestOptions(capabilities)
+  .setBundleId("com.example.shop")
+  .setUsePrebuiltWda(true)
+  .setNoReset(true);`,
+    },
+    {
       name: 'SelenideAppium.launchApp()',
       level: 'beginner',
       platform: 'mobile',

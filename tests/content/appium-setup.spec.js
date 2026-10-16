@@ -107,4 +107,52 @@ test.describe('Appium Setup entries (selenide-appium 7.19.0)', () => {
       expect(item.code).not.toContain('MobileElement');
     }
   });
+
+  test('"Permissions and alerts (provider options)" uses the java-client 11 setters', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'Permissions and alerts (provider options)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 android/options/app/SupportsAutoGrantPermissionsOption.java: default T setAutoGrantPermissions(
+    expect(entry.code).toContain('.setAutoGrantPermissions(true)');
+    // java-client 11.0.0 ios/options/wda/SupportsAutoAcceptAlertsOption.java: default T setAutoAcceptAlerts(
+    expect(entry.code).toContain('.setAutoAcceptAlerts(true)');
+    // options are built from the provider's capabilities, as in "WebDriverProvider (Android)"
+    expect(entry.code).toContain('new UiAutomator2Options(capabilities)');
+    expect(entry.code).toContain('new XCUITestOptions(capabilities)');
+    // SupportsAutoAcceptAlertsOption javadoc: "This includes privacy access permission alerts ... Default is false."
+    expect(entry.tip).toMatch(/privacy/);
+    expect(entry.tip).toMatch(/false/);
+  });
+
+  test('"Animations off (provider options)" uses one option per platform', async ({ page }) => {
+    const entry = await itemIn(page, CAT, 'Animations off (provider options)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 android/options/server/SupportsDisableWindowAnimationOption.java: default T setDisableWindowAnimation(
+    expect(entry.code).toContain('.setDisableWindowAnimation(true)');
+    // java-client 11.0.0 ios/options/simulator/SupportsReduceMotionOption.java: default T setReduceMotion(  ("Only on simulators.")
+    expect(entry.code).toContain('.setReduceMotion(true)');
+    expect(entry.tip).toMatch(/simulators? only/i);
+  });
+
+  test('"Faster session start (provider options)" names the trade-offs', async ({ page }) => {
+    const entry = await itemIn(page, CAT, 'Faster session start (provider options)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 android/options/server/SupportsSkipServerInstallationOption.java: default T setSkipServerInstallation(
+    expect(entry.code).toContain('.setSkipServerInstallation(true)');
+    // java-client 11.0.0 android/options/server/SupportsSkipDeviceInitializationOption.java: default T setSkipDeviceInitialization(
+    expect(entry.code).toContain('.setSkipDeviceInitialization(true)');
+    // java-client 11.0.0 ios/options/wda/SupportsUsePrebuiltWdaOption.java: default T setUsePrebuiltWda(
+    expect(entry.code).toContain('.setUsePrebuiltWda(true)');
+    // java-client 11.0.0 remote/options/BaseOptions.java implements SupportsNoResetOption: default T setNoReset(
+    expect(entry.code).toContain('.setNoReset(true)');
+    // the misspelling used in some blogs does not exist in java-client 11.0.0
+    expect(entry.code).not.toContain('setUsePrebuiltWDA');
+  });
 });
