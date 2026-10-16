@@ -12,7 +12,7 @@ const shell = (page, code) => page.evaluate((c) => window.highlightShell(c), cod
 const xml = (page, code) => page.evaluate((c) => window.highlightXml(c), code);
 
 test.describe('highlight() for Java', () => {
-  test('backticks inside a Java string stay in the string (iOS class chain)', async ({ page }) => {
+  test('backticks inside a Java string stay in the string', async ({ page }) => {
     expect(await java(page, 'By b = AppiumBy.iOSClassChain("**/X[`a`]");')).toBe(
       'By b = <span class="tok-api">AppiumBy</span>.<span class="tok-fn">iOSClassChain</span>(' +
         '<span class="tok-string">"**/X[`a`]"</span>);'

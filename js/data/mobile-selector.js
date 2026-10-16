@@ -69,11 +69,11 @@ $(AppiumBy.accessibilityId("Username input field")).setValue("bob@example.com");
 $(AppiumBy.accessibilityId("Login button")).shouldBe(visible).tap();`,
     },
     {
-      name: 'AppiumBy.iOSNsPredicateString()',
+      name: '$(AppiumBy.iOSNsPredicateString())',
       level: 'intermediate',
       platform: 'mobile',
       desc: 'Finds iOS elements with an NSPredicate over their attributes, evaluated natively by the XCUITest driver.',
-      tip: 'It works only with the XCUITest driver. In CombinedBy, the iOS side is often this locator and the Android side an id or accessibility locator.',
+      tip: 'It works only with the XCUITest driver.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/selector/CombinedBy.html#ios(org.openqa.selenium.By)',
       code: `import io.appium.java_client.AppiumBy;
 import static com.codeborne.selenide.appium.SelenideAppium.$;

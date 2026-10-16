@@ -272,10 +272,7 @@ test.describe('Mobile Selectors guards (selenide-appium 7.19.0)', () => {
     page,
   }) => {
     const items = await allItems(page);
-    // D1 (approved 2026-10-16): the native-locator entry is named after its method
-    const NATIVE = ['AppiumBy.iOSNsPredicateString()'];
     for (const item of items) {
-      if (NATIVE.includes(item.name)) continue;
       expect(item.name, item.name).not.toMatch(/^AppiumBy/);
       // Any AppiumBy.x(...) in code is an argument: preceded by $( , ( or an annotation-free call site.
       for (const m of item.code.matchAll(/(.{0,30})AppiumBy\.\w+\(/g)) {
@@ -295,8 +292,8 @@ test.describe('Mobile Selectors guards (selenide-appium 7.19.0)', () => {
     }
   });
 
-  test('"AppiumBy.iOSNsPredicateString()" uses label predicates', async ({ page }) => {
-    const entry = await itemIn(page, CAT, 'AppiumBy.iOSNsPredicateString()');
+  test('"$(AppiumBy.iOSNsPredicateString())" uses label predicates', async ({ page }) => {
+    const entry = await itemIn(page, CAT, '$(AppiumBy.iOSNsPredicateString())');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('mobile');

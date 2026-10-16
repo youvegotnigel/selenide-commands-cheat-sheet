@@ -97,15 +97,17 @@ test.describe('Appium Setup entries (selenide-appium 7.19.0)', () => {
       CAT
     );
     expect(items.length).toBeGreaterThanOrEqual(8);
-    // D1 (approved 2026-10-16): the two device-tooling setup steps are the only exception
+    // original spec §12 allows raw tooling "unless the user later approves appium.io and asks for it":
+    // D1 (approved 2026-10-16) exempts only these two setup steps, and only from the tooling regex
     const TOOLING = ['Appium server and drivers (npm)', 'Android emulator and adb'];
     for (const item of items) {
       expect(item.platform).toBe('mobile');
-      if (TOOLING.includes(item.name)) continue;
       // scope rule: selenide-appium API only, no Appium CLI, adb or simctl
-      expect(item.code).not.toMatch(
-        /appium driver install|npm i(nstall)? -g appium|\badb\b|simctl/
-      );
+      if (!TOOLING.includes(item.name)) {
+        expect(item.code).not.toMatch(
+          /appium driver install|npm i(nstall)? -g appium|\badb\b|simctl/
+        );
+      }
       expect(item.code).not.toContain('DesiredCapabilities');
       expect(item.code).not.toContain('MobileElement');
     }

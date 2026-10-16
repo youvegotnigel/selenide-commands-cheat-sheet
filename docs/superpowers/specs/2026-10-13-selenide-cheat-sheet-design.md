@@ -36,7 +36,7 @@ language-specific highlighter, the version source and the release-sync tooling c
 | Sync cadence | Fortnightly: cron `0 6 1,15 * *` (06:00 UTC on the 1st and 15th) |
 | `javac` snippet check | Deferred to a follow-up |
 | Git | Baseline commit `4a25ee9` on `master` (untouched copy). All work on `develop`. Nothing is pushed without being asked |
-| Mobile scope | **selenide-appium's own API only.** No raw Appium, Appium CLI, Appium Inspector, `adb` or `xcrun simctl` entries. The "Appium CLI & Tools" category from the brief is dropped |
+| Mobile scope | **selenide-appium's own API only.** No raw Appium, Appium CLI, Appium Inspector, `adb` or `xcrun simctl` entries. The "Appium CLI & Tools" category from the brief is dropped. Exception (D1, 2026-10-16): two Appium Setup tooling entries, see section 12 |
 | `AppiumBy` | Allowed **only inside Selenide calls** (`$(AppiumBy.accessibilityId("Login"))`, `CombinedBy`), never as a standalone entry. Same for other java-client classes (`UiAutomator2Options`, `AndroidDriver`), which appear only inside a `WebDriverProvider` |
 | Verification order | Tooling (`fetch-sources.mjs`, `check-docs-links.mjs`) is built in phase 4b, **before** content |
 
@@ -460,5 +460,9 @@ also `npm run check:links`), and is committed on `develop` as one commit.
 - Splitting `platform` into `android` / `ios`.
 - Raw Appium tooling (Appium CLI, drivers, Inspector, `adb`, `simctl`), unless the user later
   approves `appium.io` and asks for it.
+  Exception (2026-10-16, decision D1 in `docs/superpowers/plans/2026-10-16-mobile-guide-gap-fill.md`):
+  the user approved appium.io, the XCUITest driver docs and the Android UI Automator page as fact
+  sources, and the Appium Setup category now has two tooling entries (Appium server and drivers,
+  Android emulator and adb).
 - A grouped-view divider between the web and mobile halves (the gradient family carries the
   split for v1).
