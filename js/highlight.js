@@ -150,6 +150,9 @@ const SHELL_PROGRAMS = new Set([
   'npm',
   'npx',
   'git',
+  'appium',
+  'adb',
+  'xcrun',
 ]);
 
 // '#' starts a comment only at line start or after whitespace, so

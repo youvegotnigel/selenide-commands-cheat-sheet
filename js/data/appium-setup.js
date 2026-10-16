@@ -5,6 +5,29 @@ export default {
   color: '#9e92f3',
   items: [
     {
+      name: 'Appium server and drivers (npm)',
+      level: 'beginner',
+      platform: 'mobile',
+      desc: 'Installs the Appium server with npm and one driver per platform, then starts it. Selenide talks to this server through the URL in your WebDriverProvider.',
+      tip: 'The xcuitest driver needs a macOS host with Xcode.',
+      docs: 'https://github.com/selenide/selenide/blob/main/modules/appium/README.md#initiating-android--ios-driver-session',
+      code: `npm install -g appium
+appium driver install uiautomator2
+appium driver install xcuitest   # macOS only
+appium driver list --installed
+appium                           # listens on http://127.0.0.1:4723`,
+    },
+    {
+      name: 'Android emulator and adb',
+      level: 'beginner',
+      platform: 'mobile',
+      desc: 'Starts an Android virtual device from the command line and checks that adb sees it before the tests run.',
+      tip: 'Create the AVD first, in Android Studio. adb devices must show the emulator as connected before you start a session.',
+      docs: 'https://github.com/selenide-examples/selenide-appium#how-to-run-the-example',
+      code: `emulator -avd Pixel_4_API_28_1
+adb devices`,
+    },
+    {
       name: 'selenide-appium dependency (Maven)',
       level: 'beginner',
       platform: 'mobile',

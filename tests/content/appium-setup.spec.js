@@ -97,8 +97,11 @@ test.describe('Appium Setup entries (selenide-appium 7.19.0)', () => {
       CAT
     );
     expect(items.length).toBeGreaterThanOrEqual(8);
+    // D1 (approved 2026-10-16): the two device-tooling setup steps are the only exception
+    const TOOLING = ['Appium server and drivers (npm)', 'Android emulator and adb'];
     for (const item of items) {
       expect(item.platform).toBe('mobile');
+      if (TOOLING.includes(item.name)) continue;
       // scope rule: selenide-appium API only, no Appium CLI, adb or simctl
       expect(item.code).not.toMatch(
         /appium driver install|npm i(nstall)? -g appium|\badb\b|simctl/
@@ -216,5 +219,29 @@ test.describe('Appium Setup entries (selenide-appium 7.19.0)', () => {
     expect(entry.docs).toBe(
       'https://github.com/selenide/selenide/blob/v7.19.0/modules/appium/src/test/java/it/mobile/BrowserstackUtils.java'
     );
+  });
+
+  test('"Appium server and drivers (npm)" installs both platform drivers', async ({ page }) => {
+    const entry = await itemIn(page, CAT, 'Appium server and drivers (npm)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('mobile');
+    // https://appium.io/docs/en/latest/quickstart/install/: npm install -g appium
+    // https://appium.io/docs/en/latest/reference/cli/extensions/: appium driver install xcuitest
+    expect(entry.code.trim().startsWith('npm install -g appium')).toBe(true);
+    expect(entry.code).toContain('appium driver install uiautomator2');
+    expect(entry.code).toContain('appium driver install xcuitest');
+    expect(entry.code).not.toMatch(/^sudo /m);
+  });
+
+  test('"Android emulator and adb" starts an AVD by name', async ({ page }) => {
+    const entry = await itemIn(page, CAT, 'Android emulator and adb');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('mobile');
+    // selenide-examples/selenide-appium README, "How to run the example": emulator -avd Pixel_4_API_28_1
+    expect(entry.code).toMatch(/^emulator -avd \w+/m);
+    // https://appium.io/docs/en/latest/quickstart/uiauto2-driver/: adb devices
+    expect(entry.code).toContain('adb devices');
   });
 });
