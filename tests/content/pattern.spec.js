@@ -109,9 +109,10 @@ test.describe('Patterns entries (Selenide 7.19.0)', () => {
     expect(entry.platform).toBe('both');
     // selenide-core 7.19.0 FluentCommand.java: protected abstract void execute(WebElementSource locator, Object @Nullable [] args);
     expect(entry.code).toContain('extends FluentCommand');
-    expect(entry.code).toContain(
-      'protected void execute(WebElementSource locator, Object @Nullable [] args)'
-    );
+    // selenide-appium 7.19.0 AppiumSetValue.java: protected void execute(WebElementSource locator, Object[] args)
+    // (the unannotated override form compiles without jspecify on the classpath)
+    expect(entry.code).toContain('protected void execute(WebElementSource locator, Object[] args)');
+    expect(entry.code).not.toContain('org.jspecify');
     // FluentCommand.java: the 3-argument execute(SelenideElement proxy, ...) is @Deprecated
     expect(entry.code).not.toContain('execute(SelenideElement proxy');
     // SelenideElement.java:1434: <ReturnType extends SelenideElement> ReturnType execute(FluentCommand command);

@@ -82,7 +82,6 @@ $("#avatar").should(widerThan(100));`,
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#execute(com.codeborne.selenide.FluentCommand)',
       code: `import com.codeborne.selenide.FluentCommand;
 import com.codeborne.selenide.impl.WebElementSource;
-import org.jspecify.annotations.Nullable;
 import org.openqa.selenium.WebElement;
 
 public class ReplaceText extends FluentCommand {
@@ -97,7 +96,7 @@ public class ReplaceText extends FluentCommand {
   }
 
   @Override
-  protected void execute(WebElementSource locator, Object @Nullable [] args) {
+  protected void execute(WebElementSource locator, Object[] args) {
     WebElement field = locator.findAndAssertElementIsInteractable();
     field.clear();
     field.sendKeys(text);

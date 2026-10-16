@@ -22,7 +22,7 @@ appium                           # listens on http://127.0.0.1:4723`,
       level: 'beginner',
       platform: 'mobile',
       desc: 'Starts an Android virtual device from the command line and checks that adb sees it before the tests run.',
-      tip: 'Create the AVD first, in Android Studio. adb devices must show the emulator as connected before you start a session.',
+      tip: 'Create the AVD first, in Android Studio. adb devices must list the emulator with the state device before you start a session.',
       docs: 'https://github.com/selenide-examples/selenide-appium#how-to-run-the-example',
       code: `emulator -avd Pixel_4_API_28_1
 adb devices`,
@@ -155,10 +155,12 @@ XCUITestOptions ios = new XCUITestOptions(capabilities)
       code: `import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.options.XCUITestOptions;
 
+// in AndroidDriverProvider.createDriver(capabilities)
 UiAutomator2Options android = new UiAutomator2Options(capabilities)
   .setApp("build/apps/shop-debug.apk")
   .setDisableWindowAnimation(true);
 
+// in IosDriverProvider.createDriver(capabilities)
 XCUITestOptions ios = new XCUITestOptions(capabilities)
   .setBundleId("com.example.shop")
   .setReduceMotion(true); // simulators only`,
@@ -173,14 +175,16 @@ XCUITestOptions ios = new XCUITestOptions(capabilities)
       code: `import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.options.XCUITestOptions;
 
-// Android: the UiAutomator2 server and Settings app are already on this device
+// Android, in AndroidDriverProvider.createDriver(capabilities):
+// the UiAutomator2 server and Settings app are already on this device
 UiAutomator2Options android = new UiAutomator2Options(capabilities)
   .setApp("build/apps/shop-debug.apk")
   .setSkipServerInstallation(true)
   .setSkipDeviceInitialization(true)
   .setNoReset(true);
 
-// iOS: WebDriverAgent was built once, before the run
+// iOS, in IosDriverProvider.createDriver(capabilities):
+// WebDriverAgent was built once, before the run
 XCUITestOptions ios = new XCUITestOptions(capabilities)
   .setBundleId("com.example.shop")
   .setUsePrebuiltWda(true)
@@ -190,7 +194,7 @@ XCUITestOptions ios = new XCUITestOptions(capabilities)
       name: 'Mobile web (Chrome or Safari on a device)',
       level: 'intermediate',
       platform: 'mobile',
-      desc: 'Tests a website in the phone browser instead of a native app: the provider sets withBrowserName("Chrome") and no app, and the test calls open(url). From there it is ordinary Selenide with CSS selectors. For Safari, build XCUITestOptions with withBrowserName("Safari") and return an IOSDriver.',
+      desc: 'Tests a website in the phone browser instead of a native app: the provider sets withBrowserName("Chrome") and no app, and the test calls open(url). From there you find elements with CSS selectors, as on desktop. For Safari, build XCUITestOptions with withBrowserName("Safari") and return an IOSDriver.',
       tip: 'Set Configuration.browserSize = null before the first open(). Selenide resizes the window of every driver it creates while browserSize is set (default "1366x768"), one returned by your provider included, and only launchApp() clears it. open() does not.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Configuration.html#browserSize',
       code: `import com.codeborne.selenide.Configuration;
@@ -310,7 +314,7 @@ SelenideAppium.launchApp();`,
       level: 'advanced',
       platform: 'mobile',
       desc: 'Runs the same tests on a BrowserStack device: the provider points AndroidDriver at the BrowserStack hub and adds a bstack:options capability with the credentials and build name. Screens and tests do not change.',
-      tip: "This follows the provider selenide-appium uses for its own CI tests, which reads the access key from a system property, never from source. Map.of() rejects null values, so a missing -Dbs.key fails fast with a NullPointerException instead of an unauthorised session. selenide's BrowserstackExtension also reports each test result to the BrowserStack dashboard through executeJavaScript, because BrowserStack cannot see the JUnit outcome.",
+      tip: "This follows the provider selenide-appium uses for its own CI tests, which reads the access key from a system property, never from source. Map.of() rejects null values, so a missing -Dbs.key fails fast with a NullPointerException instead of an unauthorised session. Selenide's own test suite (not a shipped class) also reports each test result to the BrowserStack dashboard with executeJavaScript and the browserstack_executor setSessionStatus action.",
       docs: 'https://github.com/selenide/selenide/blob/v7.19.0/modules/appium/src/test/java/it/mobile/BrowserstackUtils.java',
       code: `import com.codeborne.selenide.WebDriverProvider;
 import io.appium.java_client.android.AndroidDriver;

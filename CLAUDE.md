@@ -226,7 +226,7 @@ Verify the API in `.cache/sources/` (`grep -rn`), write the guard test in
 | `github.com/selenide/*`, `github.com/selenide-examples/selenide-appium` | Discovery, mobile setup patterns, `docs` links |
 | `appium.io/docs/en/latest/`, `appium.github.io/appium-xcuitest-driver/`, `developer.android.com/training/testing/ui-automator` (approved 2026-10-16) | Appium-side syntax and tooling facts only (not `docs` targets) |
 
-Anything else (blogs, DeepWiki, `appium.io`, Q&A sites) is named to the user and approved
+Anything else (blogs, DeepWiki, other `appium.io` pages, Q&A sites) is named to the user and approved
 before use. When Context7 or the docs disagree with the jar, the jar wins and the conflict is
 reported. The real Selenide code is in `selenide-core`; `com.codeborne:selenide` holds
 `Configuration`, `Selenide`, `WebDriverRunner` and the JUnit 5 extensions.
