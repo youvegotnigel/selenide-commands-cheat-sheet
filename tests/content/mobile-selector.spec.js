@@ -291,4 +291,15 @@ test.describe('Mobile Selectors guards (selenide-appium 7.19.0)', () => {
       );
     }
   });
+
+  test('"$(AppiumBy.iOSNsPredicateString())" uses label predicates', async ({ page }) => {
+    const entry = await itemIn(page, CAT, '$(AppiumBy.iOSNsPredicateString())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 AppiumBy.java:212: public static By iOSNsPredicateString(final String iOSNsPredicateString)
+    // https://appium.github.io/appium-xcuitest-driver/latest/reference/ios-predicate/: label == '...', CONTAINS
+    expect(entry.code).toContain('AppiumBy.iOSNsPredicateString("label == \'Log in\'")');
+    expect(entry.code).toContain('label CONTAINS');
+  });
 });

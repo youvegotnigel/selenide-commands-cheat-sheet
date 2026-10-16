@@ -12,6 +12,12 @@ const shell = (page, code) => page.evaluate((c) => window.highlightShell(c), cod
 const xml = (page, code) => page.evaluate((c) => window.highlightXml(c), code);
 
 test.describe('highlight() for Java', () => {
+  test('backticks inside a Java string stay in the string', async ({ page }) => {
+    expect(await java(page, 'By b = AppiumBy.iOSClassChain("**/X[`a`]");')).toBe(
+      'By b = <span class="tok-api">AppiumBy</span>.<span class="tok-fn">iOSClassChain</span>(' +
+        '<span class="tok-string">"**/X[`a`]"</span>);'
+    );
+  });
   test('$ and $$ are API tokens, methods before ( are fn, strings are strings', async ({
     page,
   }) => {
@@ -127,6 +133,15 @@ test.describe('highlight() for Java', () => {
 });
 
 test.describe('highlightShell()', () => {
+  test('appium, adb and xcrun are programs', async ({ page }) => {
+    expect(await shell(page, 'adb devices')).toBe('<span class="tok-api">adb</span> devices');
+    expect(await shell(page, 'appium driver list')).toBe(
+      '<span class="tok-api">appium</span> driver list'
+    );
+    expect(await shell(page, 'xcrun simctl list')).toBe(
+      '<span class="tok-api">xcrun</span> simctl list'
+    );
+  });
   test('./gradlew is a program, --tests a flag, the quoted name a string', async ({ page }) => {
     expect(await shell(page, './gradlew test --tests "LoginTest"')).toBe(
       '<span class="tok-api">./gradlew</span> test <span class="tok-keyword">--tests</span> ' +

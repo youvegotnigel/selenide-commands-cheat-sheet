@@ -99,4 +99,27 @@ test.describe('Patterns entries (Selenide 7.19.0)', () => {
     // selenide 7.19.0 Selenide.java:207: public static <PageObjectClass> PageObjectClass open(String relativeOrAbsoluteUrl, Class<PageObjectClass> pageObjectClassClass)
     expect(entry.code).toContain('open("/login", LoginPage.class)');
   });
+
+  test('"execute(Command) (custom command)" extends FluentCommand and passes data by constructor', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Patterns', 'execute(Command) (custom command)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('both');
+    // selenide-core 7.19.0 FluentCommand.java: protected abstract void execute(WebElementSource locator, Object @Nullable [] args);
+    expect(entry.code).toContain('extends FluentCommand');
+    // selenide-appium 7.19.0 AppiumSetValue.java: protected void execute(WebElementSource locator, Object[] args)
+    // (the unannotated override form compiles without jspecify on the classpath)
+    expect(entry.code).toContain('protected void execute(WebElementSource locator, Object[] args)');
+    expect(entry.code).not.toContain('org.jspecify');
+    // FluentCommand.java: the 3-argument execute(SelenideElement proxy, ...) is @Deprecated
+    expect(entry.code).not.toContain('execute(SelenideElement proxy');
+    // SelenideElement.java:1434: <ReturnType extends SelenideElement> ReturnType execute(FluentCommand command);
+    expect(entry.code).toMatch(/\.execute\(\w+\("[^"]*"\)\)\.\w+\(/);
+    // commands/Execute.java: command.execute(proxy, locator, NO_ARGS)
+    expect(entry.tip).toMatch(/no arguments/);
+    // the custom-interface + Commands.add pattern cannot give $() a typed method
+    expect(entry.code).not.toContain('Commands.getInstance()');
+  });
 });

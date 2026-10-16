@@ -97,14 +97,153 @@ test.describe('Appium Setup entries (selenide-appium 7.19.0)', () => {
       CAT
     );
     expect(items.length).toBeGreaterThanOrEqual(8);
+    // original spec §12 allows raw tooling "unless the user later approves appium.io and asks for it":
+    // D1 (approved 2026-10-16) exempts only these two setup steps, and only from the tooling regex
+    const TOOLING = ['Appium server and drivers (npm)', 'Android emulator and adb'];
     for (const item of items) {
       expect(item.platform).toBe('mobile');
       // scope rule: selenide-appium API only, no Appium CLI, adb or simctl
-      expect(item.code).not.toMatch(
-        /appium driver install|npm i(nstall)? -g appium|\badb\b|simctl/
-      );
+      if (!TOOLING.includes(item.name)) {
+        expect(item.code).not.toMatch(
+          /appium driver install|npm i(nstall)? -g appium|\badb\b|simctl/
+        );
+      }
       expect(item.code).not.toContain('DesiredCapabilities');
       expect(item.code).not.toContain('MobileElement');
     }
+  });
+
+  test('"Permissions and alerts (provider options)" uses the java-client 11 setters', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'Permissions and alerts (provider options)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 android/options/app/SupportsAutoGrantPermissionsOption.java: default T setAutoGrantPermissions(
+    expect(entry.code).toContain('.setAutoGrantPermissions(true)');
+    // java-client 11.0.0 ios/options/wda/SupportsAutoAcceptAlertsOption.java: default T setAutoAcceptAlerts(
+    expect(entry.code).toContain('.setAutoAcceptAlerts(true)');
+    // options are built from the provider's capabilities, as in "WebDriverProvider (Android)"
+    expect(entry.code).toContain('new UiAutomator2Options(capabilities)');
+    expect(entry.code).toContain('new XCUITestOptions(capabilities)');
+    // SupportsAutoAcceptAlertsOption javadoc: "This includes privacy access permission alerts ... Default is false."
+    expect(entry.tip).toMatch(/privacy/);
+    expect(entry.tip).toMatch(/false/);
+  });
+
+  test('"Animations off (provider options)" uses one option per platform', async ({ page }) => {
+    const entry = await itemIn(page, CAT, 'Animations off (provider options)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 android/options/server/SupportsDisableWindowAnimationOption.java: default T setDisableWindowAnimation(
+    expect(entry.code).toContain('.setDisableWindowAnimation(true)');
+    // java-client 11.0.0 ios/options/simulator/SupportsReduceMotionOption.java: default T setReduceMotion(  ("Only on simulators.")
+    expect(entry.code).toContain('.setReduceMotion(true)');
+    expect(entry.tip).toMatch(/simulators? only/i);
+  });
+
+  test('"Faster session start (provider options)" names the trade-offs', async ({ page }) => {
+    const entry = await itemIn(page, CAT, 'Faster session start (provider options)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 android/options/server/SupportsSkipServerInstallationOption.java: default T setSkipServerInstallation(
+    expect(entry.code).toContain('.setSkipServerInstallation(true)');
+    // java-client 11.0.0 android/options/server/SupportsSkipDeviceInitializationOption.java: default T setSkipDeviceInitialization(
+    expect(entry.code).toContain('.setSkipDeviceInitialization(true)');
+    // java-client 11.0.0 ios/options/wda/SupportsUsePrebuiltWdaOption.java: default T setUsePrebuiltWda(
+    expect(entry.code).toContain('.setUsePrebuiltWda(true)');
+    // java-client 11.0.0 remote/options/BaseOptions.java implements SupportsNoResetOption: default T setNoReset(
+    expect(entry.code).toContain('.setNoReset(true)');
+    // the misspelling used in some blogs does not exist in java-client 11.0.0
+    expect(entry.code).not.toContain('setUsePrebuiltWDA');
+  });
+
+  test('"Mobile web (Chrome or Safari on a device)" clears browserSize before open()', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'Mobile web (Chrome or Safari on a device)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 remote/options/SupportsBrowserNameOption.java:39: default T withBrowserName(String browserName)
+    expect(entry.code).toContain('.withBrowserName("Chrome")');
+    // selenide-core 7.19.0 WebDriverFactory.java: factory.setBrowserSize(config, webdriver);
+    // BrowserResizer.java: if (browserSize != null) { ... driver.manage().window().setSize(dimension); }
+    const cleared = entry.code.indexOf('Configuration.browserSize = null;');
+    const opened = entry.code.indexOf('open("https://');
+    expect(cleared).toBeGreaterThan(-1);
+    expect(opened).toBeGreaterThan(cleared);
+    expect(entry.tip).toContain('launchApp()');
+    // a browser session has no app under test
+    expect(entry.code).not.toMatch(/\.setApp\(|\.setAppPackage\(|\.setBundleId\(/);
+  });
+
+  test('"Parallel devices (one udid and port per thread)" sets udid and systemPort per thread', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'Parallel devices (one udid and port per thread)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 remote/options/SupportsUdidOption.java: default T setUdid(String id)
+    expect(entry.code).toContain('.setUdid(device.udid())');
+    // java-client 11.0.0 android/options/server/SupportsSystemPortOption.java: default T setSystemPort(int port)
+    expect(entry.code).toContain('.setSystemPort(device.systemPort())');
+    expect(entry.code).toContain('ThreadLocal<Device>');
+    // SupportsSystemPortOption javadoc: "the first free port from 8200..8299 range is selected for UIA2"
+    expect(entry.tip).toContain('8200..8299');
+    // SupportsWdaLocalPortOption javadoc: default 8100
+    expect(entry.tip).toContain('setWdaLocalPort()');
+    // selenide 7.19.0 Configuration.java: static fields, shared by every thread
+    expect(entry.code).not.toContain('Configuration.browserCapabilities');
+  });
+
+  test('"Cloud devices (BrowserStack provider)" mirrors selenide\'s own CI provider', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'Cloud devices (BrowserStack provider)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('mobile');
+    // selenide v7.19.0 modules/appium/src/test/java/it/mobile/BrowserstackUtils.java: "https://hub.browserstack.com/wd/hub"
+    expect(entry.code).toContain('"https://hub.browserstack.com/wd/hub"');
+    // it/mobile/android/driverproviders/ci/AndroidDriverProvider.java: options.setCapability("bstack:options", ...)
+    expect(entry.code).toContain('options.setCapability("bstack:options", Map.of(');
+    // BrowserstackUtils.java getBrowserstackOptions(): userName, accessKey, projectName, buildName
+    for (const key of ['"userName"', '"accessKey"', '"projectName"', '"buildName"']) {
+      expect(entry.code).toContain(key);
+    }
+    // BrowserstackUtils.java reads the key with System.getProperty: never a literal in source
+    expect(entry.code).toMatch(/"accessKey", System\.getProperty\("[\w.]+"\)/);
+    expect(entry.docs).toBe(
+      'https://github.com/selenide/selenide/blob/v7.19.0/modules/appium/src/test/java/it/mobile/BrowserstackUtils.java'
+    );
+  });
+
+  test('"Appium server and drivers (npm)" installs both platform drivers', async ({ page }) => {
+    const entry = await itemIn(page, CAT, 'Appium server and drivers (npm)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('mobile');
+    // https://appium.io/docs/en/latest/quickstart/install/: npm install -g appium
+    // https://appium.io/docs/en/latest/reference/cli/extensions/: appium driver install xcuitest
+    expect(entry.code.trim().startsWith('npm install -g appium')).toBe(true);
+    expect(entry.code).toContain('appium driver install uiautomator2');
+    expect(entry.code).toContain('appium driver install xcuitest');
+    expect(entry.code).not.toMatch(/^sudo /m);
+  });
+
+  test('"Android emulator and adb" starts an AVD by name', async ({ page }) => {
+    const entry = await itemIn(page, CAT, 'Android emulator and adb');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('mobile');
+    // selenide-examples/selenide-appium README, "How to run the example": emulator -avd Pixel_4_API_28_1
+    expect(entry.code).toMatch(/^emulator -avd \w+/m);
+    // https://appium.io/docs/en/latest/quickstart/uiauto2-driver/: adb devices
+    expect(entry.code).toContain('adb devices');
   });
 });

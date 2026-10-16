@@ -69,6 +69,19 @@ $(AppiumBy.accessibilityId("Username input field")).setValue("bob@example.com");
 $(AppiumBy.accessibilityId("Login button")).shouldBe(visible).tap();`,
     },
     {
+      name: '$(AppiumBy.iOSNsPredicateString())',
+      level: 'intermediate',
+      platform: 'mobile',
+      desc: 'Finds iOS elements with an NSPredicate over their attributes, evaluated natively by the XCUITest driver.',
+      tip: 'It works only with the XCUITest driver.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/selector/CombinedBy.html#ios(org.openqa.selenium.By)',
+      code: `import io.appium.java_client.AppiumBy;
+import static com.codeborne.selenide.appium.SelenideAppium.$;
+
+$(AppiumBy.iOSNsPredicateString("label == 'Log in'")).tap();
+$(AppiumBy.iOSNsPredicateString("label CONTAINS 'Welcome'")).shouldBe(visible);`,
+    },
+    {
       name: 'Fluent chain with smart waits',
       level: 'beginner',
       platform: 'mobile',

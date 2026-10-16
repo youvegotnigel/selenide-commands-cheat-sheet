@@ -74,6 +74,39 @@ $(".toast").shouldBe(toast("success"));
 $("#avatar").should(widerThan(100));`,
     },
     {
+      name: 'execute(Command) (custom command)',
+      level: 'advanced',
+      platform: 'both',
+      desc: 'Packs a reusable element action into a class: extend FluentCommand (or implement Command<T> to return a value) and run it with $(...).execute(command). A FluentCommand returns the element, so the chain continues.',
+      tip: 'execute() passes the command no arguments, so give it its data through a constructor or a static factory. Override the two-argument execute(WebElementSource, args): the three-argument one is deprecated. execute(command, Duration) runs it with its own timeout. Registering a name with Commands.getInstance().add() does not add a method to SelenideElement or SelenideAppiumElement, so prefer execute(). The same command works on web and mobile elements.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#execute(com.codeborne.selenide.FluentCommand)',
+      code: `import com.codeborne.selenide.FluentCommand;
+import com.codeborne.selenide.impl.WebElementSource;
+import org.openqa.selenium.WebElement;
+
+public class ReplaceText extends FluentCommand {
+  private final String text;
+
+  private ReplaceText(String text) {
+    this.text = text;
+  }
+
+  public static ReplaceText replaceText(String text) {
+    return new ReplaceText(text);
+  }
+
+  @Override
+  protected void execute(WebElementSource locator, Object[] args) {
+    WebElement field = locator.findAndAssertElementIsInteractable();
+    field.clear();
+    field.sendKeys(text);
+  }
+}
+
+// import static com.example.ReplaceText.replaceText;
+$("#search").execute(replaceText("selenide")).pressEnter();`,
+    },
+    {
       name: 'inNewBrowser() (second user)',
       level: 'intermediate',
       platform: 'web',
