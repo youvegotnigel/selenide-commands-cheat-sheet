@@ -126,4 +126,41 @@ test.describe('Mobile Context & App entries (selenide-appium 7.19.0)', () => {
     expect(entry.code).toContain('clipboard().setText(');
     expect(entry.code).not.toContain('new AppiumClipboard(');
   });
+
+  test('"Device features without getAndroidDriver()" casts to java-client interfaces', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'Device features without getAndroidDriver()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('mobile');
+    // selenide-appium 7.19.0 AppiumDriverRunner.java: @Deprecated(forRemoval = true) getAndroidDriver/getIosDriver/getMobileDriver,
+    // javadoc: "cast your WebDriver to the needed interface, e.g. SupportsRotation or HidesKeyboard"
+    expect(entry.code).not.toMatch(/getAndroidDriver|getIosDriver|getMobileDriver/);
+    expect(entry.code).toContain('((SupportsRotation) WebDriverRunner.getWebDriver())');
+    // java-client 11.0.0 remote/SupportsRotation.java:56: default void rotate(ScreenOrientation orientation)
+    expect(entry.code).toContain('.rotate(ScreenOrientation.LANDSCAPE)');
+    expect(entry.code).toContain('import org.openqa.selenium.ScreenOrientation;');
+    // java-client 11.0.0 InteractsWithApps.java:89: default void runAppInBackground(Duration duration)
+    expect(entry.code).toMatch(/\.runAppInBackground\(Duration\.of\w+\(\d+\)\)/);
+    // AndroidDriver and IOSDriver both implement SupportsRotation and InteractsWithApps: no platform branch
+    expect(entry.code).not.toContain('isAndroidDriver()');
+    expect(entry.tip).toContain('forRemoval');
+  });
+
+  test('"Failure evidence on mobile (XML page source)" needs no setup', async ({ page }) => {
+    const entry = await itemIn(page, CAT, 'Failure evidence on mobile (XML page source)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // selenide-appium 7.19.0 AppiumScreenSourceExtractor.java: createFileWithExtension(config, fileName, "xml")
+    expect(entry.desc).toContain('.xml');
+    // META-INF/services/com.codeborne.selenide.impl.PageSourceExtractor: AppiumScreenSourceExtractor
+    expect(entry.tip).toContain('AppiumScreenSourceExtractor');
+    expect(entry.code).not.toMatch(/new AppiumScreenSourceExtractor|new AppiumElementDescriber/);
+    // selenide 7.19.0 Configuration.java: public static boolean savePageSource
+    expect(entry.code).toContain('Configuration.savePageSource = true;');
+    // AppiumElementDescriber.androidAttributes(): "resource-id", ..., "content-desc"
+    expect(entry.tip).toMatch(/resource-id/);
+  });
 });

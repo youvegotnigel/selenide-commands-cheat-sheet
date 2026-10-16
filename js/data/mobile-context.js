@@ -188,5 +188,43 @@ if (AppiumDriverRunner.isAndroidDriver()) {
   $(AppiumBy.accessibilityId("Back")).click();
 }`,
     },
+    {
+      name: 'Device features without getAndroidDriver()',
+      level: 'advanced',
+      platform: 'mobile',
+      desc: 'Reaches Appium features that Selenide does not wrap, such as rotating the screen or sending the app to the background, by casting the current driver to the java-client interface that declares them.',
+      tip: 'getAndroidDriver(), getIosDriver() and getMobileDriver() are @Deprecated(forRemoval = true) in 7.19.0, and their Javadoc asks for this cast instead. AndroidDriver and IOSDriver implement the same interfaces (SupportsRotation, InteractsWithApps, HidesKeyboard), so one line serves both platforms. For the keyboard, the element method hideKeyboard() is simpler.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/AppiumDriverRunner.html#getAndroidDriver()',
+      code: `import com.codeborne.selenide.WebDriverRunner;
+import io.appium.java_client.AppiumBy;
+import io.appium.java_client.InteractsWithApps;
+import io.appium.java_client.remote.SupportsRotation;
+import java.time.Duration;
+import org.openqa.selenium.ScreenOrientation;
+
+((SupportsRotation) WebDriverRunner.getWebDriver()).rotate(ScreenOrientation.LANDSCAPE);
+$(AppiumBy.accessibilityId("Video player")).shouldBe(visible);
+
+// background the app for 3 seconds; Appium brings it back afterwards
+((InteractsWithApps) WebDriverRunner.getWebDriver()).runAppInBackground(Duration.ofSeconds(3));
+$(AppiumBy.accessibilityId("Cart badge")).shouldHave(text("1"));`,
+    },
+    {
+      name: 'Failure evidence on mobile (XML page source)',
+      level: 'intermediate',
+      platform: 'mobile',
+      desc: 'With selenide-appium on the classpath, a failing check in a native session saves the screen hierarchy as an .xml file next to the screenshot, and the error message describes the element with its native attributes.',
+      tip: 'Both come from ServiceLoader registrations in the selenide-appium jar (AppiumScreenSourceExtractor and AppiumElementDescriber), so there is nothing to configure: savePageSource and reportsFolder work as on the web. Open the .xml to find attributes a locator can use, such as resource-id and content-desc on Android. In a browser session the same classes fall back to .html and the web description.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/AppiumScreenSourceExtractor.html',
+      code: `import com.codeborne.selenide.Configuration;
+import io.appium.java_client.AppiumBy;
+
+Configuration.screenshots = true;     // default
+Configuration.savePageSource = true;  // default; .xml for a native session
+Configuration.reportsFolder = "target/selenide-reports";
+
+$(AppiumBy.accessibilityId("Order total")).shouldHave(text("29.99"));
+// on failure: a .png and an .xml in target/selenide-reports, linked from the error`,
+    },
   ],
 };
