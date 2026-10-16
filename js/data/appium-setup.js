@@ -164,6 +164,43 @@ XCUITestOptions ios = new XCUITestOptions(capabilities)
   .setNoReset(true);`,
     },
     {
+      name: 'Mobile web (Chrome or Safari on a device)',
+      level: 'intermediate',
+      platform: 'mobile',
+      desc: 'Tests a website in the phone browser instead of a native app: the provider sets withBrowserName("Chrome") and no app, and the test calls open(url). From there it is ordinary Selenide with CSS selectors. For Safari, build XCUITestOptions with withBrowserName("Safari") and return an IOSDriver.',
+      tip: 'Set Configuration.browserSize = null before the first open(). Selenide resizes the window of every driver it creates while browserSize is set (default "1366x768"), one returned by your provider included, and only launchApp() clears it. open() does not.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Configuration.html#browserSize',
+      code: `import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.WebDriverProvider;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.options.UiAutomator2Options;
+import java.net.MalformedURLException;
+import java.net.URI;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.WebDriver;
+
+public class AndroidChromeProvider implements WebDriverProvider {
+  @Override
+  public WebDriver createDriver(Capabilities capabilities) {
+    UiAutomator2Options options = new UiAutomator2Options(capabilities)
+      .setDeviceName("Android Emulator")
+      .withBrowserName("Chrome");
+    try {
+      return new AndroidDriver(URI.create("http://127.0.0.1:4723").toURL(), options);
+    } catch (MalformedURLException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+}
+
+// in the test
+Configuration.browser = AndroidChromeProvider.class.getName();
+Configuration.browserSize = null; // otherwise Selenide calls window().setSize() on the phone
+open("https://example.com/login");
+$("#username").setValue("standard_user");
+$("h1").shouldHave(text("Dashboard"));`,
+    },
+    {
       name: 'SelenideAppium.launchApp()',
       level: 'beginner',
       platform: 'mobile',
@@ -204,6 +241,83 @@ mvn test -Dselenide.browser=com.example.mobile.IosDriverProvider
 
 # override one capability for this run (read by new UiAutomator2Options(capabilities))
 mvn test -Dselenide.browser=com.example.mobile.AndroidDriverProvider -Dcapabilities.appium:udid=emulator-5556`,
+    },
+    {
+      name: 'Parallel devices (one udid and port per thread)',
+      level: 'advanced',
+      platform: 'mobile',
+      desc: 'Runs tests on several devices at once. Selenide keeps one driver per thread and calls the provider in the thread that first needs it, so the provider can look up the device that belongs to the current thread and set its udid and port.',
+      tip: 'Every parallel Android session on one machine needs its own setSystemPort(): unset, UiAutomator2 takes the first free port from 8200..8299, and the javadoc recommends setting it for parallel tests on one machine. Each real iOS device needs its own setWdaLocalPort() (default 8100). Never share a device between threads. Configuration fields are static and shared by all threads, so per-device values cannot go in Configuration.browserCapabilities.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverProvider.html#createDriver(org.openqa.selenium.Capabilities)',
+      code: `import com.codeborne.selenide.WebDriverProvider;
+import com.codeborne.selenide.appium.SelenideAppium;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.options.UiAutomator2Options;
+import java.net.MalformedURLException;
+import java.net.URI;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.WebDriver;
+
+record Device(String udid, int systemPort) {
+  static final ThreadLocal<Device> CURRENT = new ThreadLocal<>();
+}
+
+public class ParallelAndroidProvider implements WebDriverProvider {
+  @Override
+  public WebDriver createDriver(Capabilities capabilities) {
+    Device device = Device.CURRENT.get();
+    UiAutomator2Options options = new UiAutomator2Options(capabilities)
+      .setUdid(device.udid())
+      .setSystemPort(device.systemPort())
+      .setApp("build/apps/shop-debug.apk");
+    try {
+      return new AndroidDriver(URI.create("http://127.0.0.1:4723").toURL(), options);
+    } catch (MalformedURLException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+}
+
+// in each test thread, before the first command (e.g. TestNG @Parameters in @BeforeMethod)
+Device.CURRENT.set(new Device("emulator-5556", 8202));
+SelenideAppium.launchApp();`,
+    },
+    {
+      name: 'Cloud devices (BrowserStack provider)',
+      level: 'advanced',
+      platform: 'mobile',
+      desc: 'Runs the same tests on a BrowserStack device: the provider points AndroidDriver at the BrowserStack hub and adds a bstack:options capability with the credentials and build name. Screens and tests do not change.',
+      tip: "This follows the provider selenide-appium uses for its own CI tests, which reads the access key from a system property, never from source. Map.of() rejects null values, so a missing -Dbs.key fails fast with a NullPointerException instead of an unauthorised session. selenide's BrowserstackExtension also reports each test result to the BrowserStack dashboard through executeJavaScript, because BrowserStack cannot see the JUnit outcome.",
+      docs: 'https://github.com/selenide/selenide/blob/v7.19.0/modules/appium/src/test/java/it/mobile/BrowserstackUtils.java',
+      code: `import com.codeborne.selenide.WebDriverProvider;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.options.UiAutomator2Options;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.Map;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.WebDriver;
+
+public class BrowserStackAndroidProvider implements WebDriverProvider {
+  @Override
+  public WebDriver createDriver(Capabilities capabilities) {
+    UiAutomator2Options options = new UiAutomator2Options(capabilities)
+      .setDeviceName("Google Pixel 8")
+      .setApp(System.getProperty("bs.app")); // the app reference of the uploaded build
+    options.setCapability("bstack:options", Map.of(
+      "userName", System.getProperty("bs.user"),
+      "accessKey", System.getProperty("bs.key"),
+      "projectName", "Shop app",
+      "buildName", System.getProperty("bs.build", "local")));
+    try {
+      return new AndroidDriver(URI.create("https://hub.browserstack.com/wd/hub").toURL(), options);
+    } catch (MalformedURLException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+}
+
+// mvn test -Dselenide.browser=com.example.BrowserStackAndroidProvider -Dbs.user=... -Dbs.key=... -Dbs.app=...`,
     },
     {
       name: 'MobileTestExtension (JUnit 5)',

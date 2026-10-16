@@ -155,4 +155,66 @@ test.describe('Appium Setup entries (selenide-appium 7.19.0)', () => {
     // the misspelling used in some blogs does not exist in java-client 11.0.0
     expect(entry.code).not.toContain('setUsePrebuiltWDA');
   });
+
+  test('"Mobile web (Chrome or Safari on a device)" clears browserSize before open()', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'Mobile web (Chrome or Safari on a device)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 remote/options/SupportsBrowserNameOption.java:39: default T withBrowserName(String browserName)
+    expect(entry.code).toContain('.withBrowserName("Chrome")');
+    // selenide-core 7.19.0 WebDriverFactory.java: factory.setBrowserSize(config, webdriver);
+    // BrowserResizer.java: if (browserSize != null) { ... driver.manage().window().setSize(dimension); }
+    const cleared = entry.code.indexOf('Configuration.browserSize = null;');
+    const opened = entry.code.indexOf('open("https://');
+    expect(cleared).toBeGreaterThan(-1);
+    expect(opened).toBeGreaterThan(cleared);
+    expect(entry.tip).toContain('launchApp()');
+    // a browser session has no app under test
+    expect(entry.code).not.toMatch(/\.setApp\(|\.setAppPackage\(|\.setBundleId\(/);
+  });
+
+  test('"Parallel devices (one udid and port per thread)" sets udid and systemPort per thread', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'Parallel devices (one udid and port per thread)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('mobile');
+    // java-client 11.0.0 remote/options/SupportsUdidOption.java: default T setUdid(String id)
+    expect(entry.code).toContain('.setUdid(device.udid())');
+    // java-client 11.0.0 android/options/server/SupportsSystemPortOption.java: default T setSystemPort(int port)
+    expect(entry.code).toContain('.setSystemPort(device.systemPort())');
+    expect(entry.code).toContain('ThreadLocal<Device>');
+    // SupportsSystemPortOption javadoc: "the first free port from 8200..8299 range is selected for UIA2"
+    expect(entry.tip).toContain('8200..8299');
+    // SupportsWdaLocalPortOption javadoc: default 8100
+    expect(entry.tip).toContain('setWdaLocalPort()');
+    // selenide 7.19.0 Configuration.java: static fields, shared by every thread
+    expect(entry.code).not.toContain('Configuration.browserCapabilities');
+  });
+
+  test('"Cloud devices (BrowserStack provider)" mirrors selenide\'s own CI provider', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, CAT, 'Cloud devices (BrowserStack provider)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('mobile');
+    // selenide v7.19.0 modules/appium/src/test/java/it/mobile/BrowserstackUtils.java: "https://hub.browserstack.com/wd/hub"
+    expect(entry.code).toContain('"https://hub.browserstack.com/wd/hub"');
+    // it/mobile/android/driverproviders/ci/AndroidDriverProvider.java: options.setCapability("bstack:options", ...)
+    expect(entry.code).toContain('options.setCapability("bstack:options", Map.of(');
+    // BrowserstackUtils.java getBrowserstackOptions(): userName, accessKey, projectName, buildName
+    for (const key of ['"userName"', '"accessKey"', '"projectName"', '"buildName"']) {
+      expect(entry.code).toContain(key);
+    }
+    // BrowserstackUtils.java reads the key with System.getProperty: never a literal in source
+    expect(entry.code).toMatch(/"accessKey", System\.getProperty\("[\w.]+"\)/);
+    expect(entry.docs).toBe(
+      'https://github.com/selenide/selenide/blob/v7.19.0/modules/appium/src/test/java/it/mobile/BrowserstackUtils.java'
+    );
+  });
 });
