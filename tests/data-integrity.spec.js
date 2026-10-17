@@ -35,30 +35,40 @@ test.describe('Data integrity', () => {
     });
   }
 
-  // Javadoc gap fill (plan 2026-10-17): the 25 entries added from the 7.19.0 Javadoc.
+  // Javadoc gap fill (plan 2026-10-17): the 25 tiles added from the 7.19.0 Javadoc, now split into one tile per method.
   const gapFillNames = [
-    'getText() and text()',
-    'val() and getValue()',
+    'getText()',
+    'text() (getter)',
+    'val()',
+    'getValue()',
     'getAttribute()',
-    'innerHtml() and getOwnText()',
-    'exists() and isDisplayed()',
+    'innerHtml()',
+    'getOwnText()',
+    'exists()',
+    'isDisplayed()',
     'texts()',
-    'getSelectedOptionText() and getSelectedOptionValue()',
-    'getOptions() and getSelectedOptions()',
+    'getSelectedOptionText()',
+    'getSelectedOptionValue()',
+    'getOptions()',
+    'getSelectedOptions()',
     'getSelectedRadio()',
-    'url() and source()',
+    'url()',
+    'source()',
     'updateHash()',
     'zoom()',
-    'byLinkText() and byPartialLinkText()',
+    'byLinkText()',
+    'byPartialLinkText()',
     'byLabel()',
     'getFocusedElement()',
     'switchTo().alert()',
     'switchTo().newWindow()',
     'actions()',
-    'toWebElement() and getWrappedElement()',
+    'toWebElement()',
+    'getWrappedElement()',
     'cached()',
     'getWebDriverLogs()',
-    'emulateDevice() and resetEmulation()',
+    'emulateDevice()',
+    'resetEmulation()',
     'atBottom()',
     'downloadFiles(DownloadOptions)',
     'Configuration.browserBinary',
@@ -66,7 +76,7 @@ test.describe('Data integrity', () => {
 
   test('Javadoc gap fill entries avoid deprecated APIs', () => {
     const found = data.flatMap((c) => c.items).filter((i) => gapFillNames.includes(i.name));
-    expect(found.length).toBe(25);
+    expect(found.length).toBe(gapFillNames.length);
     // selenide 7.19.0 Selenide.java:1071,1085 clearBrowserCookies() and clearBrowserLocalStorage()
     // are @Deprecated(since = "7.17.0"); Configuration.java:65-75 holdBrowserOpen is @Deprecated.
     for (const item of found) {
@@ -80,11 +90,15 @@ test.describe('Data integrity', () => {
     const byName = (n) => data.flatMap((c) => c.items).find((i) => i.name === n);
     // SelenideElement.java 7.19.0 links NOT RECOMMENDED (do-not-use-getters-in-tests) on all of these.
     for (const n of [
-      'val() and getValue()',
+      'val()',
+      'getValue()',
       'getAttribute()',
-      'innerHtml() and getOwnText()',
-      'exists() and isDisplayed()',
-      'getSelectedOptionText() and getSelectedOptionValue()',
+      'innerHtml()',
+      'getOwnText()',
+      'exists()',
+      'isDisplayed()',
+      'getSelectedOptionText()',
+      'getSelectedOptionValue()',
     ]) {
       expect(byName(n).tip, n).toContain('NOT RECOMMENDED');
     }

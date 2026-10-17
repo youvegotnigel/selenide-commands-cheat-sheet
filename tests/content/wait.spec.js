@@ -7,6 +7,7 @@ test.describe('Waits & Timeouts entries (Selenide 7.19.0)', () => {
   });
 
   test('"Wait() (SelenideWait)" exists at level advanced, platform both', async ({ page }) => {
+    await page.goto('/');
     const entry = await itemIn(page, 'Waits & Timeouts', 'Wait() (SelenideWait)');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('advanced');
@@ -20,6 +21,7 @@ test.describe('Waits & Timeouts entries (Selenide 7.19.0)', () => {
   });
 
   test('"is(condition, Duration)" exists at level advanced, platform both', async ({ page }) => {
+    await page.goto('/');
     const entry = await itemIn(page, 'Waits & Timeouts', 'is(condition, Duration)');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('advanced');
@@ -29,6 +31,7 @@ test.describe('Waits & Timeouts entries (Selenide 7.19.0)', () => {
   });
 
   test('"sleep(milliseconds)" exists at level intermediate, platform both', async ({ page }) => {
+    await page.goto('/');
     const entry = await itemIn(page, 'Waits & Timeouts', 'sleep(milliseconds)');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
@@ -42,6 +45,7 @@ test.describe('Waits & Timeouts entries (Selenide 7.19.0)', () => {
   test('"webdriver().shouldHave(condition, Duration)" exists at level intermediate, platform web', async ({
     page,
   }) => {
+    await page.goto('/');
     const entry = await itemIn(
       page,
       'Waits & Timeouts',
@@ -57,6 +61,7 @@ test.describe('Waits & Timeouts entries (Selenide 7.19.0)', () => {
   });
 
   test('no entry uses the removed waitUntil() or waitWhile()', async ({ page }) => {
+    await page.goto('/');
     const items = await page.evaluate(
       () => window.categories.find((c) => c.cat === 'Waits & Timeouts')?.items ?? []
     );
@@ -71,21 +76,75 @@ test.describe('Waits & Timeouts entries (Selenide 7.19.0)', () => {
 });
 
 test.describe('Javadoc gap fill: exists and isDisplayed (Selenide 7.19.0)', () => {
-  test('"exists() and isDisplayed()" exists at level beginner, platform both', async ({ page }) => {
+  test('"is(condition)" exists at level intermediate, platform both', async ({ page }) => {
     await page.goto('/');
-    const entry = await itemIn(page, 'Waits & Timeouts', 'exists() and isDisplayed()');
+    const entry = await itemIn(page, 'Waits & Timeouts', 'is(condition)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#is(com.codeborne.selenide.WebElementCondition)'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:389 boolean is(WebElementCondition condition);
+    expect(entry.code).toContain('.is(visible)');
+    expect(entry.tip).toContain('hidden');
+    expect(entry.tip).toContain('should*');
+  });
+
+  test('"has(condition)" exists at level intermediate, platform both', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Waits & Timeouts', 'has(condition)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#has(com.codeborne.selenide.WebElementCondition)'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:420 boolean has(WebElementCondition condition);
+    expect(entry.code).toContain('.has(text(');
+    expect(entry.tip).toContain('should*');
+  });
+
+  test('"exists()" exists at level beginner, platform both', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Waits & Timeouts', 'exists()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('beginner');
     expect(entry.platform).toBe('both');
     expect(entry.docs).toBe(
       'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#exists()'
     );
-    // selenide-core 7.19.0 SelenideElement.java: boolean exists(); boolean isDisplayed();
+    // selenide-core 7.19.0 SelenideElement.java: boolean exists(); commands/Exists.java returns false when the element is missing
     expect(entry.code).toContain('.exists()');
-    expect(entry.code).toContain('.isDisplayed()');
     expect(entry.code).not.toContain('assertTrue(');
-    // commands/Exists.java and IsDisplayed.java return false when the element is missing.
+    expect(entry.tip).toContain('NOT RECOMMENDED');
     expect(entry.tip).toContain('false');
     expect(entry.tip).toContain('is(');
+  });
+
+  test('"isDisplayed()" exists at level beginner, platform both', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Waits & Timeouts', 'isDisplayed()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#isDisplayed()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: boolean isDisplayed(); commands/IsDisplayed.java returns false when the element is missing
+    expect(entry.code).toContain('.isDisplayed()');
+    expect(entry.code).not.toContain('assertTrue(');
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+    expect(entry.tip).toContain('false');
+    expect(entry.tip).toContain('is(');
+  });
+
+  test('the combined tiles are gone: is(condition) and has(condition), exists() and isDisplayed()', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    for (const name of ['is(condition) and has(condition)', 'exists() and isDisplayed()']) {
+      expect(await itemIn(page, 'Waits & Timeouts', name)).toBeNull();
+    }
   });
 });

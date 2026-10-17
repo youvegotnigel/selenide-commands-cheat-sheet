@@ -176,19 +176,40 @@ test.describe('Mobile Selectors entries (selenide-appium 7.19.0)', () => {
     expect(entry.code).toMatch(/SelenideAppiumCollection \w+ = \$\$\(/);
   });
 
-  test('"SelenideAppium.element() and elements()" exists at level intermediate, platform mobile', async ({
+  test('"SelenideAppium.element()" exists at level intermediate, platform mobile', async ({
     page,
   }) => {
-    const entry = await itemIn(page, CAT, 'SelenideAppium.element() and elements()');
+    const entry = await itemIn(page, 'Mobile Selectors', 'SelenideAppium.element()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('mobile');
-    // selenide-appium 7.19.0 SelenideAppium.java: public static SelenideAppiumElement element(By seleniumSelector)
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppium.html#element(org.openqa.selenium.By)'
+    );
+    // selenide-appium 7.19.0 SelenideAppium.java: public static SelenideAppiumElement element(By seleniumSelector); Javadoc "usable without backticks in Kotlin page objects"
     expect(entry.code).toContain('SelenideAppiumElement login = element(');
+    expect(entry.tip).toContain('Kotlin');
+  });
+
+  test('"SelenideAppium.elements()" exists at level intermediate, platform mobile', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Mobile Selectors', 'SelenideAppium.elements()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppium.html#elements(org.openqa.selenium.By)'
+    );
     // selenide-appium 7.19.0 SelenideAppium.java: public static SelenideAppiumCollection elements(By selector)
     expect(entry.code).toContain('SelenideAppiumCollection fields = elements(');
-    // SelenideAppium.java Javadoc: "usable without backticks in Kotlin page objects"
     expect(entry.tip).toContain('Kotlin');
+  });
+
+  test('the combined tiles are gone: SelenideAppium.element() and elements()', async ({ page }) => {
+    for (const name of ['SelenideAppium.element() and elements()']) {
+      expect(await itemIn(page, 'Mobile Selectors', name)).toBeNull();
+    }
   });
 
   test('"Fluent chain with smart waits" exists at level beginner, platform mobile', async ({

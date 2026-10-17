@@ -107,16 +107,25 @@ public class ReplaceText extends FluentCommand {
 $("#search").execute(replaceText("selenide")).pressEnter();`,
     },
     {
-      name: 'toWebElement() and getWrappedElement()',
+      name: 'toWebElement()',
       level: 'advanced',
       platform: 'both',
-      desc: 'Return the Selenium WebElement behind a SelenideElement, for libraries and Selenium APIs that need the raw element.',
-      tip: 'toWebElement() throws NoSuchElementException at once if the element is missing. getWrappedElement() waits up to Configuration.timeout and throws Selenide ElementNotFound. The raw element is not retried afterwards.',
+      desc: 'Returns the Selenium WebElement behind a SelenideElement, for libraries and Selenium APIs that need the raw element.',
+      tip: 'It throws NoSuchElementException at once if the element is missing, without waiting. The raw element is not retried afterwards. getWrappedElement() does the same but waits first.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#toWebElement()',
       code: `import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
 
-WebElement raw = $("#chart").toWebElement();
+WebElement raw = $("#chart").toWebElement();`,
+    },
+    {
+      name: 'getWrappedElement()',
+      level: 'advanced',
+      platform: 'both',
+      desc: 'Returns the Selenium WebElement behind a SelenideElement, for libraries and Selenium APIs that need the raw element.',
+      tip: 'It waits up to Configuration.timeout and throws Selenide ElementNotFound if the element is still missing. The raw element is not retried afterwards. toWebElement() fails at once instead.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getWrappedElement()',
+      code: `import org.openqa.selenium.support.ui.Select;
+
 Select select = new Select($("#country").getWrappedElement());`,
     },
     {

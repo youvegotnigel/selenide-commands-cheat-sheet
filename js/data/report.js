@@ -44,49 +44,74 @@ String base64 = screenshot(OutputType.BASE64);
 File temporary = screenshot(OutputType.FILE);`,
     },
     {
-      name: 'screenshot() and screenshotAsImage()',
+      name: 'screenshot() (element)',
       level: 'intermediate',
       platform: 'web',
-      desc: 'Captures just one element. screenshot() saves a PNG into reportsFolder and returns the File; screenshotAsImage() returns a BufferedImage without saving anything.',
-      tip: 'The element must be visible: when WebDriver refuses (for example a hidden element) both throw RuntimeException "Cannot take screenshot", although the Javadoc of screenshot() mentions null. The file is named <timestamp>.<counter>.png. For an element inside a frame use Screenshots.takeScreenShot(iframe, element).',
+      desc: 'Captures just one element: it saves a PNG into reportsFolder and returns the File.',
+      tip: 'The element must be visible: when WebDriver refuses (for example a hidden element) it throws RuntimeException "Cannot take screenshot", although the Javadoc mentions null. The file is named <timestamp>.<counter>.png. For an element inside a frame use Screenshots.takeScreenShot(iframe, element).',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#screenshot()',
-      code: `import java.awt.image.BufferedImage;
-import java.io.File;
+      code: `import java.io.File;
 
 File logo = $("#logo").screenshot();
-// build/reports/tests/<timestamp>.<counter>.png
+// build/reports/tests/<timestamp>.<counter>.png`,
+    },
+    {
+      name: 'screenshotAsImage()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Captures just one element and returns it as a BufferedImage, without saving anything.',
+      tip: 'The element must be visible: when WebDriver refuses (for example a hidden element) it throws RuntimeException "Cannot take screenshot". Use screenshot() on the element when you want a file in reportsFolder.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#screenshotAsImage()',
+      code: `import java.awt.image.BufferedImage;
 
 BufferedImage chart = $("#sales-chart").screenshotAsImage();
 int width = chart.getWidth();`,
     },
     {
-      name: 'as() and describe()',
+      name: 'as()',
       level: 'intermediate',
       platform: 'both',
-      desc: 'as("name") gives an element or collection a readable name for error messages and reports. describe() returns the element as HTML-like text with its attributes, for logging while debugging.',
-      tip: 'The alias is shown in quotes but the selector is still printed in braces, so the message stays traceable. An empty alias throws IllegalArgumentException. describe() never throws: for a missing element it returns the "not found" message instead. Page object fields can use @As (Page Objects).',
+      desc: 'Gives an element or collection a readable name for error messages and reports.',
+      tip: 'The alias is shown in quotes but the selector is still printed in braces, so the message stays traceable. An empty alias throws IllegalArgumentException. Page object fields can use @As (Page Objects).',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#as(java.lang.String)',
       code: `import com.codeborne.selenide.SelenideElement;
 
 SelenideElement pay = $("#checkout > button.primary").as("Pay button");
 pay.shouldBe(visible);
-// Element "Pay button" should be visible {#checkout > button.primary}
-
-System.out.println($("#pay").describe());
+// Element "Pay button" should be visible {#checkout > button.primary}`,
+    },
+    {
+      name: 'describe()',
+      level: 'intermediate',
+      platform: 'both',
+      desc: 'Returns the element as HTML-like text with its attributes, for logging while debugging.',
+      tip: 'It never throws: for a missing element it returns the "not found" message instead. It is meant for logging, not for assertions. Use as() to name an element in failure messages.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#describe()',
+      code: `System.out.println($("#pay").describe());
 // <button class="primary" id="pay" displayed:false></button>`,
     },
     {
-      name: 'highlight() and unhighlight()',
+      name: 'highlight()',
       level: 'beginner',
       platform: 'web',
-      desc: 'Paints an element (a gradient background by default) so you can see what a locator matched in the browser, a screenshot or a video. unhighlight() restores the original look.',
+      desc: 'Paints an element (a gradient background by default) so you can see what a locator matched in the browser, a screenshot or a video.',
       tip: 'It runs JavaScript that replaces the whole style attribute and keeps the old value in data-original-style, so inline styles such as display are gone until unhighlight(). Highlighting the same element twice stores the highlight as the original, and unhighlight() can then no longer restore it.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#highlight(com.codeborne.selenide.HighlightOptions)',
       code: `import com.codeborne.selenide.HighlightOptions;
 
 $("#pay").highlight();
 $("#total").highlight(HighlightOptions.border("2px solid red"));
-screenshot("pay-and-total");
+screenshot("pay-and-total");`,
+    },
+    {
+      name: 'unhighlight()',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Restores the original look of an element that highlight() painted.',
+      tip: 'It puts back the style saved in data-original-style. After a second highlight() on the same element the saved style is the highlight itself, so unhighlight() can no longer restore the real one.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#unhighlight()',
+      code: `$("#total").highlight();
+screenshot("total-highlighted");
 $("#total").unhighlight();`,
     },
     {

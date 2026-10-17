@@ -119,4 +119,35 @@ test.describe('Javadoc gap fill: alert and new window (Selenide 7.19.0)', () => 
     expect(entry.code).toContain('switchTo().newWindow(WindowType.TAB)');
     expect(entry.code).toContain('import org.openqa.selenium.WindowType;');
   });
+  test('"switchTo().parentFrame()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Windows, Frames, Alerts', 'switchTo().parentFrame()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideTargetLocator.html#parentFrame()'
+    );
+    // selenide-core 7.19.0 SelenideTargetLocator.java parentFrame()
+    expect(entry.code).toContain('switchTo().parentFrame()');
+    expect(entry.tip).toContain('ElementNotFound');
+  });
+
+  test('"switchTo().defaultContent()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Windows, Frames, Alerts', 'switchTo().defaultContent()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideTargetLocator.html#defaultContent()'
+    );
+    // selenide-core 7.19.0 SelenideTargetLocator.java defaultContent()
+    expect(entry.code).toContain('switchTo().defaultContent()');
+    expect(entry.tip).toContain('ElementNotFound');
+  });
+
+  test('the combined tiles are gone: parentFrame() and defaultContent()', async ({ page }) => {
+    for (const name of ['parentFrame() and defaultContent()']) {
+      expect(await itemIn(page, 'Windows, Frames, Alerts', name)).toBeNull();
+    }
+  });
 });

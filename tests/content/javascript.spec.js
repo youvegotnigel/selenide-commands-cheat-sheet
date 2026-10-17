@@ -7,6 +7,7 @@ test.describe('JavaScript, Storage, Clipboard entries (Selenide 7.19.0)', () => 
   });
 
   test('"executeJavaScript()" exists at level beginner, platform web', async ({ page }) => {
+    await page.goto('/');
     const entry = await itemIn(page, 'JavaScript, Storage, Clipboard', 'executeJavaScript()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('beginner');
@@ -21,6 +22,7 @@ test.describe('JavaScript, Storage, Clipboard entries (Selenide 7.19.0)', () => 
   });
 
   test('"clock().setFixedTime()" exists at level intermediate, platform web', async ({ page }) => {
+    await page.goto('/');
     const entry = await itemIn(page, 'JavaScript, Storage, Clipboard', 'clock().setFixedTime()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
@@ -35,6 +37,7 @@ test.describe('JavaScript, Storage, Clipboard entries (Selenide 7.19.0)', () => 
   });
 
   test('"clock().setTimezone()" exists at level intermediate, platform web', async ({ page }) => {
+    await page.goto('/');
     const entry = await itemIn(page, 'JavaScript, Storage, Clipboard', 'clock().setTimezone()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
@@ -50,6 +53,7 @@ test.describe('JavaScript, Storage, Clipboard entries (Selenide 7.19.0)', () => 
   });
 
   test('"clipboard()" exists at level intermediate, platform web', async ({ page }) => {
+    await page.goto('/');
     const entry = await itemIn(page, 'JavaScript, Storage, Clipboard', 'clipboard()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
@@ -66,6 +70,7 @@ test.describe('JavaScript, Storage, Clipboard entries (Selenide 7.19.0)', () => 
   });
 
   test('"paste()" exists at level beginner, platform web', async ({ page }) => {
+    await page.goto('/');
     const entry = await itemIn(page, 'JavaScript, Storage, Clipboard', 'paste()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('beginner');
@@ -77,6 +82,7 @@ test.describe('JavaScript, Storage, Clipboard entries (Selenide 7.19.0)', () => 
   });
 
   test('"cookies()" exists at level intermediate, platform web', async ({ page }) => {
+    await page.goto('/');
     const entry = await itemIn(page, 'JavaScript, Storage, Clipboard', 'cookies()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
@@ -96,27 +102,40 @@ test.describe('JavaScript, Storage, Clipboard entries (Selenide 7.19.0)', () => 
 });
 
 test.describe('Javadoc gap fill: device emulation (Selenide 7.19.0)', () => {
-  test('"emulateDevice() and resetEmulation()" exists at level advanced, platform web', async ({
-    page,
-  }) => {
+  test('"emulateDevice()" exists at level advanced, platform web', async ({ page }) => {
     await page.goto('/');
-    const entry = await itemIn(
-      page,
-      'JavaScript, Storage, Clipboard',
-      'emulateDevice() and resetEmulation()'
-    );
+    const entry = await itemIn(page, 'JavaScript, Storage, Clipboard', 'emulateDevice()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('advanced');
     expect(entry.platform).toBe('web');
     expect(entry.docs).toBe(
       'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#emulateDevice(com.codeborne.selenide.Device)'
     );
-    // selenide-7.19.0 Selenide.java:149 emulateDevice(Device device), :153 resetEmulation()
-    // selenide-core 7.19.0 Device.java:6 public static final Device PIXEL_7
+    // selenide-7.19.0 Selenide.java:149 emulateDevice(Device device); selenide-core 7.19.0 Device.java:6 public static final Device PIXEL_7; SelenideDriver.java throws UnsupportedOperationException outside Chromium and BiDi Firefox
     expect(entry.code).toContain('emulateDevice(Device.PIXEL_7)');
-    expect(entry.code).toContain('resetEmulation()');
     expect(entry.code).toContain('import com.codeborne.selenide.Device;');
-    // SelenideDriver.java:526-562 throws UnsupportedOperationException outside Chromium and BiDi Firefox.
     expect(entry.tip).toContain('UnsupportedOperationException');
+  });
+
+  test('"resetEmulation()" exists at level advanced, platform web', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'JavaScript, Storage, Clipboard', 'resetEmulation()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#resetEmulation()'
+    );
+    // selenide-7.19.0 Selenide.java:153 resetEmulation(); SelenideDriver.java resetEmulation() throws UnsupportedOperationException outside Chromium and BiDi Firefox
+    expect(entry.code).toContain('resetEmulation()');
+    expect(entry.tip).toContain('UnsupportedOperationException');
+    expect(entry.tip).toContain('emulateDevice()');
+  });
+
+  test('the combined tiles are gone: emulateDevice() and resetEmulation()', async ({ page }) => {
+    await page.goto('/');
+    for (const name of ['emulateDevice() and resetEmulation()']) {
+      expect(await itemIn(page, 'JavaScript, Storage, Clipboard', name)).toBeNull();
+    }
   });
 });

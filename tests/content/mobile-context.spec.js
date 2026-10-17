@@ -62,9 +62,7 @@ test.describe('Mobile Context & App entries (selenide-appium 7.19.0)', () => {
     expect(entry.tip).toContain('SAFARI_ELEMENTS_TIMEOUT');
   });
 
-  test('"SelenideAppium.relaunchApp()" and the lifecycle entry use the 7.19.0 signatures', async ({
-    page,
-  }) => {
+  test('"SelenideAppium.relaunchApp()" uses the 7.19.0 signature', async ({ page }) => {
     const relaunch = await itemIn(page, CAT, 'SelenideAppium.relaunchApp()');
     expect(relaunch).not.toBeNull();
     expect(relaunch.level).toBe('intermediate');
@@ -75,19 +73,6 @@ test.describe('Mobile Context & App entries (selenide-appium 7.19.0)', () => {
     );
     // selenide-appium 7.19.0 AppiumNavigator.java: if (mobileDriver instanceof AndroidDriver androidDriver && timeout != null) {
     expect(relaunch.tip).toMatch(/Android/);
-
-    const lifecycle = await itemIn(page, CAT, 'App lifecycle: terminateApp(), activateApp()');
-    expect(lifecycle).not.toBeNull();
-    expect(lifecycle.level).toBe('intermediate');
-    expect(lifecycle.platform).toBe('mobile');
-    // selenide-appium 7.19.0 SelenideAppium.java: public static void launchApp() {
-    expect(lifecycle.code).toContain('SelenideAppium.launchApp();');
-    // selenide-appium 7.19.0 SelenideAppium.java: public static void terminateApp(String appId) {
-    expect(lifecycle.code).toMatch(/SelenideAppium\.terminateApp\("[\w.]+"\)/);
-    // selenide-appium 7.19.0 SelenideAppium.java: public static void activateApp(String appId) {
-    expect(lifecycle.code).toMatch(/SelenideAppium\.activateApp\("[\w.]+"\)/);
-    // no such methods on SelenideAppium 7.19.0
-    expect(lifecycle.code).not.toMatch(/closeApp|resetApp|runAppInBackground/);
   });
 
   test('"AppiumCondition.attribute()" builds a CombinedAttribute with android() then ios()', async ({
@@ -162,5 +147,49 @@ test.describe('Mobile Context & App entries (selenide-appium 7.19.0)', () => {
     expect(entry.code).toContain('Configuration.savePageSource = true;');
     // AppiumElementDescriber.androidAttributes(): "resource-id", ..., "content-desc"
     expect(entry.tip).toMatch(/resource-id/);
+  });
+  test('"SelenideAppium.terminateApp()" exists at level intermediate, platform mobile', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Mobile Context & App', 'SelenideAppium.terminateApp()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppium.html#terminateApp(java.lang.String)'
+    );
+    // selenide-appium 7.19.0 SelenideAppium.java: public static void terminateApp(String appId) {; public static void launchApp() {
+    expect(entry.code).toContain('SelenideAppium.launchApp();');
+    expect(entry.code).not.toContain('closeApp');
+    expect(entry.code).not.toContain('resetApp');
+    expect(entry.code).not.toContain('runAppInBackground');
+    expect(entry.tip).toContain('IllegalStateException');
+    expect(entry.tip).toContain('closeWebDriver()');
+  });
+
+  test('"SelenideAppium.activateApp()" exists at level intermediate, platform mobile', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Mobile Context & App', 'SelenideAppium.activateApp()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppium.html#activateApp(java.lang.String)'
+    );
+    // selenide-appium 7.19.0 SelenideAppium.java: public static void activateApp(String appId) {
+    expect(entry.code).not.toContain('closeApp');
+    expect(entry.code).not.toContain('resetApp');
+    expect(entry.code).not.toContain('runAppInBackground');
+    expect(entry.tip).toContain('IllegalStateException');
+    expect(entry.tip).toContain('launchApp()');
+  });
+
+  test('the combined tiles are gone: App lifecycle: terminateApp(), activateApp()', async ({
+    page,
+  }) => {
+    for (const name of ['App lifecycle: terminateApp(), activateApp()']) {
+      expect(await itemIn(page, 'Mobile Context & App', name)).toBeNull();
+    }
   });
 });

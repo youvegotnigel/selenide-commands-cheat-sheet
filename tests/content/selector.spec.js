@@ -27,34 +27,73 @@ test.describe('Selectors entries (Selenide 7.19.0)', () => {
     expect(entry.code).toMatch(/shadowDeepCss\("[^",]+"\)/);
   });
 
-  test('"closest() and ancestor()" exists at level intermediate, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Selectors', 'closest() and ancestor()');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('intermediate');
-    expect(entry.platform).toBe('web');
-    // selenide-core 7.19.0 SelenideElement.java: SelenideElement closest(String selector);
-    expect(entry.code).toContain('.closest("table")');
-    // selenide-core 7.19.0 SelenideElement.java: SelenideElement ancestor(String selector, int index);
-    expect(entry.code).toContain('.ancestor(".panel", 1)');
-    // closest has no index overload in 7.19.0 (only closest(String)), although the
-    // ancestor() Javadoc mentions closest("selector", 0).
-    expect(entry.code).not.toMatch(/closest\("[^"]*",/);
+  const relatives = [
+    {
+      name: 'parent()',
+      call: '.parent()',
+      // selenide-core 7.19.0 SelenideElement.java: SelenideElement parent(); GetParent.java: By.xpath("..")
+      source: 'parent()',
+    },
+    {
+      name: 'lastChild()',
+      call: '.lastChild()',
+      // selenide-core 7.19.0 SelenideElement.java: SelenideElement lastChild(); GetLastChild.java: xpath "*[last()]"
+      source: 'lastChild()',
+    },
+    {
+      name: 'closest()',
+      call: '.closest("table")',
+      // selenide-core 7.19.0 SelenideElement.java: SelenideElement closest(String selector);
+      source: 'closest(String)',
+    },
+    {
+      name: 'ancestor()',
+      call: '.ancestor(".panel", 1)',
+      // selenide-core 7.19.0 SelenideElement.java: SelenideElement ancestor(String selector, int index);
+      source: 'ancestor(String, int)',
+    },
+    {
+      name: 'sibling()',
+      call: '.sibling(0)',
+      // selenide-core 7.19.0 SelenideElement.java: SelenideElement sibling(int index);
+      // GetSibling.java: following-sibling::*[index + 1], so index 0 is the nearest
+      source: 'sibling(int)',
+    },
+    {
+      name: 'preceding()',
+      call: '.preceding(0)',
+      // selenide-core 7.19.0 SelenideElement.java: SelenideElement preceding(int index);
+      // GetPreceding.java: preceding-sibling::*[index + 1]
+      source: 'preceding(int)',
+    },
+  ];
+
+  for (const { name, call } of relatives) {
+    test(`"${name}" exists at level intermediate, platform web`, async ({ page }) => {
+      const entry = await itemIn(page, 'Selectors', name);
+      expect(entry).not.toBeNull();
+      expect(entry.level).toBe('intermediate');
+      expect(entry.platform).toBe('web');
+      expect(entry.code).toContain(call);
+    });
+  }
+
+  test('the combined relative-element tiles are gone', async ({ page }) => {
+    for (const name of [
+      'parent() and lastChild()',
+      'closest() and ancestor()',
+      'sibling() and preceding()',
+    ]) {
+      expect(await itemIn(page, 'Selectors', name)).toBeNull();
+    }
   });
 
-  test('"sibling() and preceding()" exists at level intermediate, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Selectors', 'sibling() and preceding()');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('intermediate');
-    expect(entry.platform).toBe('web');
-    // selenide-core 7.19.0 SelenideElement.java: SelenideElement sibling(int index);
-    // GetSibling.java: int siblingIndex = (int) firstOf(args) + 1; so index 0 is the nearest
-    expect(entry.code).toContain('.sibling(0)');
-    // selenide-core 7.19.0 SelenideElement.java: SelenideElement preceding(int index);
-    expect(entry.code).toContain('.preceding(0)');
+  test('"closest()" has no index overload; "ancestor()" does', async ({ page }) => {
+    const closest = await itemIn(page, 'Selectors', 'closest()');
+    const ancestor = await itemIn(page, 'Selectors', 'ancestor()');
+    // SelenideElement.java declares only closest(String selector), but ancestor(String, int).
+    expect(closest.code).not.toMatch(/closest\("[^"]*",/);
+    expect(ancestor.code).toMatch(/ancestor\("[^"]*", \d\)/);
   });
 
   test('"byTestId()" exists at level intermediate, platform web', async ({ page }) => {
@@ -91,20 +130,38 @@ test.describe('Javadoc gap fill: link text and label selectors (Selenide 7.19.0)
     await page.goto('/');
   });
 
-  test('"byLinkText() and byPartialLinkText()" exists at level beginner, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Selectors', 'byLinkText() and byPartialLinkText()');
+  test('"byLinkText()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Selectors', 'byLinkText()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('beginner');
     expect(entry.platform).toBe('web');
     expect(entry.docs).toBe(
       'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byLinkText(java.lang.String)'
     );
-    // selenide-core 7.19.0 Selectors.java:296 byLinkText(String linkText), :303 byPartialLinkText(String)
+    // selenide-core 7.19.0 Selectors.java:296 byLinkText(String linkText)
     expect(entry.code).toContain('byLinkText("');
+    expect(entry.code).toContain('import static com.codeborne.selenide.Selectors.');
+    expect(entry.tip).toContain('By.linkText()');
+  });
+
+  test('"byPartialLinkText()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Selectors', 'byPartialLinkText()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byPartialLinkText(java.lang.String)'
+    );
+    // selenide-core 7.19.0 Selectors.java:303 byPartialLinkText(String)
     expect(entry.code).toContain('byPartialLinkText("');
     expect(entry.code).toContain('import static com.codeborne.selenide.Selectors.');
+    expect(entry.tip).toContain('By.partialLinkText()');
+  });
+
+  test('the combined tiles are gone: byLinkText() and byPartialLinkText()', async ({ page }) => {
+    for (const name of ['byLinkText() and byPartialLinkText()']) {
+      expect(await itemIn(page, 'Selectors', name)).toBeNull();
+    }
   });
 
   test('"byLabel()" exists at level intermediate, platform web', async ({ page }) => {

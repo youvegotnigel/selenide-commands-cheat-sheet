@@ -117,14 +117,8 @@ test.describe('Javadoc gap fill: select and radio getters (Selenide 7.19.0)', ()
     await page.goto('/');
   });
 
-  test('"getSelectedOptionText() and getSelectedOptionValue()" exists at level beginner, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(
-      page,
-      'Actions',
-      'getSelectedOptionText() and getSelectedOptionValue()'
-    );
+  test('"getSelectedOptionText()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Actions', 'getSelectedOptionText()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('beginner');
     expect(entry.platform).toBe('web');
@@ -132,17 +126,29 @@ test.describe('Javadoc gap fill: select and radio getters (Selenide 7.19.0)', ()
       'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getSelectedOptionText()'
     );
     // selenide-core 7.19.0 SelenideElement.java:1056 String getSelectedOptionText();
-    // and :1038 String getSelectedOptionValue();
     expect(entry.code).toContain('getSelectedOptionText()');
-    expect(entry.code).toContain('getSelectedOptionValue()');
-    // Selenide.getSelectedText() is the selected page text, a different method.
     expect(entry.code).not.toContain('getSelectedText()');
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+    expect(entry.tip).toContain('IllegalArgumentException');
   });
 
-  test('"getOptions() and getSelectedOptions()" exists at level intermediate, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Actions', 'getOptions() and getSelectedOptions()');
+  test('"getSelectedOptionValue()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Actions', 'getSelectedOptionValue()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getSelectedOptionValue()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:1038 String getSelectedOptionValue();
+    expect(entry.code).toContain('getSelectedOptionValue()');
+    expect(entry.code).not.toContain('getSelectedText()');
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+    expect(entry.tip).toContain('null');
+  });
+
+  test('"getOptions()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Actions', 'getOptions()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('web');
@@ -150,9 +156,32 @@ test.describe('Javadoc gap fill: select and radio getters (Selenide 7.19.0)', ()
       'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getOptions()'
     );
     // selenide-core 7.19.0 SelenideElement.java:1016 ElementsCollection getOptions();
-    // and :1001 ElementsCollection getSelectedOptions();
     expect(entry.code).toContain('.getOptions().shouldHave(size(');
+    expect(entry.tip).toContain('lazy');
+  });
+
+  test('"getSelectedOptions()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Actions', 'getSelectedOptions()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getSelectedOptions()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:1001 ElementsCollection getSelectedOptions();
     expect(entry.code).toContain('.getSelectedOptions()');
+    expect(entry.tip).toContain('multiple select');
+  });
+
+  test('the combined tiles are gone: getSelectedOptionText() and getSelectedOptionValue(), getOptions() and getSelectedOptions()', async ({
+    page,
+  }) => {
+    for (const name of [
+      'getSelectedOptionText() and getSelectedOptionValue()',
+      'getOptions() and getSelectedOptions()',
+    ]) {
+      expect(await itemIn(page, 'Actions', name)).toBeNull();
+    }
   });
 
   test('"getSelectedRadio()" exists at level intermediate, platform web', async ({ page }) => {

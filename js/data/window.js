@@ -93,16 +93,26 @@ $("h1").shouldHave(text("Preview"));
 switchTo().defaultContent();`,
     },
     {
-      name: 'parentFrame() and defaultContent()',
+      name: 'switchTo().parentFrame()',
       level: 'beginner',
       platform: 'web',
-      desc: 'switchTo().parentFrame() moves up one frame level. switchTo().defaultContent() returns to the top page from any depth.',
-      tip: 'Selenide never leaves a frame on its own. A $() call on the top page while you are still inside a frame fails with ElementNotFound, so switch back as soon as the frame work is done.',
-      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideTargetLocator.html#defaultContent()',
+      desc: 'Moves up one frame level, from a nested frame to the frame that contains it.',
+      tip: 'Selenide never leaves a frame on its own. A $() call on the top page while you are still inside a frame fails with ElementNotFound, so switch back as soon as the frame work is done. Use defaultContent() to jump straight to the top page.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideTargetLocator.html#parentFrame()',
       code: `switchTo().frame("editor");
 switchTo().frame("toolbar");
 $("#bold").click();
 switchTo().parentFrame(); // back in "editor"
+$("#body").setValue("Hello");`,
+    },
+    {
+      name: 'switchTo().defaultContent()',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Returns to the top page from any frame depth.',
+      tip: 'Selenide never leaves a frame on its own. A $() call on the top page while you are still inside a frame fails with ElementNotFound, so call it as soon as the frame work is done. Use parentFrame() to go up one level only.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideTargetLocator.html#defaultContent()',
+      code: `switchTo().frame("editor");
 $("#body").setValue("Hello");
 switchTo().defaultContent(); // back on the top page
 $("#save").click();`,

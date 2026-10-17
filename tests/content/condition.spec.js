@@ -265,16 +265,185 @@ test.describe('Element Conditions entries (Selenide 7.19.0)', () => {
     expect(entry.code).toContain('partialValue("');
   });
 
-  test('"id(), name(), type() and tagName()" exists at level intermediate, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Element Conditions', 'id(), name(), type() and tagName()');
+  test('"getText()" exists at level beginner, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'getText()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getText()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String getText();
+    expect(entry.code).toContain('.getText()');
+    expect(entry.code).not.toContain('assertEquals(');
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+    expect(entry.tip).toContain('shouldHave(text(');
+  });
+
+  test('"text() (getter)" exists at level beginner, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'text() (getter)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#text()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String text();
+    expect(entry.code).toContain('.text()');
+    expect(entry.code).not.toContain('assertEquals(');
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+    expect(entry.tip).toContain('getText()');
+  });
+
+  test('"innerHtml()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'innerHtml()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('web');
-    // selenide-core 7.19.0 Condition.java: id(String id), name(String name), type(String type), tagName(String cssClass)
-    for (const f of ['id', 'name', 'type', 'tagName']) {
-      expect(entry.code).toMatch(new RegExp(`shouldHave\\(${f}\\("`));
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#innerHtml()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String innerHtml(); "can be used to get the html of a hidden element"
+    expect(entry.code).toContain('.innerHtml()');
+    expect(entry.tip).toContain('hidden');
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+  });
+
+  test('"getOwnText()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'getOwnText()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getOwnText()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String getOwnText();
+    expect(entry.code).toContain('.getOwnText()');
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+    expect(entry.tip).toContain('ownText()');
+  });
+
+  test('"val()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'val()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#val()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String val(); @return attribute "value" value or null if attribute is missing; val(String) is the same as setValue(String)
+    expect(entry.code).toContain('.val()');
+    expect(entry.code).not.toContain('assertEquals(');
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+    expect(entry.tip).toContain('null');
+    expect(entry.tip).toContain('setValue');
+  });
+
+  test('"getValue()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'getValue()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getValue()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String getValue();
+    expect(entry.code).toContain('.getValue()');
+    expect(entry.code).not.toContain('assertEquals(');
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+    expect(entry.tip).toContain('null');
+  });
+
+  test('"id()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'id()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#id(java.lang.String)'
+    );
+    // selenide-core 7.19.0 Condition.java:285 public static WebElementCondition id(String id)
+    expect(entry.code).toContain('shouldHave(id("');
+    expect(entry.tip).toContain('By.id()');
+  });
+
+  test('"name()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'name()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#name(java.lang.String)'
+    );
+    // selenide-core 7.19.0 Condition.java:266 public static WebElementCondition name(String name)
+    expect(entry.code).toContain('shouldHave(name("');
+    expect(entry.tip).toContain('By.name()');
+  });
+
+  test('"type()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'type()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#type(java.lang.String)'
+    );
+    // selenide-core 7.19.0 Condition.java:276 public static WebElementCondition type(String type)
+    expect(entry.code).toContain('shouldHave(type("');
+    expect(entry.tip).toContain('tagName()');
+  });
+
+  test('"tagName()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'tagName()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#tagName(java.lang.String)'
+    );
+    // selenide-core 7.19.0 Condition.java:555 public static WebElementCondition tagName(String cssClass)
+    expect(entry.code).toContain('shouldHave(tagName("');
+    expect(entry.tip).toContain('lower case');
+  });
+
+  test('"be()" exists at level intermediate, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'be()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#be(com.codeborne.selenide.WebElementCondition)'
+    );
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition be(WebElementCondition delegate) {
+    expect(entry.code).toContain('should(be(');
+    expect(entry.tip).toContain('shouldBe()');
+    expect(entry.tip).toContain('appear');
+  });
+
+  test('"have()" exists at level intermediate, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'have()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#have(com.codeborne.selenide.WebElementCondition)'
+    );
+    // selenide-core 7.19.0 Condition.java: public static WebElementCondition have(WebElementCondition delegate) {
+    expect(entry.code).toContain('have(text("');
+    expect(entry.tip).toContain('shouldHave()');
+  });
+
+  test('the combined tiles are gone: getText() and text(), innerHtml() and getOwnText(), val() and getValue(), id(), name(), type() and tagName(), be() and have()', async ({
+    page,
+  }) => {
+    for (const name of [
+      'getText() and text()',
+      'innerHtml() and getOwnText()',
+      'val() and getValue()',
+      'id(), name(), type() and tagName()',
+      'be() and have()',
+    ]) {
+      expect(await itemIn(page, 'Element Conditions', name)).toBeNull();
     }
   });
 
@@ -370,16 +539,6 @@ test.describe('Element Conditions entries (Selenide 7.19.0)', () => {
     expect(entry.code).toMatch(/\$\("img[^"]*"\)\.shouldBe\(image\)/);
   });
 
-  test('"be() and have()" exists at level intermediate, platform both', async ({ page }) => {
-    const entry = await itemIn(page, 'Element Conditions', 'be() and have()');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('intermediate');
-    expect(entry.platform).toBe('both');
-    // selenide-core 7.19.0 Condition.java: public static WebElementCondition be(WebElementCondition delegate) {
-    // selenide-core 7.19.0 Condition.java: public static WebElementCondition have(WebElementCondition delegate) {
-    expect(entry.code).toMatch(/\.should\(be\(\w+\), have\(\w+\(/);
-  });
-
   test('"because()" exists at level intermediate, platform both', async ({ page }) => {
     const entry = await itemIn(page, 'Element Conditions', 'because()');
     expect(entry).not.toBeNull();
@@ -398,41 +557,6 @@ test.describe('Javadoc gap fill: element getters (Selenide 7.19.0)', () => {
     await page.goto('/');
   });
 
-  test('"getText() and text()" exists at level beginner, platform both', async ({ page }) => {
-    const entry = await itemIn(page, 'Element Conditions', 'getText() and text()');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('beginner');
-    expect(entry.platform).toBe('both');
-    expect(entry.docs).toBe(
-      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getText()'
-    );
-    // selenide-core 7.19.0 SelenideElement.java: String getText(); and String text();
-    expect(entry.code).toContain('.getText()');
-    expect(entry.code).toContain('.text()');
-    expect(entry.code).not.toContain('assertEquals(');
-    // SelenideElement.java links "NOT RECOMMENDED" (do-not-use-getters-in-tests) on getText().
-    expect(entry.tip).toContain('NOT RECOMMENDED');
-    expect(entry.tip).toContain('shouldHave(text(');
-  });
-
-  test('"val() and getValue()" exists at level beginner, platform web', async ({ page }) => {
-    const entry = await itemIn(page, 'Element Conditions', 'val() and getValue()');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('beginner');
-    expect(entry.platform).toBe('web');
-    expect(entry.docs).toBe(
-      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#val()'
-    );
-    // selenide-core 7.19.0 SelenideElement.java: String val(); String getValue();
-    expect(entry.code).toContain('.val()');
-    expect(entry.code).toContain('.getValue()');
-    expect(entry.code).not.toContain('assertEquals(');
-    // SelenideElement.java: @return attribute "value" value or null if attribute is missing;
-    // val(String) is the same as setValue(String).
-    expect(entry.tip).toContain('null');
-    expect(entry.tip).toContain('setValue');
-  });
-
   test('"getAttribute()" exists at level beginner, platform both', async ({ page }) => {
     const entry = await itemIn(page, 'Element Conditions', 'getAttribute()');
     expect(entry).not.toBeNull();
@@ -445,23 +569,6 @@ test.describe('Javadoc gap fill: element getters (Selenide 7.19.0)', () => {
     expect(entry.code).toContain('.getAttribute("');
     expect(entry.code).not.toContain('assertEquals(');
     expect(entry.tip).toContain('shouldHave(attribute(');
-  });
-
-  test('"innerHtml() and getOwnText()" exists at level intermediate, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Element Conditions', 'innerHtml() and getOwnText()');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('intermediate');
-    expect(entry.platform).toBe('web');
-    expect(entry.docs).toBe(
-      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#innerHtml()'
-    );
-    // selenide-core 7.19.0 SelenideElement.java: String innerHtml(); String getOwnText();
-    expect(entry.code).toContain('.innerHtml()');
-    expect(entry.code).toContain('.getOwnText()');
-    // SelenideElement.java: innerHtml() "can be used to get the html of a hidden element".
-    expect(entry.tip).toContain('hidden');
   });
 });
 

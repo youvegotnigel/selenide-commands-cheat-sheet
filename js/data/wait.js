@@ -30,28 +30,44 @@ $(".loader").shouldBe(hidden, Duration.ofSeconds(30)); // and finished
 $$(".result").shouldHave(sizeGreaterThan(0));`,
     },
     {
-      name: 'is(condition) and has(condition)',
+      name: 'is(condition)',
       level: 'intermediate',
       platform: 'both',
-      desc: 'Return true or false at once, without waiting and without failing the test. Use them to branch, for example to dismiss a cookie banner only when it is shown.',
-      tip: 'A missing element is not an error: is(visible) returns false and is(hidden) returns true. The Javadoc marks both methods as not recommended for checks, because a check that never waits makes flaky tests. Assert with should* instead.',
+      desc: 'Returns true or false at once, without waiting and without failing the test. Use it to branch, for example to dismiss a cookie banner only when it is shown.',
+      tip: 'A missing element is not an error: is(visible) returns false and is(hidden) returns true. The Javadoc marks it as not recommended for checks, because a check that never waits makes flaky tests. Assert with should* instead.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#is(com.codeborne.selenide.WebElementCondition)',
       code: `if ($("#cookie-banner").is(visible)) {
   $("#cookie-banner .accept").click();
-}
-boolean premium = $("#plan").has(text("Premium"));`,
+}`,
     },
     {
-      name: 'exists() and isDisplayed()',
+      name: 'has(condition)',
+      level: 'intermediate',
+      platform: 'both',
+      desc: 'Returns true or false at once, without waiting and without failing the test. It is the counterpart of is(), written for conditions that read as "has", such as text().',
+      tip: 'A missing element is not an error: has(text("x")) returns false. The Javadoc marks it as not recommended for checks, because a check that never waits makes flaky tests. Assert with should* instead.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#has(com.codeborne.selenide.WebElementCondition)',
+      code: `boolean premium = $("#plan").has(text("Premium"));`,
+    },
+    {
+      name: 'exists()',
       level: 'beginner',
       platform: 'both',
-      desc: 'exists() returns true when the element is in the DOM. isDisplayed() returns true when it exists and is visible. Both answer at once, without waiting.',
-      tip: 'The Javadoc marks them NOT RECOMMENDED for checks. They return false instead of throwing when the element is missing or the browser is closed, so a slow page can look like a missing element. An invalid selector still throws. For a yes or no that you assert on, use should(exist) or shouldBe(visible), or is(condition) to branch.',
+      desc: 'Returns true when the element is in the DOM. It answers at once, without waiting.',
+      tip: 'The Javadoc marks it NOT RECOMMENDED for checks. It returns false instead of throwing when the element is missing or the browser is closed, so a slow page can look like a missing element. An invalid selector still throws. For a yes or no that you assert on, use should(exist), or is(condition) to branch.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#exists()',
+      code: `boolean hasResults = $(".results").exists();`,
+    },
+    {
+      name: 'isDisplayed()',
+      level: 'beginner',
+      platform: 'both',
+      desc: 'Returns true when the element exists and is visible. It answers at once, without waiting.',
+      tip: 'The Javadoc marks it NOT RECOMMENDED for checks. It returns false instead of throwing when the element is missing or the browser is closed, so a slow page can look like a missing element. An invalid selector still throws. For a yes or no that you assert on, use shouldBe(visible), or is(condition) to branch.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#isDisplayed()',
       code: `if ($("#cookie-banner").isDisplayed()) {
   $("#cookie-banner .accept").click();
-}
-boolean hasResults = $(".results").exists();`,
+}`,
     },
     {
       name: 'is(condition, Duration)',

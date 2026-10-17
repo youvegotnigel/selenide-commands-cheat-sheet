@@ -157,17 +157,29 @@ $(".order-date").shouldHave(text("2026/01/01 09:00"));
 clock().reset(); // fixed time and timezone back to normal`,
     },
     {
-      name: 'emulateDevice() and resetEmulation()',
+      name: 'emulateDevice()',
       level: 'advanced',
       platform: 'web',
-      desc: 'emulateDevice(Device) sets the viewport size and pixel ratio of a phone, tablet or other device. resetEmulation() restores the normal viewport.',
+      desc: 'Sets the viewport size and pixel ratio of a phone, tablet or other device.',
       tip: 'Predefined devices include IPHONE_SE, IPHONE_14, PIXEL_7 and GALAXY_S21, and Device is a record of name, width, height and pixelRatio, so you can build your own. It works through DevTools in Chromium browsers and through BiDi in Firefox. Any other setup throws UnsupportedOperationException.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#emulateDevice(com.codeborne.selenide.Device)',
       code: `import com.codeborne.selenide.Device;
 
 emulateDevice(Device.PIXEL_7);
 open("/");
-$("#mobile-menu").shouldBe(visible);
+$("#mobile-menu").shouldBe(visible);`,
+    },
+    {
+      name: 'resetEmulation()',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'Restores the normal viewport after emulateDevice().',
+      tip: 'Call it in @AfterEach or a finally block so the next test does not inherit the emulated viewport. It uses the same mechanism as emulateDevice(), so on any other browser setup it throws UnsupportedOperationException.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#resetEmulation()',
+      code: `import com.codeborne.selenide.Device;
+
+emulateDevice(Device.IPHONE_14);
+open("/");
 resetEmulation();`,
     },
   ],
