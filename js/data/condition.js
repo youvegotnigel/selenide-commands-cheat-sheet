@@ -153,7 +153,7 @@ $("#inbox").shouldHave(exactOwnTextCaseSensitive("Inbox"));`,
       level: 'intermediate',
       platform: 'web',
       desc: 'innerHtml() returns the HTML of the element with its children. getOwnText() returns the text of the element without the text of its child elements.',
-      tip: 'innerHtml() also works on a hidden element, where getText() returns an empty string. It is short for getAttribute("innerHTML"). To check own text, use shouldHave(ownText()) or exactOwnText() instead of the getter.',
+      tip: 'The Javadoc marks both NOT RECOMMENDED for checks. innerHtml() also works on a hidden element, where getText() returns an empty string. It is short for getAttribute("innerHTML"). To check own text, use shouldHave(ownText()) or exactOwnText() instead of the getter.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#innerHtml()',
       code: `// <li id="inbox">Inbox <span class="badge">3</span></li>
 String html = $("#inbox").innerHtml(); // Inbox <span class="badge">3</span>
@@ -207,7 +207,7 @@ $("#email").shouldHave(exactValue("ada@example.com"));`,
       level: 'beginner',
       platform: 'web',
       desc: 'Return the value attribute of an input, textarea or select as a String. val() and getValue() are the same method.',
-      tip: 'They return null when the element has no value attribute. val("text") with an argument is setValue("text"), not a getter. To check a value, use shouldHave(value("...")) or exactValue(), which wait for the value to change.',
+      tip: 'The Javadoc marks them NOT RECOMMENDED for checks. They return null when the element has no value attribute. val("text") with an argument is setValue("text"), not a getter. To check a value, use shouldHave(value("...")) or exactValue(), which wait for the value to change.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#val()',
       code: `String email = $("#email").val();
 String same = $("#email").getValue();
@@ -250,7 +250,7 @@ $("#ticket").shouldHave(attributeMatching("data-id", "T-\\\\d+"));`,
       level: 'beginner',
       platform: 'both',
       desc: 'Returns the value of an attribute of the element as a String, or null when the attribute is missing.',
-      tip: 'It waits for the element, then reads the attribute once. To check an attribute, use shouldHave(attribute("name", "value")), which retries. getAttribute() suits a value the test reuses, such as an id taken from the page.',
+      tip: 'The Javadoc marks it NOT RECOMMENDED for checks. It waits for the element, then reads the attribute once. To check an attribute, use shouldHave(attribute("name", "value")), which retries. getAttribute() suits a value the test reuses, such as an id taken from the page.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getAttribute(java.lang.String)',
       code: `String orderId = $("#order").getAttribute("data-id");
 $("#search").setValue(orderId);
@@ -362,14 +362,12 @@ $("#password").shouldBe(focused);`,
       name: 'getFocusedElement()',
       level: 'intermediate',
       platform: 'web',
-      desc: 'Returns the element that has the keyboard focus, or null when no element is focused.',
-      tip: 'It reads once. To assert that a field has focus, use shouldBe(focused), which waits. getFocusedElement() helps when you do not know which field should be focused and need to look at it.',
+      desc: 'Returns the element that has the keyboard focus. When no field has focus, that is the body element.',
+      tip: 'The element is looked up again on each call, from document.activeElement, so it is never null and is the body when nothing has focus. To assert that a field has focus, use shouldBe(focused), which waits. getFocusedElement() helps when you do not know which field should be focused.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#getFocusedElement()',
       code: `$("#email").pressTab();
 SelenideElement active = getFocusedElement();
-if (active != null) {
-  System.out.println(active.getAttribute("id"));
-}`,
+String id = active.getAttribute("id");`,
     },
     {
       name: 'shouldBe(image)',

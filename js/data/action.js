@@ -178,7 +178,7 @@ $("#country").getSelectedOption().shouldHave(text("Finland"));`,
       level: 'beginner',
       platform: 'web',
       desc: 'Read the selected option of a select element: its visible text, or its value attribute.',
-      tip: 'getSelectedOptionText() returns null when no option is selected and throws IllegalArgumentException when the element is not a select. getSelectedOptionValue() returns null when the option has no value attribute. To check a selection, use getSelectedOption().shouldHave(text("...")), which waits.',
+      tip: 'The Javadoc marks them NOT RECOMMENDED for checks. getSelectedOptionText() returns null when no option is selected and throws IllegalArgumentException when the element is not a select. getSelectedOptionValue() returns null when the option has no value attribute. To check a selection, use getSelectedOption().shouldHave(text("...")), which waits.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getSelectedOptionText()',
       code: `String country = $("#country").getSelectedOptionText(); // "Finland"
 String code = $("#country").getSelectedOptionValue();   // "fi"`,
@@ -215,9 +215,8 @@ $(By.name("delivery")).selectRadio("express").shouldBe(selected);`,
       code: `import static com.codeborne.selenide.Selectors.byName;
 
 SelenideElement plan = getSelectedRadio(byName("plan"));
-if (plan != null) {
-  plan.shouldHave(value("pro"));
-}`,
+String chosen = plan == null ? "none" : plan.getValue();
+$("#summary").setValue(chosen);`,
     },
     {
       name: 'setSelected()',

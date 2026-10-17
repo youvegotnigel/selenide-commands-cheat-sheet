@@ -101,7 +101,7 @@ $("h1").shouldHave(text("Order 42"));`,
       level: 'advanced',
       platform: 'web',
       desc: 'Zooms the current page in or out. The factor is relative to normal size: 1.5 zooms in, 0.5 zooms out.',
-      tip: 'Use it to check how a layout behaves at 200 percent or to fit a wide page into a screenshot. Pass 1.0 to go back to normal size, because the zoom stays for the rest of the session.',
+      tip: 'It scales document.body with a CSS transform, so the layout does not reflow like browser zoom and media queries do not change. The next page load resets it, and zoom(1.0) restores normal size at once.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#zoom(double)',
       code: `zoom(2.0);
 $("#menu").shouldBe(visible);

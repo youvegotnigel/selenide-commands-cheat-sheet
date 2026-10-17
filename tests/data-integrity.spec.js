@@ -75,4 +75,31 @@ test.describe('Data integrity', () => {
       );
     }
   });
+
+  test('final review fixes: getter tips, C4 snippet, focused element and zoom claims', () => {
+    const byName = (n) => data.flatMap((c) => c.items).find((i) => i.name === n);
+    // SelenideElement.java 7.19.0 links NOT RECOMMENDED (do-not-use-getters-in-tests) on all of these.
+    for (const n of [
+      'val() and getValue()',
+      'getAttribute()',
+      'innerHtml() and getOwnText()',
+      'exists() and isDisplayed()',
+      'getSelectedOptionText() and getSelectedOptionValue()',
+    ]) {
+      expect(byName(n).tip, n).toContain('NOT RECOMMENDED');
+    }
+    // SelenideDriver.java:302 getFocusedElement() returns $(new FocusedElementLocator()), a lazy
+    // proxy over get-focused-element.js (document.activeElement): never null, body when nothing focused.
+    const focused = byName('getFocusedElement()');
+    expect(focused.desc).not.toContain('null');
+    expect(focused.tip).not.toContain('reads once');
+    expect(focused.code).not.toContain('!= null');
+    expect(focused.tip).toContain('body');
+    // SelenideDriver.java:404 getSelectedRadio reads once, so a check behind a null test can be skipped.
+    expect(byName('getSelectedRadio()').code).not.toMatch(/\.should(Have|Be)\(/);
+    // zoom.js: document.body.style.transform = 'scale(f)'; the next page load resets it.
+    const zoom = byName('zoom()');
+    expect(zoom.tip).toContain('transform');
+    expect(zoom.tip).not.toContain('rest of the session');
+  });
 });

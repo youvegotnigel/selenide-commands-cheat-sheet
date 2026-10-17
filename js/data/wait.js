@@ -46,7 +46,7 @@ boolean premium = $("#plan").has(text("Premium"));`,
       level: 'beginner',
       platform: 'both',
       desc: 'exists() returns true when the element is in the DOM. isDisplayed() returns true when it exists and is visible. Both answer at once, without waiting.',
-      tip: 'They return false instead of throwing when the element is missing or the browser is closed, so a slow page can look like a missing element. An invalid selector still throws. For a yes or no that you assert on, use should(exist) or shouldBe(visible), or is(condition) to branch.',
+      tip: 'The Javadoc marks them NOT RECOMMENDED for checks. They return false instead of throwing when the element is missing or the browser is closed, so a slow page can look like a missing element. An invalid selector still throws. For a yes or no that you assert on, use should(exist) or shouldBe(visible), or is(condition) to branch.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#exists()',
       code: `if ($("#cookie-banner").isDisplayed()) {
   $("#cookie-banner .accept").click();
