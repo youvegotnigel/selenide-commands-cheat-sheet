@@ -136,6 +136,19 @@ File archive = $("#export-all").download(DownloadOptions.using(FOLDER)
     .withAction(clickAndConfirm("Export all data?")));`,
     },
     {
+      name: 'downloadFiles(DownloadOptions)',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Clicks the element and returns every file that the click downloads, as a List of Files. DownloadOptions filters them by extension or name. Added in Selenide 7.17.0.',
+      tip: 'DownloadOptions.files() waits for at least 2 files. Pass a count, as in files(3), to wait for another minimum. For a single file use download(), which returns a File.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#downloadFiles(com.codeborne.selenide.DownloadOptions)',
+      code: `import java.io.File;
+import java.util.List;
+import com.codeborne.selenide.DownloadOptions;
+
+List<File> reports = $("#export-all").downloadFiles(DownloadOptions.files().withExtension("csv"));`,
+    },
+    {
       name: 'download(url)',
       level: 'intermediate',
       platform: 'web',

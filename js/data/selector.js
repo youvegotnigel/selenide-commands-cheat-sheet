@@ -79,6 +79,18 @@ $(byTagAndText("button", "Delete")).click();
 $(withTagAndText("li", "overdue")).shouldBe(visible);`,
     },
     {
+      name: 'byLinkText() and byPartialLinkText()',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Find a link by its whole visible text, or by part of it.',
+      tip: 'They wrap By.linkText() and By.partialLinkText(), so they match anchor elements only, and the text is case-sensitive. byXpath(), byCssSelector(), byClassName() and byTagName() are wrappers of the same kind.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byLinkText(java.lang.String)',
+      code: `import static com.codeborne.selenide.Selectors.*;
+
+$(byLinkText("Sign in")).click();
+$(byPartialLinkText("Terms")).click();`,
+    },
+    {
       name: 'byAttribute()',
       level: 'intermediate',
       platform: 'web',
@@ -113,6 +125,19 @@ $$(byClassName("error")).shouldHave(size(0));`,
       code: `import static com.codeborne.selenide.Selectors.byTestId;
 
 $(byTestId("checkout-button")).click();`,
+    },
+    {
+      name: 'byLabel()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Finds the form field that belongs to a label with the given text. The text must match the whole label, unless a TextMatchOptions is passed.',
+      tip: "It follows the label: the element whose id equals the label's for attribute, or else the input, select or textarea inside the label. TextMatchOptions.partialText() matches part of the label text. Qualify it, because Condition has its own partialText(String).",
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byLabel(java.lang.String,com.codeborne.selenide.TextMatchOptions)',
+      code: `import com.codeborne.selenide.TextMatchOptions;
+import static com.codeborne.selenide.Selectors.byLabel;
+
+$(byLabel("Email")).setValue("ada@example.com");
+$(byLabel("Pass", TextMatchOptions.partialText())).setValue("secret");`,
     },
     {
       name: 'byRole()',

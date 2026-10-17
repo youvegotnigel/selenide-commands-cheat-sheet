@@ -392,3 +392,91 @@ test.describe('Element Conditions entries (Selenide 7.19.0)', () => {
     expect(entry.tip).toContain('CollectionCondition.empty');
   });
 });
+
+test.describe('Javadoc gap fill: element getters (Selenide 7.19.0)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  test('"getText() and text()" exists at level beginner, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'getText() and text()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getText()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String getText(); and String text();
+    expect(entry.code).toContain('.getText()');
+    expect(entry.code).toContain('.text()');
+    expect(entry.code).not.toContain('assertEquals(');
+    // SelenideElement.java links "NOT RECOMMENDED" (do-not-use-getters-in-tests) on getText().
+    expect(entry.tip).toContain('NOT RECOMMENDED');
+    expect(entry.tip).toContain('shouldHave(text(');
+  });
+
+  test('"val() and getValue()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'val() and getValue()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#val()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String val(); String getValue();
+    expect(entry.code).toContain('.val()');
+    expect(entry.code).toContain('.getValue()');
+    expect(entry.code).not.toContain('assertEquals(');
+    // SelenideElement.java: @return attribute "value" value or null if attribute is missing;
+    // val(String) is the same as setValue(String).
+    expect(entry.tip).toContain('null');
+    expect(entry.tip).toContain('setValue');
+  });
+
+  test('"getAttribute()" exists at level beginner, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'getAttribute()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getAttribute(java.lang.String)'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: @Nullable String getAttribute(String name);
+    expect(entry.code).toContain('.getAttribute("');
+    expect(entry.code).not.toContain('assertEquals(');
+    expect(entry.tip).toContain('shouldHave(attribute(');
+  });
+
+  test('"innerHtml() and getOwnText()" exists at level intermediate, platform web', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'innerHtml() and getOwnText()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#innerHtml()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String innerHtml(); String getOwnText();
+    expect(entry.code).toContain('.innerHtml()');
+    expect(entry.code).toContain('.getOwnText()');
+    // SelenideElement.java: innerHtml() "can be used to get the html of a hidden element".
+    expect(entry.tip).toContain('hidden');
+  });
+});
+
+test.describe('Javadoc gap fill: focused element (Selenide 7.19.0)', () => {
+  test('"getFocusedElement()" exists at level intermediate, platform web', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Element Conditions', 'getFocusedElement()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#getFocusedElement()'
+    );
+    // selenide-7.19.0 Selenide.java:836 public static SelenideElement getFocusedElement()
+    expect(entry.code).toContain('getFocusedElement()');
+    expect(entry.tip).toContain('shouldBe(focused)');
+  });
+});
