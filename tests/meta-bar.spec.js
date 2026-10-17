@@ -16,6 +16,10 @@ const CORS = {
 async function mockBackends(page, { count = MOCK_COUNT, offline = false } = {}) {
   const state = { posts: 0 };
 
+  // Registered first so every specific route below takes precedence; anything
+  // unmocked is aborted and can never reach the live Supabase project.
+  await page.route('**tilbhgcncnwibnfgebkg.supabase.co/**', (route) => route.abort());
+
   // The "last updated" badge reads from the stamped js/meta.json (same-origin)
   await page.route('**/js/meta.json**', (route) =>
     route.fulfill({
@@ -32,7 +36,7 @@ async function mockBackends(page, { count = MOCK_COUNT, offline = false } = {}) 
   }
 
   // Read path: live visitor count
-  await page.route('**/rest/v1/visits**', (route) =>
+  await page.route('**/rest/v1/selenide_visits**', (route) =>
     route.fulfill({
       status: 200,
       headers: { ...CORS, 'content-type': 'application/json' },
@@ -41,7 +45,7 @@ async function mockBackends(page, { count = MOCK_COUNT, offline = false } = {}) 
   );
 
   // Write path: increment — count only real POSTs (ignore CORS preflight)
-  await page.route('**/functions/v1/increment-visitor', (route) => {
+  await page.route('**/functions/v1/increment-selenide-visitor', (route) => {
     if (route.request().method() === 'POST') state.posts += 1;
     route.fulfill({
       status: 200,
@@ -127,8 +131,7 @@ test.describe('Meta bar', () => {
 });
 
 /* ── VISITOR COUNTER: DISPLAY ──────────────────────────────────── */
-// Supabase deferred (plan Task 8): re-enable together with ENABLED = true.
-test.describe.skip('Visitor counter — display', () => {
+test.describe('Visitor counter — display', () => {
   test('shows the live count, formatted with separators', async ({ page }) => {
     await mockBackends(page, { count: 12345 });
     await page.goto('/');
@@ -137,7 +140,7 @@ test.describe.skip('Visitor counter — display', () => {
   });
 
   test('falls back to the cached value (dimmed) when offline', async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('visitor-count-cache', '9876'));
+    await page.addInitScript(() => localStorage.setItem('selenide-visitor-count-cache', '9876'));
     await mockBackends(page, { offline: true });
     await page.goto('/');
 
@@ -145,6 +148,14 @@ test.describe.skip('Visitor counter — display', () => {
     await expect(number).toHaveText('9,876');
     await expect(number).toHaveCSS('opacity', '0.6');
     await expect(number).toHaveAttribute('title', /Last known count/);
+  });
+
+  test("ignores the Playwright site's cached count (separate storage keys)", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('visitor-count-cache', '9876'));
+    await mockBackends(page, { offline: true });
+    await page.goto('/');
+    // No Selenide cache, backend offline: the display falls back to 0, dimmed.
+    await expect(page.locator('#visitor-count-number')).toHaveText('0');
   });
 
   test('does not break the page when the backend is down', async ({ page }) => {
@@ -166,8 +177,7 @@ async function poseAsRealVisitor(page) {
   );
 }
 
-// Supabase deferred (plan Task 8): re-enable together with ENABLED = true.
-test.describe.skip('Visitor counter — increment', () => {
+test.describe('Visitor counter — increment', () => {
   test('does NOT increment in automated browsers (CI / bots)', async ({ page }) => {
     const state = await mockBackends(page);
     await page.goto('/'); // navigator.webdriver is true under Playwright
@@ -211,27 +221,26 @@ test.describe.skip('Visitor counter — increment', () => {
   });
 });
 
-/* ── ANALYTICS PLACEHOLDER (Supabase deferred, plan Task 8) ────── */
-test.describe('Analytics placeholder', () => {
-  test('sends no request to Supabase, even for a real visitor opening a command', async ({
-    page,
-  }) => {
+/* ── COMMAND-VIEW ANALYTICS PLACEHOLDER (Supabase deferred, plan Task 8) ─── */
+test.describe('Command-view analytics placeholder', () => {
+  test('opening a command sends no request to Supabase', async ({ page }) => {
     await poseAsRealVisitor(page);
-    const hits = [];
-    await page.route('**tilbhgcncnwibnfgebkg.supabase.co/**', (route) => {
-      hits.push(route.request().url());
+    const state = await mockBackends(page);
+    const commandHits = [];
+    await page.route('**/*command_view*', (route) => {
+      commandHits.push(route.request().url());
       route.abort();
     });
     await page.goto('/');
     await page.locator('.tile').first().click();
     await page.waitForTimeout(500);
-    expect(hits).toEqual([]);
+    expect(commandHits).toEqual([]);
+    expect(state.posts).toBe(1); // only the visitor increment
   });
 
-  test('hides the Popular filter and keeps the visitor badge placeholder', async ({ page }) => {
-    await page.route('**tilbhgcncnwibnfgebkg.supabase.co/**', (route) => route.abort());
+  test('hides the Popular filter', async ({ page }) => {
+    await mockBackends(page);
     await page.goto('/');
     await expect(page.locator('.filter-btn[data-filter="popular"]')).toHaveCount(0);
-    await expect(page.locator('#visitor-count-number')).toHaveText('—');
   });
 });
