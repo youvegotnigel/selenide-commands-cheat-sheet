@@ -174,6 +174,27 @@ $("#country").selectOptionByValue("fi");
 $("#country").getSelectedOption().shouldHave(text("Finland"));`,
     },
     {
+      name: 'getSelectedOptionText() and getSelectedOptionValue()',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Read the selected option of a select element: its visible text, or its value attribute.',
+      tip: 'getSelectedOptionText() returns null when no option is selected and throws IllegalArgumentException when the element is not a select. getSelectedOptionValue() returns null when the option has no value attribute. To check a selection, use getSelectedOption().shouldHave(text("...")), which waits.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getSelectedOptionText()',
+      code: `String country = $("#country").getSelectedOptionText(); // "Finland"
+String code = $("#country").getSelectedOptionValue();   // "fi"`,
+    },
+    {
+      name: 'getOptions() and getSelectedOptions()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'getOptions() returns all option elements of a select as an ElementsCollection. getSelectedOptions() returns only the selected ones, and is empty when nothing is selected.',
+      tip: 'Both return a lazy collection, so collection conditions wait and retry. getSelectedOptions() is the way to read a multiple select, where getSelectedOption() returns one option only.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getOptions()',
+      code: `$("#country").getOptions().shouldHave(size(3));
+$("#country").getOptions().shouldHave(texts("Finland", "Sweden", "Norway"));
+$("#interests").getSelectedOptions().shouldHave(exactTexts("Music", "Sport"));`,
+    },
+    {
       name: 'selectRadio()',
       level: 'beginner',
       platform: 'web',
@@ -183,6 +204,20 @@ $("#country").getSelectedOption().shouldHave(text("Finland"));`,
       code: `import org.openqa.selenium.By;
 
 $(By.name("delivery")).selectRadio("express").shouldBe(selected);`,
+    },
+    {
+      name: 'getSelectedRadio()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Returns the checked radio button of a group as a SelenideElement, found by the By locator of the whole group.',
+      tip: 'It is a static method of Selenide, not of an element. It returns null when nothing is selected, so check for null before you chain a call on the result. To assert a choice, check the radio you expect: $("input[name=plan][value=pro]").shouldBe(checked).',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#getSelectedRadio(org.openqa.selenium.By)',
+      code: `import static com.codeborne.selenide.Selectors.byName;
+
+SelenideElement plan = getSelectedRadio(byName("plan"));
+if (plan != null) {
+  plan.shouldHave(value("pro"));
+}`,
     },
     {
       name: 'setSelected()',

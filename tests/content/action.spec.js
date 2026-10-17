@@ -111,3 +111,61 @@ test.describe('Actions corrections', () => {
     expect(entry.tip).toContain('pageLoadTimeout');
   });
 });
+
+test.describe('Javadoc gap fill: select and radio getters (Selenide 7.19.0)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  test('"getSelectedOptionText() and getSelectedOptionValue()" exists at level beginner, platform web', async ({
+    page,
+  }) => {
+    const entry = await itemIn(
+      page,
+      'Actions',
+      'getSelectedOptionText() and getSelectedOptionValue()'
+    );
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getSelectedOptionText()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:1056 String getSelectedOptionText();
+    // and :1038 String getSelectedOptionValue();
+    expect(entry.code).toContain('getSelectedOptionText()');
+    expect(entry.code).toContain('getSelectedOptionValue()');
+    // Selenide.getSelectedText() is the selected page text, a different method.
+    expect(entry.code).not.toContain('getSelectedText()');
+  });
+
+  test('"getOptions() and getSelectedOptions()" exists at level intermediate, platform web', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Actions', 'getOptions() and getSelectedOptions()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getOptions()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:1016 ElementsCollection getOptions();
+    // and :1001 ElementsCollection getSelectedOptions();
+    expect(entry.code).toContain('.getOptions().shouldHave(size(');
+    expect(entry.code).toContain('.getSelectedOptions()');
+  });
+
+  test('"getSelectedRadio()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Actions', 'getSelectedRadio()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#getSelectedRadio(org.openqa.selenium.By)'
+    );
+    // selenide-7.19.0 Selenide.java:701 public static SelenideElement getSelectedRadio(By radioField)
+    expect(entry.code).toContain('getSelectedRadio(byName("');
+    // It is a static Selenide method, not an element method.
+    expect(entry.code).not.toContain(').getSelectedRadio(');
+  });
+});
