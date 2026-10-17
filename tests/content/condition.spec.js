@@ -587,3 +587,41 @@ test.describe('Javadoc gap fill: focused element (Selenide 7.19.0)', () => {
     expect(entry.tip).toContain('shouldBe(focused)');
   });
 });
+
+test.describe('value() and exactValue() are separate tiles (Selenide 7.19.0)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  test('"shouldHave(value())" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(value())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#value(java.lang.String)'
+    );
+    // selenide-core 7.19.0 Condition.java:211 public static WebElementCondition value(String expectedValue)
+    expect(entry.code).toContain('shouldHave(value("example.com"))');
+    // The exact form has its own tile, so this snippet shows value() only.
+    expect(entry.code).not.toContain('exactValue(');
+    // Value.java: PARTIAL_TEXT -> Html.text.contains, FULL_TEXT -> Html.text.equals
+    expect(entry.tip).toContain('textCheck');
+  });
+
+  test('"shouldHave(exactValue())" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Element Conditions', 'shouldHave(exactValue())');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#exactValue(java.lang.String)'
+    );
+    // selenide-core 7.19.0 Condition.java:256 public static WebElementCondition exactValue(String value)
+    // { return attribute("value", value); }
+    expect(entry.code).toContain('shouldHave(exactValue("ada@example.com"))');
+    expect(entry.code).not.toMatch(/shouldHave\(value\(/);
+    expect(entry.tip).toContain('attribute("value"');
+    expect(entry.tip).toContain('case-sensitive');
+  });
+});

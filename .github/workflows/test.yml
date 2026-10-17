@@ -46,7 +46,7 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
 
       - name: Run tests
-        run: npm run ${{ matrix.script }}
+        run: npm run ${{ matrix.script }} -- --workers=4
 
       - name: Upload test report
         if: always()

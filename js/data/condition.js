@@ -214,10 +214,19 @@ $("#status").shouldHave(oneOfExactTextsCaseSensitive("OK", "DONE"));`,
       level: 'beginner',
       platform: 'web',
       desc: 'Checks the value of an input, textarea or select. value() is a partial match, exactValue() requires the whole value.',
-      tip: 'value() ignores case, collapses whitespace and, with the default Configuration.textCheck, matches a substring. exactValue() is attribute("value", ...), so it is exact and case-sensitive.',
+      tip: 'value() ignores case, collapses whitespace and, with the default Configuration.textCheck, matches a substring. Under FULL_TEXT it becomes a whole-value match. Use exactValue() when the whole value must match exactly.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#value(java.lang.String)',
       code: `$("#email").setValue("ada@example.com");
-$("#email").shouldHave(value("example.com"));
+$("#email").shouldHave(value("example.com"));`,
+    },
+    {
+      name: 'shouldHave(exactValue())',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Checks the value of an input, textarea or select. value() is a partial match, exactValue() requires the whole value.',
+      tip: 'exactValue() is attribute("value", ...), so it is exact and case-sensitive, with no whitespace collapsing. Use value() when a substring is enough. exactValue("") is the check for a cleared field.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#exactValue(java.lang.String)',
+      code: `$("#email").setValue("ada@example.com");
 $("#email").shouldHave(exactValue("ada@example.com"));`,
     },
     {
