@@ -125,6 +125,21 @@ void removeStepLogger() {
 }`,
     },
     {
+      name: 'getWebDriverLogs()',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'Returns the log entries of a WebDriver log type as a list of Strings. LogType.BROWSER gives the browser console output: JS errors, warnings and messages.',
+      tip: 'Every call clears the buffer, so the next call returns only newer entries. Selenium treats the logs API as beta, so what you get depends on the browser. This is not Configuration.webdriverLogsEnabled, which writes the driver service log to a file in the reports folder (default false).',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#getWebDriverLogs(java.lang.String,java.util.logging.Level)',
+      code: `import java.util.logging.Level;
+import org.openqa.selenium.logging.LogType;
+
+open("/checkout");
+for (String entry : getWebDriverLogs(LogType.BROWSER, Level.SEVERE)) {
+  System.out.println(entry);
+}`,
+    },
+    {
       name: 'selenide-full-screenshot',
       level: 'intermediate',
       platform: 'web',

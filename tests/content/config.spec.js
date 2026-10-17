@@ -89,3 +89,24 @@ test.describe('Setup & Config entries (Selenide 7.19.0)', () => {
     }
   });
 });
+
+test.describe('Javadoc gap fill: browserBinary (Selenide 7.19.0)', () => {
+  test('"Configuration.browserBinary" exists at level intermediate, platform web', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Setup & Config', 'Configuration.browserBinary');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Configuration.html#browserBinary'
+    );
+    // selenide-7.19.0 Configuration.java:357 public static String browserBinary;
+    // Javadoc: "Works only for Chrome and Firefox", -Dselenide.browserBinary=/path/to/binary
+    expect(entry.code).toContain('Configuration.browserBinary = "');
+    expect(entry.code).not.toContain('holdBrowserOpen');
+    expect(entry.tip).toContain('Chrome and Firefox');
+    expect(entry.tip).toContain('-Dselenide.browserBinary');
+  });
+});

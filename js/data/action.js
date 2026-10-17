@@ -280,5 +280,16 @@ $(".logo").scrollIntoView(instant().block(center).inline(end));`,
       code: `$("#comments").scrollIntoCenter().shouldBe(visible);
 $("footer").scrollTo(); // aligns to the top of the window`,
     },
+    {
+      name: 'atBottom()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Returns true when the page is scrolled to the bottom. It is useful when you scroll down by a fixed step an unknown number of times.',
+      tip: 'The check is scrollY + innerHeight >= document.body.scrollHeight. A page with infinite scroll grows after each step, so always put an upper limit on the loop.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#atBottom()',
+      code: `for (int i = 0; i < 20 && !atBottom(); i++) {
+  executeJavaScript("window.scrollBy(0, 600)");
+}`,
+    },
   ],
 };

@@ -185,3 +185,19 @@ test.describe('Javadoc gap fill: Selenium actions (Selenide 7.19.0)', () => {
     expect(entry.code).toContain('.perform()');
   });
 });
+
+test.describe('Javadoc gap fill: atBottom (Selenide 7.19.0)', () => {
+  test('"atBottom()" exists at level intermediate, platform web', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Actions', 'atBottom()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#atBottom()'
+    );
+    // selenide-7.19.0 Selenide.java:1103 public static boolean atBottom()
+    expect(entry.code).toContain('atBottom()');
+    expect(entry.tip).toMatch(/bound|limit/);
+  });
+});

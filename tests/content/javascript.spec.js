@@ -94,3 +94,29 @@ test.describe('JavaScript, Storage, Clipboard entries (Selenide 7.19.0)', () => 
     expect(entry.code).toContain('cookies().clear()');
   });
 });
+
+test.describe('Javadoc gap fill: device emulation (Selenide 7.19.0)', () => {
+  test('"emulateDevice() and resetEmulation()" exists at level advanced, platform web', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const entry = await itemIn(
+      page,
+      'JavaScript, Storage, Clipboard',
+      'emulateDevice() and resetEmulation()'
+    );
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#emulateDevice(com.codeborne.selenide.Device)'
+    );
+    // selenide-7.19.0 Selenide.java:149 emulateDevice(Device device), :153 resetEmulation()
+    // selenide-core 7.19.0 Device.java:6 public static final Device PIXEL_7
+    expect(entry.code).toContain('emulateDevice(Device.PIXEL_7)');
+    expect(entry.code).toContain('resetEmulation()');
+    expect(entry.code).toContain('import com.codeborne.selenide.Device;');
+    // SelenideDriver.java:526-562 throws UnsupportedOperationException outside Chromium and BiDi Firefox.
+    expect(entry.tip).toContain('UnsupportedOperationException');
+  });
+});
