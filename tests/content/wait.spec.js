@@ -69,3 +69,23 @@ test.describe('Waits & Timeouts entries (Selenide 7.19.0)', () => {
     }
   });
 });
+
+test.describe('Javadoc gap fill: exists and isDisplayed (Selenide 7.19.0)', () => {
+  test('"exists() and isDisplayed()" exists at level beginner, platform both', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Waits & Timeouts', 'exists() and isDisplayed()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#exists()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: boolean exists(); boolean isDisplayed();
+    expect(entry.code).toContain('.exists()');
+    expect(entry.code).toContain('.isDisplayed()');
+    expect(entry.code).not.toContain('assertTrue(');
+    // commands/Exists.java and IsDisplayed.java return false when the element is missing.
+    expect(entry.tip).toContain('false');
+    expect(entry.tip).toContain('is(');
+  });
+});

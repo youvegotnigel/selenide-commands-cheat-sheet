@@ -14,6 +14,18 @@ export default {
       code: `$("#greeting").shouldHave(text("Hello"));`,
     },
     {
+      name: 'getText() and text()',
+      level: 'beginner',
+      platform: 'both',
+      desc: 'Returns the visible text of the element as a String, trimmed. text() is the short form. For a select it returns the text of the selected option.',
+      tip: 'The Javadoc marks getters as NOT RECOMMENDED for checks: they wait until the element exists, then return whatever text it has at that moment, so a value that is still loading is read too early. To check text, use shouldHave(text("...")). Use getText() when the test needs the value itself.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getText()',
+      code: `String total = $("#cart-total").getText(); // "42.50 EUR"
+double amount = Double.parseDouble(total.split(" ")[0]);
+$("#coupon").setValue(String.valueOf(amount / 10));
+String same = $("#cart-total").text();`,
+    },
+    {
       name: 'shouldHave(partialText())',
       level: 'intermediate',
       platform: 'both',
@@ -137,6 +149,17 @@ $("#inbox").shouldHave(ownTextCaseSensitive("Inbox"));
 $("#inbox").shouldHave(exactOwnTextCaseSensitive("Inbox"));`,
     },
     {
+      name: 'innerHtml() and getOwnText()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'innerHtml() returns the HTML of the element with its children. getOwnText() returns the text of the element without the text of its child elements.',
+      tip: 'innerHtml() also works on a hidden element, where getText() returns an empty string. It is short for getAttribute("innerHTML"). To check own text, use shouldHave(ownText()) or exactOwnText() instead of the getter.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#innerHtml()',
+      code: `// <li id="inbox">Inbox <span class="badge">3</span></li>
+String html = $("#inbox").innerHtml(); // Inbox <span class="badge">3</span>
+String own = $("#inbox").getOwnText(); // Inbox`,
+    },
+    {
       name: 'shouldHave(innerText())',
       level: 'advanced',
       platform: 'web',
@@ -180,6 +203,17 @@ $("#email").shouldHave(value("example.com"));
 $("#email").shouldHave(exactValue("ada@example.com"));`,
     },
     {
+      name: 'val() and getValue()',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Return the value attribute of an input, textarea or select as a String. val() and getValue() are the same method.',
+      tip: 'They return null when the element has no value attribute. val("text") with an argument is setValue("text"), not a getter. To check a value, use shouldHave(value("...")) or exactValue(), which wait for the value to change.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#val()',
+      code: `String email = $("#email").val();
+String same = $("#email").getValue();
+$("#email-copy").setValue(email);`,
+    },
+    {
       name: 'shouldHave(partialValue())',
       level: 'intermediate',
       platform: 'web',
@@ -210,6 +244,17 @@ $("#title").shouldHave(selectedText("Draft"));`,
       code: `$("#save").shouldHave(attribute("data-loading"));
 $("#save").shouldHave(attribute("aria-pressed", "true"));
 $("#ticket").shouldHave(attributeMatching("data-id", "T-\\\\d+"));`,
+    },
+    {
+      name: 'getAttribute()',
+      level: 'beginner',
+      platform: 'both',
+      desc: 'Returns the value of an attribute of the element as a String, or null when the attribute is missing.',
+      tip: 'It waits for the element, then reads the attribute once. To check an attribute, use shouldHave(attribute("name", "value")), which retries. getAttribute() suits a value the test reuses, such as an id taken from the page.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getAttribute(java.lang.String)',
+      code: `String orderId = $("#order").getAttribute("data-id");
+$("#search").setValue(orderId);
+String link = $("a.help").getAttribute("href");`,
     },
     {
       name: 'shouldHave(href())',
