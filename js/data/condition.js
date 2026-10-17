@@ -359,6 +359,19 @@ $("#username").pressTab();
 $("#password").shouldBe(focused);`,
     },
     {
+      name: 'getFocusedElement()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Returns the element that has the keyboard focus, or null when no element is focused.',
+      tip: 'It reads once. To assert that a field has focus, use shouldBe(focused), which waits. getFocusedElement() helps when you do not know which field should be focused and need to look at it.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#getFocusedElement()',
+      code: `$("#email").pressTab();
+SelenideElement active = getFocusedElement();
+if (active != null) {
+  System.out.println(active.getAttribute("id"));
+}`,
+    },
+    {
       name: 'shouldBe(image)',
       level: 'intermediate',
       platform: 'web',

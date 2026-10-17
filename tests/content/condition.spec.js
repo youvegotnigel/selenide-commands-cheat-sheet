@@ -464,3 +464,19 @@ test.describe('Javadoc gap fill: element getters (Selenide 7.19.0)', () => {
     expect(entry.tip).toContain('hidden');
   });
 });
+
+test.describe('Javadoc gap fill: focused element (Selenide 7.19.0)', () => {
+  test('"getFocusedElement()" exists at level intermediate, platform web', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Element Conditions', 'getFocusedElement()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#getFocusedElement()'
+    );
+    // selenide-7.19.0 Selenide.java:836 public static SelenideElement getFocusedElement()
+    expect(entry.code).toContain('getFocusedElement()');
+    expect(entry.tip).toContain('shouldBe(focused)');
+  });
+});
