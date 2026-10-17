@@ -129,10 +129,8 @@ test.describe('Javadoc gap fill: Selenium interop and caching (Selenide 7.19.0)'
     await page.goto('/');
   });
 
-  test('"toWebElement() and getWrappedElement()" exists at level advanced, platform both', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Patterns', 'toWebElement() and getWrappedElement()');
+  test('"toWebElement()" exists at level advanced, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Patterns', 'toWebElement()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('advanced');
     expect(entry.platform).toBe('both');
@@ -140,13 +138,27 @@ test.describe('Javadoc gap fill: Selenium interop and caching (Selenide 7.19.0)'
       'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#toWebElement()'
     );
     // selenide-core 7.19.0 SelenideElement.java:1268 WebElement toWebElement();
-    // :1277 WebElement getWrappedElement();
     expect(entry.code).toContain('.toWebElement()');
-    expect(entry.code).toContain('.getWrappedElement()');
-    // Javadoc: toWebElement() throws NoSuchElementException without waiting,
-    // getWrappedElement() throws ElementNotFound after waiting.
     expect(entry.tip).toContain('NoSuchElementException');
+  });
+
+  test('"getWrappedElement()" exists at level advanced, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Patterns', 'getWrappedElement()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getWrappedElement()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:1277 WebElement getWrappedElement();
+    expect(entry.code).toContain('.getWrappedElement()');
     expect(entry.tip).toContain('ElementNotFound');
+  });
+
+  test('the combined tiles are gone: toWebElement() and getWrappedElement()', async ({ page }) => {
+    for (const name of ['toWebElement() and getWrappedElement()']) {
+      expect(await itemIn(page, 'Patterns', name)).toBeNull();
+    }
   });
 
   test('"cached()" exists at level advanced, platform both', async ({ page }) => {

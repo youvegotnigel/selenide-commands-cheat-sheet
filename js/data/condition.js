@@ -14,16 +14,25 @@ export default {
       code: `$("#greeting").shouldHave(text("Hello"));`,
     },
     {
-      name: 'getText() and text()',
+      name: 'getText()',
       level: 'beginner',
       platform: 'both',
-      desc: 'Returns the visible text of the element as a String, trimmed. text() is the short form. For a select it returns the text of the selected option.',
+      desc: 'Returns the visible text of the element as a String, trimmed. For a select it returns the text of the selected option.',
       tip: 'The Javadoc marks getters as NOT RECOMMENDED for checks: they wait until the element exists, then return whatever text it has at that moment, so a value that is still loading is read too early. To check text, use shouldHave(text("...")). Use getText() when the test needs the value itself.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getText()',
       code: `String total = $("#cart-total").getText(); // "42.50 EUR"
 double amount = Double.parseDouble(total.split(" ")[0]);
-$("#coupon").setValue(String.valueOf(amount / 10));
-String same = $("#cart-total").text();`,
+$("#coupon").setValue(String.valueOf(amount / 10));`,
+    },
+    {
+      name: 'text() (getter)',
+      level: 'beginner',
+      platform: 'both',
+      desc: 'The short form of getText(): it returns the visible text of the element as a String, trimmed.',
+      tip: 'It is the same call as getText(), so the same warning applies: the Javadoc marks getters as NOT RECOMMENDED for checks. It is not the text() condition used in shouldHave(text("...")), which waits and retries.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#text()',
+      code: `String same = $("#cart-total").text();
+$("#cart-total").shouldHave(text("EUR")); // the condition, which waits`,
     },
     {
       name: 'shouldHave(partialText())',
@@ -149,14 +158,23 @@ $("#inbox").shouldHave(ownTextCaseSensitive("Inbox"));
 $("#inbox").shouldHave(exactOwnTextCaseSensitive("Inbox"));`,
     },
     {
-      name: 'innerHtml() and getOwnText()',
+      name: 'innerHtml()',
       level: 'intermediate',
       platform: 'web',
-      desc: 'innerHtml() returns the HTML of the element with its children. getOwnText() returns the text of the element without the text of its child elements.',
-      tip: 'The Javadoc marks both NOT RECOMMENDED for checks. innerHtml() also works on a hidden element, where getText() returns an empty string. It is short for getAttribute("innerHTML"). To check own text, use shouldHave(ownText()) or exactOwnText() instead of the getter.',
+      desc: 'Returns the HTML of the element with its children.',
+      tip: 'The Javadoc marks it NOT RECOMMENDED for checks. It also works on a hidden element, where getText() returns an empty string. It is short for getAttribute("innerHTML").',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#innerHtml()',
       code: `// <li id="inbox">Inbox <span class="badge">3</span></li>
-String html = $("#inbox").innerHtml(); // Inbox <span class="badge">3</span>
+String html = $("#inbox").innerHtml(); // Inbox <span class="badge">3</span>`,
+    },
+    {
+      name: 'getOwnText()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Returns the text of the element without the text of its child elements.',
+      tip: 'The Javadoc marks it NOT RECOMMENDED for checks. To check own text, use shouldHave(ownText()) or exactOwnText() instead of the getter.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getOwnText()',
+      code: `// <li id="inbox">Inbox <span class="badge">3</span></li>
 String own = $("#inbox").getOwnText(); // Inbox`,
     },
     {
@@ -203,14 +221,23 @@ $("#email").shouldHave(value("example.com"));
 $("#email").shouldHave(exactValue("ada@example.com"));`,
     },
     {
-      name: 'val() and getValue()',
+      name: 'val()',
       level: 'beginner',
       platform: 'web',
-      desc: 'Return the value attribute of an input, textarea or select as a String. val() and getValue() are the same method.',
-      tip: 'The Javadoc marks them NOT RECOMMENDED for checks. They return null when the element has no value attribute. val("text") with an argument is setValue("text"), not a getter. To check a value, use shouldHave(value("...")) or exactValue(), which wait for the value to change.',
+      desc: 'Returns the value attribute of an input, textarea or select as a String. getValue() is the same method.',
+      tip: 'The Javadoc marks it NOT RECOMMENDED for checks. It returns null when the element has no value attribute. val("text") with an argument is setValue("text"), not a getter. To check a value, use shouldHave(value("...")) or exactValue(), which wait for the value to change.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#val()',
       code: `String email = $("#email").val();
-String same = $("#email").getValue();
+$("#email-copy").setValue(email);`,
+    },
+    {
+      name: 'getValue()',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Returns the value attribute of an input, textarea or select as a String. val() is the same method.',
+      tip: 'The Javadoc marks it NOT RECOMMENDED for checks. It returns null when the element has no value attribute. To check a value, use shouldHave(value("...")) or exactValue(), which wait for the value to change.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getValue()',
+      code: `String email = $("#email").getValue();
 $("#email-copy").setValue(email);`,
     },
     {
@@ -267,16 +294,40 @@ String link = $("a.help").getAttribute("href");`,
 $("#docs").shouldHave(href("/docs/quick-start"));`,
     },
     {
-      name: 'id(), name(), type() and tagName()',
+      name: 'id()',
       level: 'intermediate',
       platform: 'web',
-      desc: 'Shortcuts for common checks: id(), name() and type() are attribute("id", ...), attribute("name", ...) and attribute("type", ...). tagName() checks the element tag.',
-      tip: 'All four compare exactly, case included, and tagName() expects the tag as the browser reports it, which is lower case for HTML. Selenium also has By.id() and By.name(), but those are locators, not conditions.',
+      desc: 'A condition that checks the id attribute. It is a shortcut for attribute("id", ...).',
+      tip: 'It compares exactly, case included. Selenium also has By.id(), but that is a locator, not a condition.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#id(java.lang.String)',
-      code: `$("form input").shouldHave(name("email"));
-$("form input").shouldHave(type("email"));
-$("label[for=email] + input").shouldHave(id("email"));
-$(".btn-primary").shouldHave(tagName("button"));`,
+      code: `$("label[for=email] + input").shouldHave(id("email"));`,
+    },
+    {
+      name: 'name()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'A condition that checks the name attribute. It is a shortcut for attribute("name", ...).',
+      tip: 'It compares exactly, case included. Selenium also has By.name(), but that is a locator, not a condition.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#name(java.lang.String)',
+      code: `$("form input").shouldHave(name("email"));`,
+    },
+    {
+      name: 'type()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'A condition that checks the type attribute of an input. It is a shortcut for attribute("type", ...).',
+      tip: 'It compares exactly, case included. It checks the attribute, not the element tag: use tagName() for the tag. It is not the type(TypeOptions) action that types text.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#type(java.lang.String)',
+      code: `$("form input").shouldHave(type("email"));`,
+    },
+    {
+      name: 'tagName()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'A condition that checks the tag name of the element.',
+      tip: 'It compares exactly and expects the tag as the browser reports it, which is lower case for HTML. It checks the tag, not the type attribute.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#tagName(java.lang.String)',
+      code: `$(".btn-primary").shouldHave(tagName("button"));`,
     },
     {
       name: 'shouldHave(domAttribute())',
@@ -440,12 +491,21 @@ $("#result").shouldHave(anyOf(text("Saved"), text("No changes"))); // synonym, n
 $("#result").shouldHave(text("Saved").or(text("No changes")));`,
     },
     {
-      name: 'be() and have()',
+      name: 'be()',
       level: 'intermediate',
       platform: 'both',
-      desc: 'be() and have() wrap a condition so that a should() with several conditions reads like a sentence. They change only the wording of the error message, not the check.',
-      tip: 'shouldBe() and shouldHave() already add the word, so wrapping only helps with plain should(). appear is literally be(visible), and disappear is be(hidden).',
+      desc: 'Wraps a condition so that a should() with several conditions reads like a sentence. It changes only the wording of the error message, not the check.',
+      tip: 'shouldBe() already adds the word, so wrapping only helps with plain should(). appear is literally be(visible), and disappear is be(hidden). Use have() for the property-style conditions.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#be(com.codeborne.selenide.WebElementCondition)',
+      code: `$("#greeting").should(be(visible), be(enabled));`,
+    },
+    {
+      name: 'have()',
+      level: 'intermediate',
+      platform: 'both',
+      desc: 'Wraps a condition so that a should() with several conditions reads like a sentence. It changes only the wording of the error message, not the check.',
+      tip: 'shouldHave() already adds the word, so wrapping only helps with plain should(). Use be() for the state conditions such as visible.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Condition.html#have(com.codeborne.selenide.WebElementCondition)',
       code: `$("#greeting").should(be(visible), have(text("Hello")));`,
     },
     {

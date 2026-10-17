@@ -106,20 +106,66 @@ test.describe('Javadoc gap fill: page state (Selenide 7.19.0)', () => {
     await page.goto('/');
   });
 
-  test('"url() and source()" exists at level beginner, platform web', async ({ page }) => {
-    const entry = await itemIn(page, 'Navigation & Browser', 'url() and source()');
+  test('"back()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Navigation & Browser', 'back()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#back()'
+    );
+    // selenide-7.19.0 Selenide.java:273 public static void back()
+    expect(entry.code).toContain('back();');
+    expect(entry.tip).toContain('navigate().back()');
+  });
+
+  test('"forward()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Navigation & Browser', 'forward()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#forward()'
+    );
+    // selenide-7.19.0 Selenide.java:280 public static void forward()
+    expect(entry.code).toContain('forward();');
+    expect(entry.tip).toContain('navigate().forward()');
+  });
+
+  test('"url()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Navigation & Browser', 'url()');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('beginner');
     expect(entry.platform).toBe('web');
     expect(entry.docs).toBe(
       'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverRunner.html#url()'
     );
-    // selenide-7.19.0 WebDriverRunner.java:258 public static String url(), :250 source()
+    // selenide-7.19.0 WebDriverRunner.java:258 public static String url(); :265 currentFrameUrl()
     expect(entry.code).toContain('import static com.codeborne.selenide.WebDriverRunner.url;');
-    expect(entry.code).toContain('import static com.codeborne.selenide.WebDriverRunner.source;');
-    // Selenide.java 7.19.0 has no url() or source().
     expect(entry.code).not.toContain('Selenide.url(');
     expect(entry.tip).toContain('webdriver().shouldHave(url(');
+  });
+
+  test('"source()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Navigation & Browser', 'source()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverRunner.html#source()'
+    );
+    // selenide-7.19.0 WebDriverRunner.java:250 public static String source()
+    expect(entry.code).toContain('import static com.codeborne.selenide.WebDriverRunner.source;');
+    expect(entry.code).not.toContain('Selenide.source(');
+    expect(entry.tip).toContain('WebDriverRunner');
+  });
+
+  test('the combined tiles are gone: back() and forward(), url() and source()', async ({
+    page,
+  }) => {
+    for (const name of ['back() and forward()', 'url() and source()']) {
+      expect(await itemIn(page, 'Navigation & Browser', name)).toBeNull();
+    }
   });
 
   test('"updateHash()" exists at level intermediate, platform web', async ({ page }) => {

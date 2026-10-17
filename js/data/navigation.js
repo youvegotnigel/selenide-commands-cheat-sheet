@@ -60,16 +60,29 @@ webdriver().restoreBrowserState(BrowserState.fromFile("build/auth.json"));
 open("/dashboard");`,
     },
     {
-      name: 'back() and forward()',
+      name: 'back()',
       level: 'beginner',
       platform: 'web',
-      desc: "Moves through the browser history, like the browser's back and forward buttons.",
-      tip: 'They call WebDriver navigate().back() and forward(), so on a single-page app they can return before the new view renders. Assert on an element or the URL before acting on the page.',
+      desc: "Moves one step back in the browser history, like the browser's Back button.",
+      tip: 'It calls WebDriver navigate().back(), so on a single-page app it can return before the previous view renders. Assert on an element or the URL before acting on the page.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#back()',
       code: `open("/catalog");
 $("a.product").click();
-back();    // to /catalog
-forward(); // to the product page again`,
+back(); // to /catalog
+$("h1").shouldHave(text("Catalog"));`,
+    },
+    {
+      name: 'forward()',
+      level: 'beginner',
+      platform: 'web',
+      desc: "Moves one step forward in the browser history, like the browser's Forward button.",
+      tip: 'It only has somewhere to go after a back(). It calls WebDriver navigate().forward(), so on a single-page app assert on an element or the URL before acting on the page.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#forward()',
+      code: `open("/catalog");
+$("a.product").click();
+back();
+forward(); // to the product page again
+$("h1").shouldHave(text("Product"));`,
     },
     {
       name: 'refresh()',
@@ -120,17 +133,27 @@ String current = title(); // read once, no waiting
 webdriver().shouldHave(WebDriverConditions.title("Checkout")); // waits`,
     },
     {
-      name: 'url() and source()',
+      name: 'url()',
       level: 'beginner',
       platform: 'web',
-      desc: 'url() returns the URL of the current page and source() returns its HTML. currentFrameUrl() returns the URL of the frame you switched into.',
-      tip: 'They live in WebDriverRunner, not in Selenide, so each needs its own static import. They read once and do not wait: after a click that navigates, assert with webdriver().shouldHave(url(...)) instead. Both can return null when no page is open.',
+      desc: 'Returns the URL of the current page as a String. currentFrameUrl() returns the URL of the frame you switched into.',
+      tip: 'It lives in WebDriverRunner, not in Selenide, so it needs its own static import. It reads once and does not wait: after a click that navigates, assert with webdriver().shouldHave(url(...)) instead. It can return null when no page is open.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverRunner.html#url()',
-      code: `import static com.codeborne.selenide.WebDriverRunner.source;
-import static com.codeborne.selenide.WebDriverRunner.url;
+      code: `import static com.codeborne.selenide.WebDriverRunner.url;
 
 open("/search?q=selenide");
-String current = url();
+String current = url();`,
+    },
+    {
+      name: 'source()',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Returns the HTML source of the current page as a String.',
+      tip: 'It lives in WebDriverRunner, not in Selenide, so it needs its own static import. It reads once and does not wait, and it can return null when no page is open. To check what the page shows, use element conditions such as $("body").shouldHave(text(...)).',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverRunner.html#source()',
+      code: `import static com.codeborne.selenide.WebDriverRunner.source;
+
+open("/search?q=selenide");
 String html = source();`,
     },
     {

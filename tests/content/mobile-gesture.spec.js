@@ -90,23 +90,39 @@ test.describe('Mobile Gestures entries (selenide-appium 7.19.0)', () => {
     }
   });
 
-  test('"setValue() and type() (Appium)" warns that SetValueOptions fails on mobile', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Mobile Gestures', 'setValue() and type() (Appium)');
+  test('"setValue() (Appium)" exists at level intermediate, platform mobile', async ({ page }) => {
+    const entry = await itemIn(page, 'Mobile Gestures', 'setValue() (Appium)');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('mobile');
-    // selenide-appium 7.19.0 SelenideAppiumElement.java:200: SelenideAppiumElement type(TypeOptions options);
-    // selenide-core 7.19.0 TypeOptions.java: public static TypeOptions text(CharSequence) / public TypeOptions sensitive()
-    expect(entry.code).toContain('.type(TypeOptions.text("secret_sauce").sensitive())');
-    // AppiumSetValue.java: CharSequence text = (CharSequence) requireNonNull(args)[0];
-    expect(entry.tip).toContain('ClassCastException');
-    expect(entry.code).not.toMatch(/setValue\((SetValueOptions\.)?withText\(/);
-    // TypeOptions.java: DEFAULT_DELAY_WHILE_TYPING = Duration.ofMillis(200)
-    expect(entry.desc).toContain('200 ms');
-    // AppiumType.java: if (AppiumDriverRunner.isAndroidDriver()) { element.click(); actions.sendKeys(character).perform(); }
-    expect(entry.tip).toMatch(/Android/);
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#setValue(java.lang.String)'
+    );
+    // selenide-appium 7.19.0 AppiumSetValue.java: CharSequence text = (CharSequence) requireNonNull(args)[0];
+    expect(entry.code).toContain('.setValue("standard_user")');
     expect(entry.code).toContain('import static com.codeborne.selenide.appium.SelenideAppium.$;');
+    expect(entry.code).not.toContain('SetValueOptions.');
+    expect(entry.code).not.toContain('withText(');
+    expect(entry.tip).toContain('ClassCastException');
+  });
+
+  test('"type() (Appium)" exists at level intermediate, platform mobile', async ({ page }) => {
+    const entry = await itemIn(page, 'Mobile Gestures', 'type() (Appium)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('mobile');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppiumElement.html#type(com.codeborne.selenide.TypeOptions)'
+    );
+    // selenide-appium 7.19.0 SelenideAppiumElement.java:200 SelenideAppiumElement type(TypeOptions options); TypeOptions.java DEFAULT_DELAY_WHILE_TYPING = Duration.ofMillis(200); AppiumType.java taps the field first on Android
+    expect(entry.code).toContain('.type(TypeOptions.text("secret_sauce").sensitive())');
+    expect(entry.code).toContain('import static com.codeborne.selenide.appium.SelenideAppium.$;');
+    expect(entry.tip).toContain('Android');
+  });
+
+  test('the combined tiles are gone: setValue() and type() (Appium)', async ({ page }) => {
+    for (const name of ['setValue() and type() (Appium)']) {
+      expect(await itemIn(page, 'Mobile Gestures', name)).toBeNull();
+    }
   });
 });

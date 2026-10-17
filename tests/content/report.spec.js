@@ -26,17 +26,95 @@ test.describe('Reports & Debugging entries (Selenide 7.19.0)', () => {
     expect(entry.code).toContain('byte[] png = screenshot(OutputType.BYTES)');
   });
 
-  test('"screenshot() and screenshotAsImage()" exists at level intermediate, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Reports & Debugging', 'screenshot() and screenshotAsImage()');
+  test('"screenshot() (element)" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Reports & Debugging', 'screenshot() (element)');
     expect(entry).not.toBeNull();
     expect(entry.level).toBe('intermediate');
     expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#screenshot()'
+    );
     // selenide-core 7.19.0 SelenideElement.java: File screenshot();
-    expect(entry.code).toMatch(/File \w+ = \$\("[^"]+"\)\.screenshot\(\)/);
+    expect(entry.code).toContain('File logo = $("#logo").screenshot()');
+    expect(entry.tip).toContain('Cannot take screenshot');
+  });
+
+  test('"screenshotAsImage()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Reports & Debugging', 'screenshotAsImage()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#screenshotAsImage()'
+    );
     // selenide-core 7.19.0 SelenideElement.java: BufferedImage screenshotAsImage();
-    expect(entry.code).toMatch(/BufferedImage \w+ = \$\("[^"]+"\)\.screenshotAsImage\(\)/);
+    expect(entry.code).toContain('BufferedImage chart = $("#sales-chart").screenshotAsImage()');
+    expect(entry.tip).toContain('Cannot take screenshot');
+  });
+
+  test('"as()" exists at level intermediate, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Reports & Debugging', 'as()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#as(java.lang.String)'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: SelenideElement as(String alias);
+    expect(entry.code).toContain('.as("');
+    expect(entry.tip).toContain('IllegalArgumentException');
+    expect(entry.tip).toContain('@As');
+  });
+
+  test('"describe()" exists at level intermediate, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Reports & Debugging', 'describe()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#describe()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: String describe();
+    expect(entry.code).toContain('.describe()');
+    expect(entry.tip).toContain('never throws');
+  });
+
+  test('"highlight()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Reports & Debugging', 'highlight()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#highlight(com.codeborne.selenide.HighlightOptions)'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: SelenideElement highlight(HighlightOptions options); HighlightOptions.java: public static HighlightOptions border(String borderStyle)
+    expect(entry.code).toContain('.highlight(HighlightOptions.border("');
+    expect(entry.tip).toContain('data-original-style');
+  });
+
+  test('"unhighlight()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Reports & Debugging', 'unhighlight()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#unhighlight()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java: SelenideElement unhighlight();
+    expect(entry.code).toContain('.unhighlight()');
+    expect(entry.tip).toContain('data-original-style');
+  });
+
+  test('the combined tiles are gone: screenshot() and screenshotAsImage(), as() and describe(), highlight() and unhighlight()', async ({
+    page,
+  }) => {
+    for (const name of [
+      'screenshot() and screenshotAsImage()',
+      'as() and describe()',
+      'highlight() and unhighlight()',
+    ]) {
+      expect(await itemIn(page, 'Reports & Debugging', name)).toBeNull();
+    }
   });
 
   test('"Screenshot on failure" exists at level beginner, platform both', async ({ page }) => {
@@ -71,31 +149,6 @@ test.describe('Reports & Debugging entries (Selenide 7.19.0)', () => {
     // selenide-core 7.19.0 SelenideLogger.java:
     //   public static <T extends LogEventListener> T removeListener(String name) {
     expect(entry.code).toMatch(/SelenideLogger\.removeListener\("\w+"\)/);
-  });
-
-  test('"highlight() and unhighlight()" exists at level beginner, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Reports & Debugging', 'highlight() and unhighlight()');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('beginner');
-    expect(entry.platform).toBe('web');
-    // selenide-core 7.19.0 SelenideElement.java: SelenideElement highlight(HighlightOptions options);
-    // selenide-core 7.19.0 HighlightOptions.java: public static HighlightOptions border(String borderStyle) {
-    expect(entry.code).toContain('.highlight(HighlightOptions.border("');
-    // selenide-core 7.19.0 SelenideElement.java: SelenideElement unhighlight();
-    expect(entry.code).toContain('.unhighlight()');
-  });
-
-  test('"as() and describe()" exists at level intermediate, platform both', async ({ page }) => {
-    const entry = await itemIn(page, 'Reports & Debugging', 'as() and describe()');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('intermediate');
-    expect(entry.platform).toBe('both');
-    // selenide-core 7.19.0 SelenideElement.java: SelenideElement as(String alias);
-    expect(entry.code).toContain('.as("');
-    // selenide-core 7.19.0 SelenideElement.java: String describe();
-    expect(entry.code).toContain('.describe()');
   });
 
   test('"selenide-full-screenshot" exists at level intermediate, platform web', async ({

@@ -37,23 +37,32 @@ fields.get(0).setValue("bob@example.com");
 fields.last().tap();`,
     },
     {
-      name: 'SelenideAppium.element() and elements()',
+      name: 'SelenideAppium.element()',
       level: 'intermediate',
       platform: 'mobile',
-      desc: 'Named aliases for SelenideAppium.$() and $$(), returning SelenideAppiumElement and SelenideAppiumCollection.',
-      tip: 'They exist for Kotlin, where $ must be written in backticks, and work the same from Java. Selenide.element() and Selenide.elements() also exist but return the web types, so import these two explicitly from SelenideAppium.',
+      desc: 'A named alias for SelenideAppium.$(), returning a SelenideAppiumElement.',
+      tip: 'It exists for Kotlin, where $ must be written in backticks, and works the same from Java. Selenide.element() also exists but returns the web type, so import this one explicitly from SelenideAppium.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppium.html#element(org.openqa.selenium.By)',
-      code: `import com.codeborne.selenide.appium.SelenideAppiumCollection;
-import com.codeborne.selenide.appium.SelenideAppiumElement;
+      code: `import com.codeborne.selenide.appium.SelenideAppiumElement;
 import io.appium.java_client.AppiumBy;
-import org.openqa.selenium.By;
 import static com.codeborne.selenide.appium.SelenideAppium.element;
-import static com.codeborne.selenide.appium.SelenideAppium.elements;
 
 SelenideAppiumElement login = element(AppiumBy.accessibilityId("Login button"));
-SelenideAppiumCollection fields = elements(By.className("android.widget.EditText"));
-fields.shouldHave(size(2));
 login.tap();`,
+    },
+    {
+      name: 'SelenideAppium.elements()',
+      level: 'intermediate',
+      platform: 'mobile',
+      desc: 'A named alias for SelenideAppium.$$(), returning a SelenideAppiumCollection.',
+      tip: 'It exists for Kotlin, where $$ must be written in backticks, and works the same from Java. Selenide.elements() also exists but returns the web type, so import this one explicitly from SelenideAppium.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppium.html#elements(org.openqa.selenium.By)',
+      code: `import com.codeborne.selenide.appium.SelenideAppiumCollection;
+import org.openqa.selenium.By;
+import static com.codeborne.selenide.appium.SelenideAppium.elements;
+
+SelenideAppiumCollection fields = elements(By.className("android.widget.EditText"));
+fields.shouldHave(size(2));`,
     },
     {
       name: '$(AppiumBy.accessibilityId())',

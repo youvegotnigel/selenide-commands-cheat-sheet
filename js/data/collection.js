@@ -55,15 +55,32 @@ $$("#todo li").exclude(cssClass("completed")).first().shouldHave(text("Buy milk"
 $$("#users tr").find(attribute("data-role", "admin")).shouldBe(visible);`,
     },
     {
-      name: 'get(), first() and last()',
+      name: 'get(index)',
       level: 'beginner',
       platform: 'both',
-      desc: 'get(index) (zero-based), first() and last() return one lazy element. first(n) and last(n) return a lazy sub-collection.',
-      tip: '$(css) is faster than $$(css).first() and returns the same element. An index that is out of range is not an error until you use the element, which then waits and fails with ElementNotFound.',
+      desc: 'Returns the element at a zero-based index of a collection as one lazy element.',
+      tip: '$(css) is faster than $$(css).get(0) and returns the same element. An index that is out of range is not an error until you use the element, which then waits and fails with ElementNotFound.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/BaseElementsCollection.html#get(int)',
-      code: `$$("#results li").get(2).shouldHave(text("Third"));
-$$("#results li").last().shouldBe(visible);
-$$("#results li").first(3).shouldHave(texts("One", "Two", "Three"));
+      code: `$$("#results li").get(2).shouldHave(text("Third"));`,
+    },
+    {
+      name: 'first()',
+      level: 'beginner',
+      platform: 'both',
+      desc: 'first() returns the first element of a collection, the same as get(0). first(n) returns a lazy sub-collection of the first n elements.',
+      tip: '$(css) is faster than $$(css).first() and returns the same element. An empty collection is not an error until you use the element, which then waits and fails with ElementNotFound.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/BaseElementsCollection.html#first()',
+      code: `$$("#results li").first().shouldHave(text("First"));
+$$("#results li").first(3).shouldHave(texts("One", "Two", "Three"));`,
+    },
+    {
+      name: 'last()',
+      level: 'beginner',
+      platform: 'both',
+      desc: 'last() returns the last element of a collection. last(n) returns a lazy sub-collection of the last n elements.',
+      tip: 'The last element is found again each time you use it, so on a list that is still growing it is whichever element is last at that moment.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/BaseElementsCollection.html#last()',
+      code: `$$("#results li").last().shouldBe(visible);
 $$("#pages a").last(2).shouldHave(texts("9", "10"));`,
     },
     {
@@ -79,17 +96,26 @@ List<String> names = $$(".product .name").texts();
 $("#compare").setValue(String.join(",", names));`,
     },
     {
-      name: 'asDynamicIterable() and asFixedIterable()',
+      name: 'asDynamicIterable()',
       level: 'advanced',
       platform: 'both',
-      desc: 'Choose how a for loop iterates a collection. asFixedIterable() takes one snapshot of the elements; asDynamicIterable() reloads them at each step.',
-      tip: 'A plain for-each, iterator() or stream() uses the fixed snapshot: fast, but it can throw StaleElementReferenceException if the list re-renders. Use asDynamicIterable() for a live list. Better still, replace the loop with one collection condition.',
+      desc: 'Lets a for loop iterate a collection that is reloaded at each step.',
+      tip: 'A plain for-each, iterator() or stream() uses the fixed snapshot instead: fast, but it can throw StaleElementReferenceException if the list re-renders. Use asDynamicIterable() for a live list. Better still, replace the loop with one collection condition.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/BaseElementsCollection.html#asDynamicIterable()',
       code: `import com.codeborne.selenide.SelenideElement;
 
 for (SelenideElement row : $$("#orders tr").asDynamicIterable()) {
   row.$(".status").shouldHave(text("Paid"));
-}
+}`,
+    },
+    {
+      name: 'asFixedIterable()',
+      level: 'advanced',
+      platform: 'both',
+      desc: 'Lets a for loop iterate a collection using one snapshot of the elements, taken when the loop starts.',
+      tip: 'This is what a plain for-each, iterator() or stream() already uses, so call it only to make that choice explicit. The snapshot is fast, but it can throw StaleElementReferenceException if the list re-renders. Use asDynamicIterable() for a live list.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/BaseElementsCollection.html#asFixedIterable()',
+      code: `import com.codeborne.selenide.SelenideElement;
 
 for (SelenideElement link : $$("nav a").asFixedIterable()) {
   System.out.println(link.getAttribute("href"));

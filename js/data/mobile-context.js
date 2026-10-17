@@ -70,11 +70,11 @@ SelenideAppium.openIOSDeepLink("mydemoapprn://product-details/1");
 $(byAttribute("label", "Sauce Labs Backpack")).shouldBe(visible, Duration.ofSeconds(20));`,
     },
     {
-      name: 'App lifecycle: terminateApp(), activateApp()',
+      name: 'SelenideAppium.terminateApp()',
       level: 'intermediate',
       platform: 'mobile',
-      desc: 'launchApp() starts the Appium session once per thread. Inside that session, terminateApp(appId) stops the app and activateApp(appId) brings it to the foreground, starting it if it is installed but not running.',
-      tip: 'appId is the applicationId on Android and the bundleId on iOS. Unlike the deep link methods, terminateApp() and activateApp() never start a session: without one they throw IllegalStateException ("No webdriver is bound to current thread"). Terminating the app does not end the session; closeWebDriver() does. launchApp() also sets Configuration.browserSize to null and pageLoadTimeout to -1.',
+      desc: 'Stops the app inside the current Appium session. launchApp() starts the session once per thread.',
+      tip: 'appId is the applicationId on Android and the bundleId on iOS. Unlike the deep link methods, it never starts a session: without one it throws IllegalStateException ("No webdriver is bound to current thread"). Terminating the app does not end the session; closeWebDriver() does.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppium.html#terminateApp(java.lang.String)',
       code: `import com.codeborne.selenide.appium.SelenideAppium;
 import io.appium.java_client.AppiumBy;
@@ -82,7 +82,19 @@ import io.appium.java_client.AppiumBy;
 SelenideAppium.launchApp(); // does nothing if the session already exists
 $(AppiumBy.accessibilityId("Add to cart")).click();
 
-SelenideAppium.terminateApp("com.example.shop"); // bundleId on iOS
+SelenideAppium.terminateApp("com.example.shop"); // bundleId on iOS`,
+    },
+    {
+      name: 'SelenideAppium.activateApp()',
+      level: 'intermediate',
+      platform: 'mobile',
+      desc: 'Brings the app to the foreground inside the current Appium session, starting it if it is installed but not running.',
+      tip: 'appId is the applicationId on Android and the bundleId on iOS. Unlike the deep link methods, it never starts a session: without one it throws IllegalStateException ("No webdriver is bound to current thread"). launchApp() also sets Configuration.browserSize to null and pageLoadTimeout to -1.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/appium/SelenideAppium.html#activateApp(java.lang.String)',
+      code: `import com.codeborne.selenide.appium.SelenideAppium;
+import io.appium.java_client.AppiumBy;
+
+SelenideAppium.terminateApp("com.example.shop");
 SelenideAppium.activateApp("com.example.shop");
 $(AppiumBy.accessibilityId("Cart badge")).shouldHave(text("1"));`,
     },
