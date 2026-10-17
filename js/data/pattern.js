@@ -107,6 +107,30 @@ public class ReplaceText extends FluentCommand {
 $("#search").execute(replaceText("selenide")).pressEnter();`,
     },
     {
+      name: 'toWebElement() and getWrappedElement()',
+      level: 'advanced',
+      platform: 'both',
+      desc: 'Return the Selenium WebElement behind a SelenideElement, for libraries and Selenium APIs that need the raw element.',
+      tip: 'toWebElement() throws NoSuchElementException at once if the element is missing. getWrappedElement() waits up to Configuration.timeout and throws Selenide ElementNotFound. The raw element is not retried afterwards.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#toWebElement()',
+      code: `import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
+
+WebElement raw = $("#chart").toWebElement();
+Select select = new Select($("#country").getWrappedElement());`,
+    },
+    {
+      name: 'cached()',
+      level: 'advanced',
+      platform: 'both',
+      desc: 'Returns the element with its lookup cached: later calls do not find it in the browser again.',
+      tip: 'It saves repeated lookups on a long chain of calls. If the page re-renders the element, the cached one becomes stale and calls on it fail, so use it only for elements that stay in the DOM during the steps.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#cached()',
+      code: `SelenideElement form = $("#checkout").cached();
+form.$(".email").setValue("ada@example.com");
+form.$(".pay").click();`,
+    },
+    {
       name: 'inNewBrowser() (second user)',
       level: 'intermediate',
       platform: 'web',

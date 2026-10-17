@@ -169,3 +169,19 @@ test.describe('Javadoc gap fill: select and radio getters (Selenide 7.19.0)', ()
     expect(entry.code).not.toContain(').getSelectedRadio(');
   });
 });
+
+test.describe('Javadoc gap fill: Selenium actions (Selenide 7.19.0)', () => {
+  test('"actions()" exists at level advanced, platform web', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Actions', 'actions()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#actions()'
+    );
+    // selenide-7.19.0 Selenide.java:1010 public static Actions actions()
+    expect(entry.code).toContain('actions()');
+    expect(entry.code).toContain('.perform()');
+  });
+});

@@ -242,6 +242,22 @@ $("#card-1").dragAndDrop(to("#done-column"));
 $("#slider-handle").dragAndDrop(to($("#slider-end")).usingSeleniumActions());`,
     },
     {
+      name: 'actions()',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'Returns a Selenium Actions builder for gestures that Selenide has no method for, such as key chords or a multi-step pointer path.',
+      tip: 'Nothing happens until the chain ends with perform(). Pass SelenideElement objects wherever Actions wants a WebElement. The chain does not retry, so wait for the elements first with shouldBe(visible).',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#actions()',
+      code: `import org.openqa.selenium.Keys;
+
+actions()
+  .keyDown(Keys.SHIFT)
+  .click($("#row-1"))
+  .click($("#row-5"))
+  .keyUp(Keys.SHIFT)
+  .perform();`,
+    },
+    {
       name: 'scrollIntoView(ScrollIntoViewOptions)',
       level: 'intermediate',
       platform: 'web',
