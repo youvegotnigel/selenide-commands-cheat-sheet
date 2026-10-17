@@ -123,3 +123,42 @@ test.describe('Patterns entries (Selenide 7.19.0)', () => {
     expect(entry.code).not.toContain('Commands.getInstance()');
   });
 });
+
+test.describe('Javadoc gap fill: Selenium interop and caching (Selenide 7.19.0)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  test('"toWebElement() and getWrappedElement()" exists at level advanced, platform both', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Patterns', 'toWebElement() and getWrappedElement()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#toWebElement()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:1268 WebElement toWebElement();
+    // :1277 WebElement getWrappedElement();
+    expect(entry.code).toContain('.toWebElement()');
+    expect(entry.code).toContain('.getWrappedElement()');
+    // Javadoc: toWebElement() throws NoSuchElementException without waiting,
+    // getWrappedElement() throws ElementNotFound after waiting.
+    expect(entry.tip).toContain('NoSuchElementException');
+    expect(entry.tip).toContain('ElementNotFound');
+  });
+
+  test('"cached()" exists at level advanced, platform both', async ({ page }) => {
+    const entry = await itemIn(page, 'Patterns', 'cached()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#cached()'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:1283 SelenideElement cached();
+    expect(entry.code).toContain('.cached()');
+    expect(entry.tip).toContain('stale');
+  });
+});

@@ -100,3 +100,51 @@ test.describe('Navigation & Browser entries (Selenide 7.19.0)', () => {
     expect(entry.code).not.toContain('.closeWebDriver()');
   });
 });
+
+test.describe('Javadoc gap fill: page state (Selenide 7.19.0)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  test('"url() and source()" exists at level beginner, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Navigation & Browser', 'url() and source()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverRunner.html#url()'
+    );
+    // selenide-7.19.0 WebDriverRunner.java:258 public static String url(), :250 source()
+    expect(entry.code).toContain('import static com.codeborne.selenide.WebDriverRunner.url;');
+    expect(entry.code).toContain('import static com.codeborne.selenide.WebDriverRunner.source;');
+    // Selenide.java 7.19.0 has no url() or source().
+    expect(entry.code).not.toContain('Selenide.url(');
+    expect(entry.tip).toContain('webdriver().shouldHave(url(');
+  });
+
+  test('"updateHash()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Navigation & Browser', 'updateHash()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#updateHash(java.lang.String)'
+    );
+    // selenide-7.19.0 Selenide.java:198 public static void updateHash(String hash)
+    expect(entry.code).toContain('updateHash("');
+    // SelenideDriver.java:255 executeJavaScript("window.location.hash='...'")
+    expect(entry.tip).toContain('window.location.hash');
+  });
+
+  test('"zoom()" exists at level advanced, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Navigation & Browser', 'zoom()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#zoom(double)'
+    );
+    // selenide-7.19.0 Selenide.java:1019 public static void zoom(double factor)
+    expect(entry.code).toMatch(/zoom\(\d+\.\d+\)/);
+  });
+});

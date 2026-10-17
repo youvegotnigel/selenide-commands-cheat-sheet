@@ -146,3 +146,23 @@ test.describe('Reports & Debugging entries (Selenide 7.19.0)', () => {
     expect(entry.docs).toBe('https://selenide.org/documentation/reports.html');
   });
 });
+
+test.describe('Javadoc gap fill: WebDriver logs (Selenide 7.19.0)', () => {
+  test('"getWebDriverLogs()" exists at level advanced, platform web', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Reports & Debugging', 'getWebDriverLogs()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('advanced');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#getWebDriverLogs(java.lang.String,java.util.logging.Level)'
+    );
+    // selenide-7.19.0 Selenide.java:1057 public static List<String> getWebDriverLogs(String logType, Level logLevel)
+    expect(entry.code).toContain('getWebDriverLogs(LogType.BROWSER, Level.');
+    expect(entry.code).toContain('import org.openqa.selenium.logging.LogType;');
+    expect(entry.code).toContain('import java.util.logging.Level;');
+    // Configuration.webdriverLogsEnabled writes the driver service log file: a different feature.
+    expect(entry.code).not.toContain('webdriverLogsEnabled');
+    expect(entry.tip).toContain('webdriverLogsEnabled');
+  });
+});

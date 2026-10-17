@@ -86,6 +86,28 @@ refresh();
 cartCount.shouldHave(text("0")); // same variable, looked up again`,
     },
     {
+      name: 'updateHash()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Changes the hash part of the current URL without reloading the page. It accepts "#hash" or "hash".',
+      tip: 'It runs window.location.hash = ... in the page, so it is the way to move around an ajax or single-page app, where open(url) would reload everything. The page must listen to hashchange to react.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#updateHash(java.lang.String)',
+      code: `open("/app");
+updateHash("#/orders/42");
+$("h1").shouldHave(text("Order 42"));`,
+    },
+    {
+      name: 'zoom()',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'Zooms the current page in or out. The factor is relative to normal size: 1.5 zooms in, 0.5 zooms out.',
+      tip: 'It scales document.body with a CSS transform, so the layout does not reflow like browser zoom and media queries do not change. The next page load resets it, and zoom(1.0) restores normal size at once.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#zoom(double)',
+      code: `zoom(2.0);
+$("#menu").shouldBe(visible);
+zoom(1.0);`,
+    },
+    {
       name: 'title()',
       level: 'beginner',
       platform: 'web',
@@ -96,6 +118,20 @@ cartCount.shouldHave(text("0")); // same variable, looked up again`,
 
 String current = title(); // read once, no waiting
 webdriver().shouldHave(WebDriverConditions.title("Checkout")); // waits`,
+    },
+    {
+      name: 'url() and source()',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'url() returns the URL of the current page and source() returns its HTML. currentFrameUrl() returns the URL of the frame you switched into.',
+      tip: 'They live in WebDriverRunner, not in Selenide, so each needs its own static import. They read once and do not wait: after a click that navigates, assert with webdriver().shouldHave(url(...)) instead. Both can return null when no page is open.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/WebDriverRunner.html#url()',
+      code: `import static com.codeborne.selenide.WebDriverRunner.source;
+import static com.codeborne.selenide.WebDriverRunner.url;
+
+open("/search?q=selenide");
+String current = url();
+String html = source();`,
     },
     {
       name: 'webdriver().shouldHave(url())',

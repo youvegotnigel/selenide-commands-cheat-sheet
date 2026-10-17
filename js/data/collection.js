@@ -67,6 +67,18 @@ $$("#results li").first(3).shouldHave(texts("One", "Two", "Three"));
 $$("#pages a").last(2).shouldHave(texts("9", "10"));`,
     },
     {
+      name: 'texts()',
+      level: 'beginner',
+      platform: 'both',
+      desc: 'Returns the text of every element in the collection as a List of Strings.',
+      tip: 'The Javadoc marks it NOT RECOMMENDED for checks and says to verify texts with $$.shouldHave(texts(...)) instead, which waits for the list to settle. texts() reads the collection once, so use it when the test needs the values, for example to feed them into another step.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/BaseElementsCollection.html#texts()',
+      code: `import java.util.List;
+
+List<String> names = $$(".product .name").texts();
+$("#compare").setValue(String.join(",", names));`,
+    },
+    {
       name: 'asDynamicIterable() and asFixedIterable()',
       level: 'advanced',
       platform: 'both',

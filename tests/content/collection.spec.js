@@ -45,3 +45,21 @@ test.describe('Collections entries (Selenide 7.19.0)', () => {
     expect(entry.code).toContain('.asFixedIterable()');
   });
 });
+
+test.describe('Javadoc gap fill: texts() (Selenide 7.19.0)', () => {
+  test('"texts()" exists at level beginner, platform both', async ({ page }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Collections', 'texts()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('both');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/BaseElementsCollection.html#texts()'
+    );
+    // selenide-core 7.19.0 BaseElementsCollection.java:302: public List<String> texts()
+    expect(entry.code).toContain('.texts()');
+    expect(entry.code).not.toContain('assertEquals(');
+    // Javadoc: "we highly recommend to verify them with $$.shouldHave(texts(...));"
+    expect(entry.tip).toContain('shouldHave(texts(');
+  });
+});

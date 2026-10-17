@@ -37,6 +37,19 @@ $("table.report").shouldBe(visible);
 switchTo().window(main);`,
     },
     {
+      name: 'switchTo().newWindow()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Opens a new empty tab or window and switches to it. WindowType.TAB opens a tab and WindowType.WINDOW opens a window.',
+      tip: 'Selenide then works in the new window, so open(url) loads the page there. Go back with switchTo().window(0). Use it when a test needs a second page open without a link click.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideTargetLocator.html#newWindow(org.openqa.selenium.WindowType)',
+      code: `import org.openqa.selenium.WindowType;
+
+switchTo().newWindow(WindowType.TAB);
+open("/reports");
+switchTo().window(0);`,
+    },
+    {
       name: 'webdriver().shouldHave(numberOfWindows())',
       level: 'intermediate',
       platform: 'web',
@@ -131,6 +144,21 @@ prompt("Enter a new name", "Quarterly.pdf"); // checks the text, types, clicks O
 
 $("#nickname").click();
 prompt("Alice"); // types "Alice" only, no text check`,
+    },
+    {
+      name: 'switchTo().alert()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Waits for a JavaScript dialog and returns the Selenium Alert object without closing it. alert(Duration) sets how long to wait.',
+      tip: 'Use it when confirm(), dismiss() and prompt() are not enough, for example to read the dialog text and then decide whether to accept or dismiss. The dialog stays open until you call accept() or dismiss() on the Alert.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideTargetLocator.html#alert(java.time.Duration)',
+      code: `import java.time.Duration;
+import org.openqa.selenium.Alert;
+
+$("#delete").click();
+Alert alert = switchTo().alert(Duration.ofSeconds(2));
+String message = alert.getText();
+alert.accept();`,
     },
     {
       name: 'ModalOptions',

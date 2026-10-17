@@ -86,6 +86,18 @@ Configuration.browser = "htmlunit"; // Browsers.HTMLUNIT
 open("/login");`,
     },
     {
+      name: 'Configuration.browserBinary',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Path to the browser executable to start, instead of the browser that Selenium finds on its own. There is no default.',
+      tip: 'It works only for Chrome and Firefox. Set it in code, in selenide.properties, or with -Dselenide.browserBinary=/path/to/binary. Use it to test a specific build, such as Chromium or a beta channel.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Configuration.html#browserBinary',
+      code: `import com.codeborne.selenide.Configuration;
+
+Configuration.browser = "chrome";
+Configuration.browserBinary = "/usr/bin/chromium";`,
+    },
+    {
       name: 'Configuration.baseUrl',
       level: 'beginner',
       platform: 'web',

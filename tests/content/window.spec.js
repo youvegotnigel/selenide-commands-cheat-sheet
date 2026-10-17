@@ -87,3 +87,36 @@ test.describe('Windows, Frames, Alerts entries (Selenide 7.19.0)', () => {
     expect(entry.code).not.toMatch(/(confirm|dismiss)\("[^"]*", Duration/);
   });
 });
+
+test.describe('Javadoc gap fill: alert and new window (Selenide 7.19.0)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  test('"switchTo().alert()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Windows, Frames, Alerts', 'switchTo().alert()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideTargetLocator.html#alert(java.time.Duration)'
+    );
+    // selenide-core 7.19.0 SelenideTargetLocator.java:171 public Alert alert(),
+    // :176 public Alert alert(@Nullable Duration timeout)
+    expect(entry.code).toContain('switchTo().alert(Duration.ofSeconds(');
+    expect(entry.code).toContain('import java.time.Duration;');
+  });
+
+  test('"switchTo().newWindow()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Windows, Frames, Alerts', 'switchTo().newWindow()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideTargetLocator.html#newWindow(org.openqa.selenium.WindowType)'
+    );
+    // selenide-core 7.19.0 SelenideTargetLocator.java:281 public WebDriver newWindow(WindowType typeHint)
+    expect(entry.code).toContain('switchTo().newWindow(WindowType.TAB)');
+    expect(entry.code).toContain('import org.openqa.selenium.WindowType;');
+  });
+});

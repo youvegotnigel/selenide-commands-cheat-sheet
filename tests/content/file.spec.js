@@ -83,3 +83,25 @@ test.describe('Files entries (Selenide 7.19.0)', () => {
     expect(entry.code).not.toMatch(/\.download\(\d/);
   });
 });
+
+test.describe('Javadoc gap fill: downloadFiles (Selenide 7.19.0)', () => {
+  test('"downloadFiles(DownloadOptions)" exists at level intermediate, platform web', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const entry = await itemIn(page, 'Files', 'downloadFiles(DownloadOptions)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#downloadFiles(com.codeborne.selenide.DownloadOptions)'
+    );
+    // selenide-core 7.19.0 SelenideElement.java:1253 List<File> downloadFiles(DownloadOptions options)
+    // @since 7.17.0; CHANGELOG.md at v7.19.0, 7.17.0: "add method $.downloadFiles()".
+    expect(entry.code).toContain('downloadFiles(DownloadOptions.files()');
+    expect(entry.code).toContain('List<File>');
+    expect(entry.desc).toContain('Added in Selenide 7.17.0.');
+    // DownloadOptions.java:172-174 files() is files(2).
+    expect(entry.tip).toContain('at least 2');
+  });
+});

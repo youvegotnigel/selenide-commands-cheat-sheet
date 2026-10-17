@@ -85,3 +85,41 @@ test.describe('Selectors entries (Selenide 7.19.0)', () => {
     expect(withText.code).not.toContain('AppiumSelectors');
   });
 });
+
+test.describe('Javadoc gap fill: link text and label selectors (Selenide 7.19.0)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
+
+  test('"byLinkText() and byPartialLinkText()" exists at level beginner, platform web', async ({
+    page,
+  }) => {
+    const entry = await itemIn(page, 'Selectors', 'byLinkText() and byPartialLinkText()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('beginner');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byLinkText(java.lang.String)'
+    );
+    // selenide-core 7.19.0 Selectors.java:296 byLinkText(String linkText), :303 byPartialLinkText(String)
+    expect(entry.code).toContain('byLinkText("');
+    expect(entry.code).toContain('byPartialLinkText("');
+    expect(entry.code).toContain('import static com.codeborne.selenide.Selectors.');
+  });
+
+  test('"byLabel()" exists at level intermediate, platform web', async ({ page }) => {
+    const entry = await itemIn(page, 'Selectors', 'byLabel()');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byLabel(java.lang.String,com.codeborne.selenide.TextMatchOptions)'
+    );
+    // selenide-core 7.19.0 Selectors.java:96 byLabel(String), :100 byLabel(String, TextMatchOptions)
+    expect(entry.code).toContain('byLabel("');
+    // TextMatchOptions.java:19 public static TextMatchOptions partialText()
+    expect(entry.code).toContain('TextMatchOptions.partialText()');
+    // find-elements-by-label.js: the label's "for" attribute selects the element by id.
+    expect(entry.tip).toContain('for');
+  });
+});

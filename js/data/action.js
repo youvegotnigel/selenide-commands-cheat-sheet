@@ -174,6 +174,27 @@ $("#country").selectOptionByValue("fi");
 $("#country").getSelectedOption().shouldHave(text("Finland"));`,
     },
     {
+      name: 'getSelectedOptionText() and getSelectedOptionValue()',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Read the selected option of a select element: its visible text, or its value attribute.',
+      tip: 'The Javadoc marks them NOT RECOMMENDED for checks. getSelectedOptionText() returns null when no option is selected and throws IllegalArgumentException when the element is not a select. getSelectedOptionValue() returns null when the option has no value attribute. To check a selection, use getSelectedOption().shouldHave(text("...")), which waits.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getSelectedOptionText()',
+      code: `String country = $("#country").getSelectedOptionText(); // "Finland"
+String code = $("#country").getSelectedOptionValue();   // "fi"`,
+    },
+    {
+      name: 'getOptions() and getSelectedOptions()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'getOptions() returns all option elements of a select as an ElementsCollection. getSelectedOptions() returns only the selected ones, and is empty when nothing is selected.',
+      tip: 'Both return a lazy collection, so collection conditions wait and retry. getSelectedOptions() is the way to read a multiple select, where getSelectedOption() returns one option only.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#getOptions()',
+      code: `$("#country").getOptions().shouldHave(size(3));
+$("#country").getOptions().shouldHave(texts("Finland", "Sweden", "Norway"));
+$("#interests").getSelectedOptions().shouldHave(exactTexts("Music", "Sport"));`,
+    },
+    {
       name: 'selectRadio()',
       level: 'beginner',
       platform: 'web',
@@ -183,6 +204,19 @@ $("#country").getSelectedOption().shouldHave(text("Finland"));`,
       code: `import org.openqa.selenium.By;
 
 $(By.name("delivery")).selectRadio("express").shouldBe(selected);`,
+    },
+    {
+      name: 'getSelectedRadio()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Returns the checked radio button of a group as a SelenideElement, found by the By locator of the whole group.',
+      tip: 'It is a static method of Selenide, not of an element. It returns null when nothing is selected, so check for null before you chain a call on the result. To assert a choice, check the radio you expect: $("input[name=plan][value=pro]").shouldBe(checked).',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#getSelectedRadio(org.openqa.selenium.By)',
+      code: `import static com.codeborne.selenide.Selectors.byName;
+
+SelenideElement plan = getSelectedRadio(byName("plan"));
+String chosen = plan == null ? "none" : plan.getValue();
+$("#summary").setValue(chosen);`,
     },
     {
       name: 'setSelected()',
@@ -207,6 +241,22 @@ $("#card-1").dragAndDrop(to("#done-column"));
 $("#slider-handle").dragAndDrop(to($("#slider-end")).usingSeleniumActions());`,
     },
     {
+      name: 'actions()',
+      level: 'advanced',
+      platform: 'web',
+      desc: 'Returns a Selenium Actions builder for gestures that Selenide has no method for, such as key chords or a multi-step pointer path.',
+      tip: 'Nothing happens until the chain ends with perform(). Pass SelenideElement objects wherever Actions wants a WebElement. The chain does not retry, so wait for the elements first with shouldBe(visible).',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#actions()',
+      code: `import org.openqa.selenium.Keys;
+
+actions()
+  .keyDown(Keys.SHIFT)
+  .click($("#row-1"))
+  .click($("#row-5"))
+  .keyUp(Keys.SHIFT)
+  .perform();`,
+    },
+    {
       name: 'scrollIntoView(ScrollIntoViewOptions)',
       level: 'intermediate',
       platform: 'web',
@@ -228,6 +278,17 @@ $(".logo").scrollIntoView(instant().block(center).inline(end));`,
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#scrollIntoCenter()',
       code: `$("#comments").scrollIntoCenter().shouldBe(visible);
 $("footer").scrollTo(); // aligns to the top of the window`,
+    },
+    {
+      name: 'atBottom()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Returns true when the page is scrolled to the bottom. It is useful when you scroll down by a fixed step an unknown number of times.',
+      tip: 'The check is scrollY + innerHeight >= document.body.scrollHeight. A page with infinite scroll grows after each step, so always put an upper limit on the loop.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#atBottom()',
+      code: `for (int i = 0; i < 20 && !atBottom(); i++) {
+  executeJavaScript("window.scrollBy(0, 600)");
+}`,
     },
   ],
 };
