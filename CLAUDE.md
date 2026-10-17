@@ -289,18 +289,18 @@ Design: `docs/superpowers/specs/2026-10-15-periodic-grid-refresh-design.md`.
 
 ---
 
-## Analytics (Supabase) — currently off
+## Analytics (Supabase): visitor count on, command views off
 
-Analytics are **switched off** behind `ENABLED = false` flags marked `SUPABASE PLACEHOLDER`
-in `js/popular-commands.js`, `js/visitor-counter.js` and `js/visitor-display.js`. While off,
-no request is sent, the visitor badge shows `—`, and the Popular filter is hidden. The client
-still points at the Playwright site's tables, so **do not flip the flags** until the
-Selenide-specific backend exists: tables `selenide_visits` / `selenide_command_views`, RPCs
-`increment_selenide_visits` / `increment_selenide_command_view`, Edge Functions
-`increment-selenide-visitor` / `increment-selenide-command-view`. The steps are in the plan,
-Task 8 (`docs/superpowers/plans/2026-10-13-selenide-cheat-sheet.md`). The analytics tests are
-`test.describe.skip` until then, and `Analytics placeholder` in `meta-bar.spec.js` proves no
-request reaches Supabase.
+The **visitor counter is live** (`js/visitor-counter.js`, `js/visitor-display.js`) against the
+shared Supabase project, using Selenide-only objects: table `selenide_visits`, RPC
+`increment_selenide_visits`, Edge Function `increment-selenide-visitor`
+(`supabase/migrations/0001_selenide_visits.sql`, `supabase/functions/increment-selenide-visitor/`).
+Both `mockBackends` helpers abort any unmocked request to the project.
+
+**Command-view tracking is still off** behind `ENABLED = false` in `js/popular-commands.js`
+(`SUPABASE PLACEHOLDER`); the Popular filter is hidden and its tests are `describe.skip`. Do not
+flip it until `selenide_command_views`, `increment_selenide_command_view` and
+`increment-selenide-command-view` exist (plan Task 8, `docs/superpowers/plans/2026-10-13-selenide-cheat-sheet.md`).
 
 ---
 

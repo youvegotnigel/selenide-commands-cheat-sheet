@@ -1,12 +1,9 @@
 // Live Visitor Counter Display
 (function initVisitorDisplay() {
-  // SUPABASE PLACEHOLDER (deferred, see plan Task 8): no requests until re-enabled.
-  const ENABLED = false;
-  if (!ENABLED) return;
   const SUPABASE_URL = 'https://tilbhgcncnwibnfgebkg.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_yCaOt8Z9sl-JEQC5wZ6_sQ_jZi610z1';
   const UPDATE_INTERVAL = 30000;
-  const CACHE_KEY = 'visitor-count-cache';
+  const CACHE_KEY = 'selenide-visitor-count-cache';
   let hasAnimated = false;
 
   function displayCount(count, isLive = true) {
@@ -24,7 +21,7 @@
   }
 
   function updateVisitorCount() {
-    fetch(`${SUPABASE_URL}/rest/v1/visits?select=total_count&apikey=${SUPABASE_KEY}`, {
+    fetch(`${SUPABASE_URL}/rest/v1/selenide_visits?select=total_count&apikey=${SUPABASE_KEY}`, {
       signal: AbortSignal.timeout(5000),
     })
       .then((res) => res.json())
