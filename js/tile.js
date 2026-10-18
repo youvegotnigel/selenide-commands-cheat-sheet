@@ -17,7 +17,7 @@ const QUALIFIER_RE = /^(.+?) \((.+)\)$/;
 // the argument list a small line below it.
 const ARGS_RE = /^([A-Za-z_$][\w$]*)(\([A-Za-z_$][\w$]*(?:, [A-Za-z_$][\w$]*)*\))$/;
 // A long getter, "getSelectedOptionText()": the verb is shared noise, the noun is the point.
-const VERB_RE = /^(get|as|by)([A-Z][\w$]*\(\))$/;
+const VERB_RE = /^(get|as)([A-Z][\w$]*\(\))$/;
 const VERB_MIN_LENGTH = 15;
 // Skill and MCP names share a "selenide-" stem.
 const STEM_RE = /^(selenide-)([\w-]+)$/;

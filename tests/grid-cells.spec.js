@@ -48,7 +48,10 @@ test.describe('splitName', () => {
     // long getter: the verb is the prefix
     ['getSelectedOptionText()', { prefix: 'get', key: 'SelectedOptionText()' }],
     ['asDynamicIterable()', { prefix: 'as', key: 'DynamicIterable()' }],
-    ['byPartialLinkText()', { prefix: 'by', key: 'PartialLinkText()' }],
+    // by* selectors stay whole, like their with* siblings
+    ['byPartialLinkText()', { prefix: '', key: 'byPartialLinkText()' }],
+    ['byPlaceholder()', { prefix: '', key: 'byPlaceholder()' }],
+    ['byTextCaseInsensitive()', { prefix: '', key: 'byTextCaseInsensitive()' }],
     // shared stem
     ['selenide-full-screenshot', { prefix: 'selenide-', key: 'full-screenshot' }],
     ['selenide-selenoid', { prefix: 'selenide-', key: 'selenoid' }],
