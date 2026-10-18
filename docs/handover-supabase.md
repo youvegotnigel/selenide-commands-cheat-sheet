@@ -4,64 +4,58 @@ For a fresh session. Read this, then `CLAUDE.md`, then plan Task 8.
 
 ## Where the project stands
 
-- Branch `develop`, pushed to `origin/develop`. 247 entries, 21 categories. The cheat sheet is
-  complete and usable. `master` is not on the remote yet (see "Branches" below).
-- Analytics are **off**. The user deferred all Supabase work ("let's worry about the supabase stuff
-  later, remind me to fix those stuff, keep placeholders"). The user must be reminded of this
-  at the end of major work.
-- Nothing has ever run against the live Supabase project from this repo.
+- Branch `develop`, with `master` also on the remote. 341 entries, 22 categories. The cheat sheet is
+  complete and usable.
+- The **visitor counter is live** against the shared Supabase project, using Selenide-only objects
+  (`selenide_visits`, `increment_selenide_visits`, Edge Function `increment-selenide-visitor`).
+- **Command-view tracking is still off** (the Popular filter and the fire badge). The user deferred it
+  ("let's worry about the supabase stuff later, remind me to fix those stuff, keep placeholders").
+  The user must be reminded of this at the end of major work.
 
-## Why it is off (do not flip the flags early)
+## Why command views are off (do not flip the flag early)
 
-The client code was copied from the Playwright cheat sheet and still points at **that site's**
-live project (`tilbhgcncnwibnfgebkg.supabase.co`) and its tables (`visits`, `command_views`).
-Turning analytics on now would add Selenide visitors and command opens to the Playwright
-site's counts.
+`js/popular-commands.js` was copied from the Playwright cheat sheet and still points at **that
+site's** table (`command_views`) and Edge Function (`increment-command-view`) in the shared project
+(`tilbhgcncnwibnfgebkg.supabase.co`). Turning it on now would add Selenide command opens to the
+Playwright site's counts.
 
 ## Current state in the repo
 
 | Item | State |
 |---|---|
-| `js/popular-commands.js` | `export const ENABLED = false;`, `SUPABASE PLACEHOLDER` comment, early returns |
-| `js/visitor-counter.js` | local `ENABLED = false`, early return, same comment |
-| `js/visitor-display.js` | local `ENABLED = false`, early return, same comment |
-| `js/app.js:262` | Popular filter shows only when `popularCmds.ENABLED` |
-| Visitor badge | shows `—` while off |
-| `tests/popular-commands.spec.js`, visitor tests in `tests/meta-bar.spec.js` | `test.describe.skip` |
-| `tests/meta-bar.spec.js` `Analytics placeholder` | passes now; proves no request reaches Supabase |
-| `supabase/migrations/0001_visits_counter.sql`, `0002_command_views.sql` | still the **Playwright** names |
-| `supabase/functions/increment-visitor/`, `increment-command-view/` | still the **Playwright** names |
+| `js/popular-commands.js` | `export const ENABLED = false;`, `SUPABASE PLACEHOLDER` comment, early returns, still the **Playwright** names |
+| `js/visitor-counter.js`, `js/visitor-display.js` | live, Selenide names, session and cache keys prefixed `selenide-` |
+| `js/app.js` | Popular filter shows only when `popularCmds.ENABLED` |
+| `tests/popular-commands.spec.js` | `test.describe.skip` |
+| `tests/meta-bar.spec.js` | visitor counter tests active; `Command-view analytics placeholder` passes and proves no command-view request is sent |
+| `supabase/migrations/0001_selenide_visits.sql` | Selenide names, applied |
+| `supabase/migrations/0002_command_views.sql`, `supabase/functions/increment-command-view/` | still the **Playwright** names |
+| `supabase/functions/increment-selenide-visitor/` | Selenide name, deployed |
 
-## What to build (Task 8)
+## What to build (Task 8, command views only)
 
 The full, step-by-step version is in
-`docs/superpowers/plans/2026-10-13-selenide-cheat-sheet.md`, **Task 8** (around line 2165), with
-the design in `docs/superpowers/specs/2026-10-13-selenide-cheat-sheet-design.md` section 8.
+`docs/superpowers/plans/2026-10-13-selenide-cheat-sheet.md`, **Task 8**, with the design in
+`docs/superpowers/specs/2026-10-13-selenide-cheat-sheet-design.md` section 8.
 
 Decision already made: reuse the same Supabase project, with `selenide_`-prefixed objects.
 
 | Kind | Name |
 |---|---|
-| Table | `selenide_visits` |
-| RPC | `increment_selenide_visits()` |
 | Table | `selenide_command_views` |
 | RPC | `increment_selenide_command_view(cmd_id text)` |
-| Edge Function | `increment-selenide-visitor` |
 | Edge Function | `increment-selenide-command-view` |
-| localStorage / sessionStorage keys | `selenide-visitor-counted-session`, `selenide-visitor-count-cache`, `selenide-command-views-cache`, `selenide-cmd-opened:` |
+| localStorage / sessionStorage keys | `selenide-command-views-cache`, `selenide-cmd-opened:` |
 
 Order of work (the plan's order, test first):
-1. Add the catch-all abort route `**tilbhgcncnwibnfgebkg.supabase.co/**` as the first line of both
-   `mockBackends` helpers, so an unmocked request can never reach the live project.
-2. Point the tests at the new names and the new storage keys. Watch them fail.
-3. Rename in the three client files. Watch them pass.
-4. Write the new migrations and Edge Functions. Delete the old Playwright-named ones.
-5. Then the extra steps: set `ENABLED = true` in the three files and remove the placeholder
-   comments, remove `.skip` from the four analytics describes, delete the `Analytics placeholder`
-   describe, replace the "20 commands" fixtures in the popularity tests (the plan has the exact
-   replacement), update the Mobile filter test to expect
-   `['All', '⭐ Start Here', '🔥 Popular', '📱 Mobile']`, and replace the "analytics are off" notes
-   in `CLAUDE.md` and `AGENTS.md`.
+1. Point the popularity tests at the new names and the new storage keys. Watch them fail.
+2. Rename in `js/popular-commands.js`. Watch them pass.
+3. Write the new migration and Edge Function. Delete the old Playwright-named ones.
+4. Then set `ENABLED = true`, remove the placeholder comment, remove `.skip` from the two popularity
+   describes, delete the `Command-view analytics placeholder` describe, replace the "20 commands"
+   fixtures in the popularity tests (the plan has the exact replacement), update the Mobile filter
+   test to expect `['All', '⭐ Start Here', '🔥 Popular', '📱 Mobile']`, and replace the "command
+   views are off" notes in `CLAUDE.md` and `AGENTS.md`.
 
 ## What only the user can do
 
@@ -77,14 +71,6 @@ before flipping `ENABLED`.
 - No em-dashes or en-dashes in command data. No build step, no CDN.
 - Gates: `npm test`, `npm run lint`, `npm run format:check`, `npm run check:links`.
 - Do not push or merge without being asked.
-
-## Branches
-
-Local `master` is still the baseline (a Playwright copy, `4a25ee9`) and is not on the remote.
-To fix: `git checkout master && git merge --ff-only develop && git push -u origin master`, then
-set the default branch and the Pages source in the GitHub settings. CI (`test.yml`,
-`stamp-date.yml`) only runs for `master`, so the analytics tests will not run in CI until this
-is done.
 
 ## Cleanup when finished
 
