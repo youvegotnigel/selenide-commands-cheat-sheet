@@ -6,6 +6,89 @@ test.describe('Selectors entries (Selenide 7.19.0)', () => {
     await page.goto('/');
   });
 
+  test('"$$x(xpath)" is its own tile next to "$x(xpath)"', async ({ page }) => {
+    const entry = await itemIn(page, 'Selectors', '$$x(xpath)');
+    expect(entry).not.toBeNull();
+    expect(entry.level).toBe('intermediate');
+    expect(entry.platform).toBe('web');
+    // selenide 7.19.0 Selenide.java: public static ElementsCollection $$x(String xpathExpression)
+    // selenide-core 7.19.0 SelenideElement.java: ElementsCollection $$x(String xpath)
+    expect(entry.code).toContain('$$x("//table[@id=\'users\']//tr")');
+    expect(entry.code).toContain('$("#users").$$x(".//td")');
+    expect(entry.docs).toBe(
+      'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#$$x(java.lang.String)'
+    );
+    // $x() now documents only itself
+    const single = await itemIn(page, 'Selectors', '$x(xpath)');
+    expect(single.code).not.toContain('$$x');
+  });
+
+  // Selectors added after the 7.19.0 Selectors.java audit. Each: [name, level, snippet, source].
+  const added = [
+    [
+      'byPlaceholder()',
+      'intermediate',
+      'byPlaceholder("Search")',
+      // selenide-core 7.19.0 Selectors.java: public static By byPlaceholder(String placeholderText), @since 7.12.0
+    ],
+    [
+      'byTitle()',
+      'intermediate',
+      'byTitle("Close")',
+      // selenide-core 7.19.0 Selectors.java: public static By byTitle(String title)
+    ],
+    [
+      'byAltText()',
+      'intermediate',
+      'byAltText("Company logo")',
+      // selenide-core 7.19.0 Selectors.java: public static By byAltText(String title), @since 7.12.0
+    ],
+    [
+      'byTextCaseInsensitive()',
+      'intermediate',
+      'byTextCaseInsensitive("sign in")',
+      // selenide-core 7.19.0 Selectors.java: public static By byTextCaseInsensitive(String elementText)
+    ],
+    [
+      'withTextCaseInsensitive()',
+      'intermediate',
+      'withTextCaseInsensitive("welcome")',
+      // selenide-core 7.19.0 Selectors.java: public static By withTextCaseInsensitive(String elementText)
+    ],
+    [
+      'withTagAndText()',
+      'intermediate',
+      'withTagAndText("li", "overdue")',
+      // selenide-core 7.19.0 Selectors.java: public static By withTagAndText(String tag, String elementText)
+    ],
+    [
+      '$(By)',
+      'beginner',
+      '$(byText("Sign in"))',
+      // selenide 7.19.0 Selenide.java: $(By seleniumSelector), $$(By seleniumSelector)
+    ],
+  ];
+
+  for (const [name, level, snippet] of added) {
+    test(`"${name}" exists at level ${level}, platform web`, async ({ page }) => {
+      const entry = await itemIn(page, 'Selectors', name);
+      expect(entry).not.toBeNull();
+      expect(entry.level).toBe(level);
+      expect(entry.platform).toBe('web');
+      expect(entry.code).toContain(snippet);
+    });
+  }
+
+  test('"$(By)" also shows the $$(By) collection form', async ({ page }) => {
+    const entry = await itemIn(page, 'Selectors', '$(By)');
+    expect(entry.code).toContain('$$(byClassName("error"))');
+  });
+
+  test('"byTagAndText()" no longer documents withTagAndText()', async ({ page }) => {
+    const entry = await itemIn(page, 'Selectors', 'byTagAndText()');
+    expect(entry.code).not.toContain('withTagAndText');
+  });
+
   test('"shadowCss()" exists at level advanced, platform web', async ({ page }) => {
     const entry = await itemIn(page, 'Selectors', 'shadowCss()');
     expect(entry).not.toBeNull();

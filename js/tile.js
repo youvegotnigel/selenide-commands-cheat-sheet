@@ -8,13 +8,41 @@ const PREFIX_RE = /^(?:[A-Za-z_$][\w$]*(?:\(\))?\.)+/;
 // What may follow a prefix: an identifier, optional call parens, optional " (note)"
 const KEY_RE = /^[A-Za-z_$][\w$]*(?:\(.*\))?(?: \(.*\))?$/;
 
-/** Splits a command name into a small prefix and the large key. */
+// A should/shouldBe/shouldHave style wrapper around a single argument: the argument is the
+// part worth reading, so it becomes the key and the wrapper becomes the small prefix.
+const WRAP_RE = /^(should(?:Not)?(?:Be|Have)?\()([A-Za-z_$][\w$]*(?:\(\))?)\)$/;
+// A trailing qualifier, "download() (FOLDER)": the note is what tells siblings apart.
+const QUALIFIER_RE = /^(.+?) \((.+)\)$/;
+// A method with plain identifier arguments, "click(ClickOptions)": the method is the key and
+// the argument list a small line below it.
+const ARGS_RE = /^([A-Za-z_$][\w$]*)(\([A-Za-z_$][\w$]*(?:, [A-Za-z_$][\w$]*)*\))$/;
+// A long getter, "getSelectedOptionText()": the verb is shared noise, the noun is the point.
+const VERB_RE = /^(get|as|by)([A-Z][\w$]*\(\))$/;
+const VERB_MIN_LENGTH = 15;
+// Skill and MCP names share a "selenide-" stem.
+const STEM_RE = /^(selenide-)([\w-]+)$/;
+
+/**
+ * Splits a command name into a small prefix and the large key, and optionally a small
+ * `suffix` (the closing `)` of a wrapper or qualifier, or an argument list). prefix + key +
+ * suffix always equals the name. `suffix` is absent when there is none.
+ */
 export function splitName(name) {
-  const match = name.match(PREFIX_RE);
-  if (match) {
-    const key = name.slice(match[0].length);
-    if (KEY_RE.test(key)) return { prefix: match[0], key };
+  const chain = name.match(PREFIX_RE);
+  if (chain) {
+    const key = name.slice(chain[0].length);
+    if (KEY_RE.test(key)) return { prefix: chain[0], key };
   }
+  const wrap = name.match(WRAP_RE);
+  if (wrap) return { prefix: wrap[1], key: wrap[2], suffix: ')' };
+  const qualifier = name.match(QUALIFIER_RE);
+  if (qualifier) return { prefix: `${qualifier[1]} (`, key: qualifier[2], suffix: ')' };
+  const args = name.match(ARGS_RE);
+  if (args) return { prefix: '', key: args[1], suffix: args[2] };
+  const verb = name.length >= VERB_MIN_LENGTH && name.match(VERB_RE);
+  if (verb) return { prefix: verb[1], key: verb[2] };
+  const stem = name.match(STEM_RE);
+  if (stem) return { prefix: stem[1], key: stem[2] };
   return { prefix: '', key: name };
 }
 
@@ -96,7 +124,7 @@ export function buildTile(item, { popular = false } = {}) {
   level.setAttribute('aria-hidden', 'true');
   tile.appendChild(level);
 
-  const { prefix, key } = splitName(item.name);
+  const { prefix, key, suffix } = splitName(item.name);
   const name = span('tile-name');
   if (prefix) {
     const prefixEl = span('tile-prefix');
@@ -105,7 +133,14 @@ export function buildTile(item, { popular = false } = {}) {
   }
   const keyEl = span(`tile-key tile-key--${keySize(key)}`);
   appendWithBreaks(keyEl, key);
+  // A lone ")" closes the key's line; anything longer is an argument list on its own line
+  if (suffix === ')') keyEl.appendChild(span('tile-suffix', suffix));
   name.appendChild(keyEl);
+  if (suffix && suffix !== ')') {
+    const argsEl = span('tile-suffix tile-suffix--block');
+    appendWithBreaks(argsEl, suffix);
+    name.appendChild(argsEl);
+  }
   tile.appendChild(name);
 
   tile.appendChild(span('tile-cat', item.cat));

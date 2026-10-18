@@ -162,6 +162,8 @@ input[type=text]:focus { outline: none; border-color: #64748b; }
 }
 .tile-prefix { display: block; margin-bottom: 2px; font-size: 11px; opacity: 0.7; }
 .tile-key    { display: block; font-weight: 600; line-height: 1.25; }
+.tile-suffix { font-size: 11px; opacity: 0.7; }
+.tile-suffix--block { display: block; margin-top: 2px; }
 .tile-key--s { font-size: 18px; }
 .tile-key--m { font-size: 15px; }
 .tile-key--l { font-size: 13px; }

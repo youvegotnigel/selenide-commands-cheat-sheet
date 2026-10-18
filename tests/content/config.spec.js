@@ -6,22 +6,29 @@ test.describe('Setup & Config entries (Selenide 7.19.0)', () => {
     await page.goto('/');
   });
 
-  test('"Configuration.browser (htmlunit)" exists at level intermediate, platform web', async ({
+  test('"Configuration.browser" shows every supported browser and drops the htmlunit tile', async ({
     page,
   }) => {
-    const entry = await itemIn(page, 'Setup & Config', 'Configuration.browser (htmlunit)');
+    const entry = await itemIn(page, 'Setup & Config', 'Configuration.browser');
     expect(entry).not.toBeNull();
-    expect(entry.level).toBe('intermediate');
-    expect(entry.platform).toBe('web');
-    // selenide-core 7.19.0 Browsers.java: String HTMLUNIT = "htmlunit";
-    expect(entry.code).toContain('Configuration.browser = "htmlunit"');
+    expect(entry.level).toBe('beginner');
+    // selenide-core 7.19.0 Browsers.java: CHROME, IE, EDGE, FIREFOX, SAFARI, HTMLUNIT constants
+    for (const [constant, value] of [
+      ['CHROME', 'chrome'],
+      ['FIREFOX', 'firefox'],
+      ['EDGE', 'edge'],
+      ['SAFARI', 'safari'],
+      ['IE', 'ie'],
+      ['HTMLUNIT', 'htmlunit'],
+    ]) {
+      expect(entry.code).toContain(`Configuration.browser = Browsers.${constant};`);
+      expect(entry.code).toContain(`"${value}"`);
+    }
     // selenide-core 7.19.0 HtmlUnitDriverFactory.java: "HtmlUnit driver not found. Add dependency
     // \"org.seleniumhq.selenium:htmlunit3-driver\" to your project."
     expect(entry.code).toContain('org.seleniumhq.selenium:htmlunit3-driver');
-    // The pre-3.x artifact name is the known wrong form.
     expect(entry.code).not.toContain('htmlunit-driver');
-    // CHANGELOG.md at v7.19.0: "add support for HtmlUnit browser (#3470)"
-    expect(entry.desc).toMatch(/Added in Selenide 7\.19\.0\.$/);
+    expect(await itemIn(page, 'Setup & Config', 'Configuration.browser (htmlunit)')).toBeNull();
   });
 
   test('"Selenide dependency (Maven)" exists at level beginner, platform web', async ({ page }) => {

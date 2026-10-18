@@ -34,15 +34,36 @@ email.setValue("ann@example.com");`,
 $$("#results .item").first().shouldHave(text("Selenide"));`,
     },
     {
+      name: '$(By)',
+      level: 'beginner',
+      platform: 'web',
+      desc: 'Finds elements with a Selenium By locator instead of a CSS string. $$(By) returns every match as a collection.',
+      tip: 'Any Selectors helper returns a By, so $(byText("Save")) reads like the CSS form. A $(By, index) overload picks the Nth match.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#$(org.openqa.selenium.By)',
+      code: `import static com.codeborne.selenide.Selectors.*;
+
+$(byText("Sign in")).click();
+$$(byClassName("error")).shouldHave(size(0));`,
+    },
+    {
       name: '$x(xpath)',
       level: 'intermediate',
       platform: 'web',
-      desc: 'Finds the first element that matches an XPath expression. $$x() returns every match as a collection.',
+      desc: 'Finds the first element that matches an XPath expression.',
       tip: 'Called on an element, start the expression with ./ or .// to stay inside it. An XPath that starts with // searches the whole document even from an element.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#$x(java.lang.String)',
       code: `$x("//button[@type='submit']").click();
-$$x("//table[@id='users']//tr").shouldHave(size(5));
 $("#users").$x(".//td[2]").shouldHave(text("Ann"));`,
+    },
+    {
+      name: '$$x(xpath)',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Finds every element that matches an XPath expression and returns an ElementsCollection.',
+      tip: 'Lazy like $$(): an empty match is not an error until you check or read it, so assert with shouldHave(size(n)). Called on an element, start with ./ or .// to stay inside it, because a // path searches the whole document.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selenide.html#$$x(java.lang.String)',
+      code: `$$x("//table[@id='users']//tr").shouldHave(size(5));
+$("#users").$$x(".//td").shouldHave(size(15));`,
     },
     {
       name: 'byText()',
@@ -56,6 +77,17 @@ $("#users").$x(".//td[2]").shouldHave(text("Ann"));`,
 $(byText("Sign in")).click();`,
     },
     {
+      name: 'byTextCaseInsensitive()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Same as byText(), but the case of the text is ignored.',
+      tip: 'It still matches the whole text, not a substring. Use withTextCaseInsensitive() for a substring.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byTextCaseInsensitive(java.lang.String)',
+      code: `import static com.codeborne.selenide.Selectors.*;
+
+$(byTextCaseInsensitive("sign in")).click();`,
+    },
+    {
       name: 'withText()',
       level: 'beginner',
       platform: 'web',
@@ -67,15 +99,36 @@ $(byText("Sign in")).click();`,
 $(withText("items in your cart")).shouldBe(visible);`,
     },
     {
+      name: 'withTextCaseInsensitive()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Same as withText(), but the case of the text is ignored.',
+      tip: 'It matches a substring. Use byTextCaseInsensitive() when the whole text is known.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#withTextCaseInsensitive(java.lang.String)',
+      code: `import static com.codeborne.selenide.Selectors.*;
+
+$(withTextCaseInsensitive("welcome")).shouldBe(visible);`,
+    },
+    {
       name: 'byTagAndText()',
       level: 'intermediate',
       platform: 'web',
-      desc: 'Finds an element with the given tag name and exact text. withTagAndText() is the substring variant.',
-      tip: "Use them when the same text appears in several kinds of element, such as a heading and a button. Both are case-sensitive and, like byText(), match the element's own text nodes.",
+      desc: 'Finds an element with the given tag name and exact text.',
+      tip: "Use it when the same text appears in several kinds of element, such as a heading and a button. It is case-sensitive and, like byText(), matches the element's own text nodes. withTagAndText() is the substring variant.",
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byTagAndText(java.lang.String,java.lang.String)',
       code: `import static com.codeborne.selenide.Selectors.*;
 
-$(byTagAndText("button", "Delete")).click();
+$(byTagAndText("button", "Delete")).click();`,
+    },
+    {
+      name: 'withTagAndText()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Finds an element with the given tag name whose text contains the given substring.',
+      tip: "Like withText(), it is case-sensitive and matches the element's own text nodes. Use byTagAndText() when the whole text is known.",
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#withTagAndText(java.lang.String,java.lang.String)',
+      code: `import static com.codeborne.selenide.Selectors.*;
+
 $(withTagAndText("li", "overdue")).shouldBe(visible);`,
     },
     {
@@ -111,6 +164,39 @@ $(byPartialLinkText("Terms")).click();`,
 
 $(byAttribute("data-state", "open")).shouldBe(visible);
 $(byAttribute("href*", "/invoices/")).click();`,
+    },
+    {
+      name: 'byPlaceholder()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Finds an input by its placeholder attribute. Added in Selenide 7.12.0.',
+      tip: 'The whole value must match. An overload takes TextMatchOptions, such as partialText().caseInsensitive(), for a substring or case-insensitive match.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byPlaceholder(java.lang.String)',
+      code: `import static com.codeborne.selenide.Selectors.*;
+
+$(byPlaceholder("Search")).setValue("selenide").pressEnter();`,
+    },
+    {
+      name: 'byTitle()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Finds an element by its title attribute.',
+      tip: 'Handy for icon buttons that have no text. A 7.12.0 overload takes TextMatchOptions for a partial or case-insensitive match.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byTitle(java.lang.String)',
+      code: `import static com.codeborne.selenide.Selectors.*;
+
+$(byTitle("Close")).click();`,
+    },
+    {
+      name: 'byAltText()',
+      level: 'intermediate',
+      platform: 'web',
+      desc: 'Finds an element by its alt attribute, such as an image. Added in Selenide 7.12.0.',
+      tip: 'The whole value must match. An overload takes TextMatchOptions for a partial or case-insensitive match.',
+      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Selectors.html#byAltText(java.lang.String)',
+      code: `import static com.codeborne.selenide.Selectors.*;
+
+$(byAltText("Company logo")).shouldBe(visible);`,
     },
     {
       name: 'byId()',

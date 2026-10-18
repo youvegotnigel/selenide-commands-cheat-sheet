@@ -91,7 +91,6 @@ Otherwise the prefix is empty and the key is the whole name. Exposed as
 | Name | Prefix | Key |
 |---|---|---|
 | `Configuration.browserSize` | `Configuration.` | `browserSize` |
-| `Configuration.browser (htmlunit)` | `Configuration.` | `browser (htmlunit)` |
 | `webdriver().shouldHave(urlContaining())` | `webdriver().` | `shouldHave(urlContaining())` |
 | `SelenideAppium.switchTo().context()` | `SelenideAppium.switchTo().` | `context()` |
 | `CombinedBy.android().ios()` | `CombinedBy.android().` | `ios()` |
@@ -100,7 +99,17 @@ Otherwise the prefix is empty and the key is the whole name. Exposed as
 | `./gradlew test (forward -Dselenide.*)` | (none) | `./gradlew test (forward -Dselenide.*)` |
 | `System properties (-Dselenide.*)` | (none) | `System properties (-Dselenide.*)` |
 | `$(AppiumBy.accessibilityId())` | (none) | `$(AppiumBy.accessibilityId())` |
-| `shouldHave(text())` | (none) | `shouldHave(text())` |
+| `shouldHave(text())` | `shouldHave(` | `text())` (closing `)` is a small `.tile-suffix`) |
+
+Further shapes, tried in this order after the identifier chain and the `should*` wrapper
+(`splitName` also returns a `suffix` where one applies; prefix + key + suffix equals the name):
+
+| Shape | Example | Prefix | Key | Suffix |
+|---|---|---|---|---|
+| Qualifier `head (note)` | `download() (FOLDER)` | `download() (` | `FOLDER` | `)` |
+| Identifier arguments | `click(ClickOptions)` | (none) | `click` | `(ClickOptions)` on its own line |
+| Long getter (15+ chars) `get`/`as`/`by` | `getSelectedOptionText()` | `get` | `SelectedOptionText()` | (none) |
+| `selenide-` stem | `selenide-full-screenshot` | `selenide-` | `full-screenshot` | (none) |
 
 This rule was run against all 247 current names. Only the identifier-chain names split.
 

@@ -13,17 +13,66 @@ test.beforeEach(async ({ page }) => {
 test.describe('splitName', () => {
   const CASES = [
     ['Configuration.browserSize', 'Configuration.', 'browserSize'],
-    ['Configuration.browser (htmlunit)', 'Configuration.', 'browser (htmlunit)'],
     ['webdriver().shouldHave(urlContaining())', 'webdriver().', 'shouldHave(urlContaining())'],
     ['SelenideAppium.switchTo().context()', 'SelenideAppium.switchTo().', 'context()'],
     ['CombinedBy.android().ios()', 'CombinedBy.android().', 'ios()'],
     ['SelenideAppium.$()', 'SelenideAppium.', '$()'],
     ['selenide.properties file', '', 'selenide.properties file'],
-    ['./gradlew test (forward -Dselenide.*)', '', './gradlew test (forward -Dselenide.*)'],
-    ['System properties (-Dselenide.*)', '', 'System properties (-Dselenide.*)'],
     ['$(AppiumBy.accessibilityId())', '', '$(AppiumBy.accessibilityId())'],
-    ['shouldHave(text())', '', 'shouldHave(text())'],
+    ['and()', '', 'and()'],
+    ['getOwnText()', '', 'getOwnText()'], // under 15 characters: the verb stays in the key
+    ['Headless run on CI', '', 'Headless run on CI'],
   ];
+  // Wrapper names: the argument is the key, the wrapper is the prefix, the closing paren the suffix.
+  const WRAPPED = [
+    ['shouldHave(text())', 'shouldHave(', 'text()'],
+    ['shouldBe(hidden)', 'shouldBe(', 'hidden'],
+    ['should(exist)', 'should(', 'exist'],
+    ['shouldNotBe(animated)', 'shouldNotBe(', 'animated'],
+  ];
+
+  // Every other shape: [name, expected split]. prefix + key + suffix always equals the name.
+  const SHAPES = [
+    // qualifier: the note is the key
+    ['download() (FOLDER)', { prefix: 'download() (', key: 'FOLDER', suffix: ')' }],
+    ['open (basic auth)', { prefix: 'open (', key: 'basic auth', suffix: ')' }],
+    ['Selenide dependency (Maven)', { prefix: 'Selenide dependency (', key: 'Maven', suffix: ')' }],
+    [
+      './gradlew test (forward -Dselenide.*)',
+      { prefix: './gradlew test (', key: 'forward -Dselenide.*', suffix: ')' },
+    ],
+    // method with identifier arguments: the method is the key, the arguments a small line
+    ['click(ClickOptions)', { prefix: '', key: 'click', suffix: '(ClickOptions)' }],
+    ['screenshot(fileName)', { prefix: '', key: 'screenshot', suffix: '(fileName)' }],
+    ['should(condition, Duration)', { prefix: '', key: 'should', suffix: '(condition, Duration)' }],
+    // long getter: the verb is the prefix
+    ['getSelectedOptionText()', { prefix: 'get', key: 'SelectedOptionText()' }],
+    ['asDynamicIterable()', { prefix: 'as', key: 'DynamicIterable()' }],
+    ['byPartialLinkText()', { prefix: 'by', key: 'PartialLinkText()' }],
+    // shared stem
+    ['selenide-full-screenshot', { prefix: 'selenide-', key: 'full-screenshot' }],
+    ['selenide-selenoid', { prefix: 'selenide-', key: 'selenoid' }],
+  ];
+
+  test('splits qualifiers, argument lists, long getters and the selenide- stem', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const actual = await page.evaluate(
+      (names) => names.map((n) => window.splitName(n)),
+      SHAPES.map(([n]) => n)
+    );
+    expect(actual).toEqual(SHAPES.map(([, split]) => split));
+  });
+
+  test('splits a should/shouldBe/shouldHave wrapper around its argument', async ({ page }) => {
+    await page.goto('/');
+    const actual = await page.evaluate(
+      (names) => names.map((n) => window.splitName(n)),
+      WRAPPED.map(([n]) => n)
+    );
+    expect(actual).toEqual(WRAPPED.map(([, prefix, key]) => ({ prefix, key, suffix: ')' })));
+  });
 
   test('splits identifier-chain prefixes and nothing else', async ({ page }) => {
     await page.goto('/');
@@ -128,11 +177,21 @@ test.describe('Tile cells', () => {
   });
 
   test('prefix and key follow the split rule', async ({ page }) => {
-    await expect(page.locator('.tile-prefix')).toHaveText(['Configuration.', 'SelenideAppium.']);
+    await expect(page.locator('.tile-prefix')).toHaveText([
+      'Configuration.',
+      'SelenideAppium.',
+      'Selenide dependency (',
+      'shouldHave(',
+    ]);
+    // wrapper: the argument is the key, the closing paren a small suffix inside it
+    const last = page.locator('.tile').last();
+    await expect(last.locator('.tile-key')).toHaveText('text())');
+    await expect(last.locator('.tile-suffix')).toHaveText(')');
     const first = page.locator('.tile').first();
     expect(await first.locator('.tile-key').innerHTML()).toBe('browser<wbr>Size');
+    // qualifier: "Selenide dependency (" is the prefix, "Maven" the key, ")" the suffix
     expect(await page.locator('.tile').nth(6).locator('.tile-key').innerHTML()).toBe(
-      'Selenide dependency (Maven)'
+      'Maven<span class="tile-suffix">)</span>'
     );
   });
 
@@ -142,8 +201,8 @@ test.describe('Tile cells', () => {
       .evaluateAll((els) => els.map((e) => e.className.match(/tile-key--(\w)/)[1]));
     // keys: browserSize 11 (m), $() 3 (s), pageLoadTime 12 (m, short runs), thirteen_char (l,
     // one run of 13), twenty_four_characters_x (l, run 24), twenty_five_characters_xy (l),
-    // Selenide dependency (Maven) 27 (l), shouldHave(text()) 18 (m)
-    expect(sizes).toEqual(['m', 's', 'm', 'l', 'l', 'l', 'l', 'm']);
+    // Maven) 6 (s), text() 6 (s) after the shouldHave( prefix
+    expect(sizes).toEqual(['m', 's', 'm', 'l', 'l', 'l', 's', 's']);
   });
 
   test('level shows as dots and in the accessible name', async ({ page }) => {

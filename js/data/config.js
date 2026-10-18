@@ -68,22 +68,18 @@ selenide.headless=true`,
       level: 'beginner',
       platform: 'both',
       desc: 'Which browser Selenide starts: "chrome" (the default), "firefox", "edge", "safari", "ie" or "htmlunit".',
-      tip: 'It also accepts the fully qualified name of a WebDriverProvider class. That is how selenide-appium runs plug in an AndroidDriver or IOSDriver.',
+      tip: 'It also accepts the fully qualified name of a WebDriverProvider class. That is how selenide-appium runs plug in an AndroidDriver or IOSDriver. HtmlUnit (added in 7.19.0) needs the htmlunit3-driver dependency, is always headless and ignores browserSize, so keep it for fast checks of simple pages.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Configuration.html#browser',
       code: `import com.codeborne.selenide.Browsers;
 
-Configuration.browser = Browsers.FIREFOX; // "firefox"`,
-    },
-    {
-      name: 'Configuration.browser (htmlunit)',
-      level: 'intermediate',
-      platform: 'web',
-      desc: 'Runs tests in HtmlUnit, a headless browser written in Java, so no browser binary or driver has to be installed. Added in Selenide 7.19.0.',
-      tip: 'Without the htmlunit3-driver dependency the first open() fails with IllegalStateException. HtmlUnit is always headless and ignores browserSize and browserPosition. It is not a real browser engine, so keep it for fast checks of simple pages.',
-      docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/Browsers.html#HTMLUNIT',
-      code: `// needs the test dependency org.seleniumhq.selenium:htmlunit3-driver
-Configuration.browser = "htmlunit"; // Browsers.HTMLUNIT
-open("/login");`,
+Configuration.browser = Browsers.CHROME;   // "chrome" (the default)
+Configuration.browser = Browsers.FIREFOX;  // "firefox"
+Configuration.browser = Browsers.EDGE;     // "edge"
+Configuration.browser = Browsers.SAFARI;   // "safari"
+Configuration.browser = Browsers.IE;       // "ie"
+
+// needs the test dependency org.seleniumhq.selenium:htmlunit3-driver
+Configuration.browser = Browsers.HTMLUNIT; // "htmlunit"`,
     },
     {
       name: 'Configuration.browserBinary',
