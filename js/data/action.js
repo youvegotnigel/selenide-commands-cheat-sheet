@@ -73,14 +73,20 @@ $("#city").val("Helsinki"); // same as setValue`,
       level: 'intermediate',
       platform: 'web',
       desc: 'setValue with options: date, time and datetime-local values, a choice of sendKeys or JavaScript, or a value masked in reports.',
-      tip: 'withDate(), withDateTime() and withTime() set the value by JavaScript in the ISO format the input expects, which avoids locale-specific typing into native pickers. sensitive() masks the value in reports and logs, so use it for passwords.',
+      tip: 'withDate(), withDateTime() and withTime() set the value by JavaScript in the ISO format the input expects, which avoids locale-specific typing into native pickers. sensitive() masks the value in reports and logs, so use it for passwords. usingMethod(SEND_KEYS) types key by key like a user, usingMethod(JS) sets the whole text in one JavaScript call: faster for long text, but it skips real key events.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SetValueOptions.html',
       code: `import static com.codeborne.selenide.SetValueOptions.withDate;
 import static com.codeborne.selenide.SetValueOptions.withText;
+import static com.codeborne.selenide.SetValueMethod.JS;
+import static com.codeborne.selenide.SetValueMethod.SEND_KEYS;
 import java.time.LocalDate;
 
 $("#birthday").setValue(withDate(LocalDate.of(1990, 12, 24)));
-$("#password").setValue(withText("s3cret").sensitive());`,
+$("#password").setValue(withText("s3cret").sensitive());
+
+// choose how the text gets in: key events or one JavaScript call
+$("#name").setValue(withText("Santa").usingMethod(SEND_KEYS));
+$("#notes").setValue(withText("A very long text").usingMethod(JS));`,
     },
     {
       name: 'append()',
@@ -106,13 +112,15 @@ $("#search").shouldHave(exactValue(""));`,
       name: 'selenide-clear-with-shortcut',
       level: 'advanced',
       platform: 'web',
-      desc: 'An optional module that makes clear() also select all text and press Delete, for framework inputs that ignore WebElement.clear().',
-      tip: 'It registers itself through ServiceLoader, so there is nothing to configure, and setValue() and type() use it too because they clear through the same command. The shortcut key (Cmd or Ctrl) comes from navigator.platform of the browser, not the OS running the tests. Without JavaScript it falls back to a plain clear.',
+      desc: 'Optional add-on for inputs that clear() leaves filled, as some React and Vue inputs do. It clears like a user: select all, then Delete.',
+      tip: 'You only need it when clear() or setValue() leaves old text behind. Add the dependency and nothing else: it plugs itself in, so your tests stay unchanged. setValue() and type() clear through the same command, so they benefit too. The select-all key (Cmd on macOS and iOS, Ctrl elsewhere) follows the browser, not the machine running the tests. Without JavaScript it does a plain clear.',
       docs: 'https://github.com/selenide/selenide/tree/v7.19.0/modules/clear-with-shortcut',
-      code: `// build.gradle.kts: testImplementation("com.codeborne:selenide-clear-with-shortcut:7.19.0")
-// No code change: the module replaces the built-in clear command.
+      code: `// build.gradle.kts
+testImplementation("com.codeborne:selenide-clear-with-shortcut:7.19.0")
+
+// Test code is unchanged. These calls now clear with Ctrl/Cmd+A, Delete:
 $("#react-input").clear();
-$("#react-input").setValue("new value"); // also clears with the shortcut`,
+$("#react-input").setValue("new value");`,
     },
     {
       name: 'type(TypeOptions)',

@@ -77,7 +77,7 @@ export function appendWithBreaks(parent, text) {
 
 // Where the key can wrap: spaces, hyphens, after "." and ",", after a call "(" that has arguments and before a
 // capital that follows a lowercase letter (the same points appendWithBreaks marks with <wbr>)
-const BREAK_RE = /[ -]|(?<=[.,])|(?<=[\w$]\()|(?<=[a-z])(?=[A-Z])/;
+const BREAK_RE = /[ -]|(?<=[.,])|(?<=[\w$]\()(?!\))|(?<=[a-z])(?=[A-Z])/;
 
 const SIZES = ['s', 'm', 'l'];
 
