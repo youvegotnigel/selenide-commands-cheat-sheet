@@ -83,21 +83,6 @@ test.describe('Actions entries (Selenide 7.19.0)', () => {
     // and public ScrollIntoViewOptions block(Block block), enum Block { start, center, end, nearest }
     expect(entry.code).toContain('scrollIntoView(instant().block(');
   });
-
-  test('"selenide-clear-with-shortcut" exists at level advanced, platform web', async ({
-    page,
-  }) => {
-    const entry = await itemIn(page, 'Actions', 'selenide-clear-with-shortcut');
-    expect(entry).not.toBeNull();
-    expect(entry.level).toBe('advanced');
-    expect(entry.platform).toBe('web');
-    // selenide-clear-with-shortcut 7.19.0 META-INF/MANIFEST.MF:
-    //   Implementation-Title: com.codeborne.selenide-clear-with-shortcut, Implementation-Version: 7.19.0
-    expect(entry.code).toContain('com.codeborne:selenide-clear-with-shortcut:7.19.0');
-    // META-INF/services/com.codeborne.selenide.commands.Clear registers
-    // com.codeborne.selenide.clearwithshortcut.ClearWithShortcut, so the call stays a plain clear().
-    expect(entry.code).toContain('.clear();');
-  });
 });
 
 test.describe('Actions corrections', () => {

@@ -103,24 +103,10 @@ $("#notes").shouldHave(value("Call back (updated)"));`,
       level: 'beginner',
       platform: 'web',
       desc: 'Empties an input or textarea, then blurs it so change and blur handlers run.',
-      tip: 'It returns void, so it ends a chain. Underneath it calls WebElement.clear(), which some React and Vue inputs ignore. Add the selenide-clear-with-shortcut module for those.',
+      tip: 'It returns void, so it ends a chain. Underneath it calls WebElement.clear(), which some React and Vue inputs ignore.',
       docs: 'https://selenide.org/javadoc/current/com/codeborne/selenide/SelenideElement.html#clear()',
       code: `$("#search").clear();
 $("#search").shouldHave(exactValue(""));`,
-    },
-    {
-      name: 'selenide-clear-with-shortcut',
-      level: 'advanced',
-      platform: 'web',
-      desc: 'Optional add-on for inputs that clear() leaves filled, as some React and Vue inputs do. It clears like a user: select all, then Delete.',
-      tip: 'You only need it when clear() or setValue() leaves old text behind. Add the dependency and nothing else: it plugs itself in, so your tests stay unchanged. setValue() and type() clear through the same command, so they benefit too. The select-all key (Cmd on macOS and iOS, Ctrl elsewhere) follows the browser, not the machine running the tests. Without JavaScript it does a plain clear.',
-      docs: 'https://github.com/selenide/selenide/tree/v7.19.0/modules/clear-with-shortcut',
-      code: `// build.gradle.kts
-testImplementation("com.codeborne:selenide-clear-with-shortcut:7.19.0")
-
-// Test code is unchanged. These calls now clear with Ctrl/Cmd+A, Delete:
-$("#react-input").clear();
-$("#react-input").setValue("new value");`,
     },
     {
       name: 'type(TypeOptions)',

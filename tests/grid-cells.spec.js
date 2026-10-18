@@ -148,7 +148,7 @@ test.describe('keySize', () => {
     ['browserSize', 'm'], // 11 chars, runs "browser" and "Size": length decides
     ['shouldHave(text())', 'm'], // 18 chars, short runs
     ['sleep(milliseconds)', 'l'], // 19 chars but the run "milliseconds)" is 13
-    ['selenide-clear-with-shortcut', 'l'], // 28 chars: length decides
+    ['twenty-eight-characters-long', 'l'], // 28 chars: length decides
     ['x'.repeat(24), 'l'], // run of 24
     ['click(Click Options)', 'm'], // 20 chars, short runs
   ];
