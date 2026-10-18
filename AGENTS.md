@@ -10,5 +10,5 @@ The full project guide lives in [CLAUDE.md](CLAUDE.md). Read it before making ch
 4. **Tests use independent expected values.** Never derive an expected value from the code or data under test. Write the test first and watch it fail.
 5. **Run the gates before finishing:** `npm test`, `npm run lint`, `npm run format:check`, `npm run check:links`.
 6. **Don't commit, push, merge, or open PRs unless asked.**
-7. **Analytics (Supabase) stay off** until the Selenide-specific backend exists.
+7. **Command-view analytics (Supabase) stay off** until the Selenide-specific backend exists. The visitor counter is already live. See `docs/handover-supabase.md`.
 8. To sync with a new Selenide release, follow `.claude/skills/selenide-release-sync/SKILL.md`.

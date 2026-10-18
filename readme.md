@@ -8,12 +8,14 @@ An interactive browser-based reference for **Selenide** (Java web UI testing) an
 Pinned versions: Selenide **7.19.0**, selenide-appium **7.19.0**, Appium java-client **11.0.0**. Every entry is checked against the sources jars of that release.
 
 ![Dashboard](images/dashboard.jpeg)
-*Grid view -> browse all commands by category and difficulty*
+*Periodic-table style grid -> every command is a tile, coloured by category family, with a live preview panel*
 
 ![Command modal](images/description.jpg)
 *Command modal -> description, code snippet, copy button, and docs link*
 
 ## Features
+- Periodic-table grid: each command is a numbered tile with level dots, a small prefix and a large key
+- Keyboard navigation over the grid (arrow keys, Home, End) and a hover/focus preview panel on desktop
 - Difficulty levels: Beginner, Intermediate, and Advanced
 - Category filter tabs, plus a **Mobile** filter for selenide-appium entries
 - Flat and Grouped view modes
@@ -39,9 +41,16 @@ Setup & Config, Navigation & Browser, Selectors, Actions, Element Conditions, Co
 selenide-commands-cheat-sheet/
 ├── images/
 ├── js/
-│   ├── app.js
+│   ├── app.js              # render, filters, search, modal, meta-bar
 │   ├── highlight.js        # dependency-free Java / shell / XML highlighter
+│   ├── tile.js             # tile anatomy: name split, break points, key size
+│   ├── grid-keys.js        # roving tabindex and arrow keys over the grid
+│   ├── inspector.js        # desktop hover/focus preview panel
+│   ├── visitor-counter.js  # visitor count (Supabase)
+│   ├── visitor-display.js
+│   ├── popular-commands.js # command-view tracking (off for now)
 │   ├── versions.json       # pinned Selenide / selenide-appium / java-client versions
+│   ├── meta.json           # last-updated date, stamped by CI
 │   └── data/
 │       ├── index.js        # imports each category and exports `categories`
 │       ├── config.js ... cli.js              # 18 web categories
@@ -50,7 +59,12 @@ selenide-commands-cheat-sheet/
 │   ├── helpers/
 │   ├── content/            # per-category guards, expected values from the sources jar
 │   ├── cheatsheet.spec.js
+│   ├── grid-cells.spec.js
+│   ├── grid-interactions.spec.js
 │   └── data-integrity.spec.js
+├── supabase/               # visitor counter migration and Edge Function
+├── docs/                   # design specs and implementation plans
+├── .github/workflows/      # test, stamp-date, cheatsheet-sync
 ├── .claude/skills/selenide-release-sync/   # how to sync the data with a new release
 ├── index.html
 ├── style.css
@@ -66,6 +80,7 @@ There is no build step and there are no runtime dependencies.
 npm install
 npm run fetch:sources   # download the pinned sources jars into .cache/sources/
 npm test                # Playwright: chromium, iPhone 16, Pixel 7
+npm run test:scripts    # node:test unit tests for the release-sync scripts
 npm run lint
 npm run format:check
 npm run check:links     # every docs URL and anchor resolves (needs network)
