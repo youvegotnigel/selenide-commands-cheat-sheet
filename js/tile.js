@@ -136,7 +136,11 @@ export function buildTile(item, { popular = false } = {}) {
   // A lone ")" closes the key's line; anything longer is an argument list on its own line
   if (suffix === ')') keyEl.appendChild(span('tile-suffix', suffix));
   name.appendChild(keyEl);
-  if (suffix && suffix !== ')') name.appendChild(span('tile-suffix tile-suffix--block', suffix));
+  if (suffix && suffix !== ')') {
+    const argsEl = span('tile-suffix tile-suffix--block');
+    appendWithBreaks(argsEl, suffix);
+    name.appendChild(argsEl);
+  }
   tile.appendChild(name);
 
   tile.appendChild(span('tile-cat', item.cat));
