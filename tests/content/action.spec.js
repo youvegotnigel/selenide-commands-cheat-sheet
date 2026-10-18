@@ -64,6 +64,12 @@ test.describe('Actions entries (Selenide 7.19.0)', () => {
     expect(entry.code).toContain('withText(');
     // selenide-core 7.19.0 SetValueOptions.java: public SetValueOptions sensitive()
     expect(entry.code).toContain('.sensitive()');
+    // selenide-core 7.19.0 SetValueOptions.java: public SetValueOptions usingMethod(SetValueMethod method)
+    // and SetValueMethod.java: enum SetValueMethod { SEND_KEYS, JS }
+    expect(entry.code).toContain('.usingMethod(SEND_KEYS)');
+    expect(entry.code).toContain('.usingMethod(JS)');
+    expect(entry.code).toContain('import static com.codeborne.selenide.SetValueMethod.JS;');
+    expect(entry.code).toContain('import static com.codeborne.selenide.SetValueMethod.SEND_KEYS;');
   });
 
   test('"scrollIntoView(ScrollIntoViewOptions)" exists at level intermediate, platform web', async ({
