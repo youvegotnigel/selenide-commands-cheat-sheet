@@ -4,7 +4,7 @@ For a fresh session. Read this, then `CLAUDE.md`, then plan Task 8.
 
 ## Where the project stands
 
-- Branch `develop`, with `master` also on the remote. 341 entries, 22 categories. The cheat sheet is
+- Branch `develop`, with `master` also on the remote. 340 entries, 22 categories. The cheat sheet is
   complete and usable.
 - The **visitor counter is live** against the shared Supabase project, using Selenide-only objects
   (`selenide_visits`, `increment_selenide_visits`, Edge Function `increment-selenide-visitor`).
