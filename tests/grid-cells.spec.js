@@ -111,8 +111,8 @@ test.describe('appendWithBreaks', () => {
     ['browserSize', 'browser<wbr>Size'],
     ['Configuration.', 'Configuration.<wbr>'],
     ['SelenideAppium.', 'Selenide<wbr>Appium.<wbr>'],
-    ['shouldHave(text())', 'should<wbr>Have(<wbr>text(<wbr>))'],
-    ['$()', '$(<wbr>)'],
+    ['shouldHave(text())', 'should<wbr>Have(<wbr>text())'],
+    ['$()', '$()'], // no break inside empty parens: ")" never wraps alone
     ['Selenide dependency (Maven)', 'Selenide dependency (Maven)'],
     ['a,b', 'a,<wbr>b'],
   ];
@@ -199,7 +199,7 @@ test.describe('Tile cells', () => {
     await expect(page.locator('.tile-prefix')).toHaveText([
       'Configuration.',
       'SelenideAppium.',
-      'Selenide dependency (',
+      'Selenide dependency ',
       'shouldHave(',
     ]);
     // wrapper: the argument is the key, the closing paren a small suffix inside it
@@ -208,10 +208,8 @@ test.describe('Tile cells', () => {
     await expect(last.locator('.tile-suffix')).toHaveText(')');
     const first = page.locator('.tile').first();
     expect(await first.locator('.tile-key').innerHTML()).toBe('browser<wbr>Size');
-    // qualifier: "Selenide dependency (" is the prefix, "Maven" the key, ")" the suffix
-    expect(await page.locator('.tile').nth(6).locator('.tile-key').innerHTML()).toBe(
-      'Maven<span class="tile-suffix">)</span>'
-    );
+    // qualifier: "Selenide dependency " is the prefix, "(Maven)" the key
+    expect(await page.locator('.tile').nth(6).locator('.tile-key').innerHTML()).toBe('(Maven)');
   });
 
   test('key size class follows key length', async ({ page }) => {
@@ -220,7 +218,7 @@ test.describe('Tile cells', () => {
       .evaluateAll((els) => els.map((e) => e.className.match(/tile-key--(\w)/)[1]));
     // keys: browserSize 11 (m), $() 3 (s), pageLoadTime 12 (m, short runs), thirteen_char (l,
     // one run of 13), twenty_four_characters_x (l, run 24), twenty_five_characters_xy (l),
-    // Maven) 6 (s), text() 6 (s) after the shouldHave( prefix
+    // (Maven) 7 (s), text() 6 (s) after the shouldHave( prefix
     expect(sizes).toEqual(['m', 's', 'm', 'l', 'l', 'l', 's', 's']);
   });
 

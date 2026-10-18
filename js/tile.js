@@ -69,12 +69,13 @@ export function appendWithBreaks(parent, text) {
     const prev = i > 0 ? text[i - 1] : '';
     if (/[A-Z]/.test(ch) && /[a-z]/.test(prev)) wbr();
     run += ch;
-    if (ch === '.' || ch === ',' || (ch === '(' && /[\w$]/.test(prev))) wbr();
+    const callOpen = ch === '(' && /[\w$]/.test(prev) && text[i + 1] !== ')';
+    if (ch === '.' || ch === ',' || callOpen) wbr();
   }
   flush();
 }
 
-// Where the key can wrap: spaces, hyphens, after "." and ",", after a call "(" and before a
+// Where the key can wrap: spaces, hyphens, after "." and ",", after a call "(" that has arguments and before a
 // capital that follows a lowercase letter (the same points appendWithBreaks marks with <wbr>)
 const BREAK_RE = /[ -]|(?<=[.,])|(?<=[\w$]\()|(?<=[a-z])(?=[A-Z])/;
 
