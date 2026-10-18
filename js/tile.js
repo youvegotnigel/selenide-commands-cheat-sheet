@@ -13,12 +13,14 @@ const KEY_RE = /^[A-Za-z_$][\w$]*(?:\(.*\))?(?: \(.*\))?$/;
 const WRAP_RE = /^(should(?:Not)?(?:Be|Have)?\()([A-Za-z_$][\w$]*(?:\(\))?)\)$/;
 // A trailing qualifier, "download() (FOLDER)": the note is what tells siblings apart.
 const QUALIFIER_RE = /^(.+?) \((.+)\)$/;
+// A bare method call with a prose note, "find() (inside an element)": the method is the point.
+// A one-word note, "download() (FOLDER)", is the variant that tells siblings apart.
+const METHOD_NOTE_RE = /^([A-Za-z_$][\w$]*\(\))( \(.* .*\))$/;
+// A class name with a note, "ElementsCollection (lazy)": the class is the point.
+const CLASS_NOTE_RE = /^([A-Z][\w$]*)( \(.+\))$/;
 // A method with plain identifier arguments, "click(ClickOptions)": the method is the key and
 // the argument list a small line below it.
 const ARGS_RE = /^([A-Za-z_$][\w$]*)(\([A-Za-z_$][\w$]*(?:, [A-Za-z_$][\w$]*)*\))$/;
-// A long getter, "getSelectedOptionText()": the verb is shared noise, the noun is the point.
-const VERB_RE = /^(get|as)([A-Z][\w$]*\(\))$/;
-const VERB_MIN_LENGTH = 15;
 // Skill and MCP names share a "selenide-" stem.
 const STEM_RE = /^(selenide-)([\w-]+)$/;
 
@@ -35,12 +37,14 @@ export function splitName(name) {
   }
   const wrap = name.match(WRAP_RE);
   if (wrap) return { prefix: wrap[1], key: wrap[2], suffix: ')' };
+  const methodNote = name.match(METHOD_NOTE_RE);
+  if (methodNote) return { prefix: '', key: methodNote[1], suffix: methodNote[2] };
+  const classNote = name.match(CLASS_NOTE_RE);
+  if (classNote) return { prefix: '', key: classNote[1], suffix: classNote[2] };
   const qualifier = name.match(QUALIFIER_RE);
-  if (qualifier) return { prefix: `${qualifier[1]} (`, key: qualifier[2], suffix: ')' };
+  if (qualifier) return { prefix: `${qualifier[1]} `, key: `(${qualifier[2]})` };
   const args = name.match(ARGS_RE);
   if (args) return { prefix: '', key: args[1], suffix: args[2] };
-  const verb = name.length >= VERB_MIN_LENGTH && name.match(VERB_RE);
-  if (verb) return { prefix: verb[1], key: verb[2] };
   const stem = name.match(STEM_RE);
   if (stem) return { prefix: stem[1], key: stem[2] };
   return { prefix: '', key: name };

@@ -108,7 +108,7 @@ Further shapes, tried in this order after the identifier chain and the `should*`
 |---|---|---|---|---|
 | Qualifier `head (note)` | `download() (FOLDER)` | `download() (` | `FOLDER` | `)` |
 | Identifier arguments | `click(ClickOptions)` | (none) | `click` | `(ClickOptions)` on its own line |
-| Long getter (15+ chars) `get`/`as`/`by` | `getSelectedOptionText()` | `get` | `SelectedOptionText()` | (none) |
+| Long getter | `getSelectedOptionText()` | (none) | `getSelectedOptionText()` | (none) |
 | `selenide-` stem | `selenide-full-screenshot` | `selenide-` | `full-screenshot` | (none) |
 
 This rule was run against all 247 current names. Only the identifier-chain names split.
